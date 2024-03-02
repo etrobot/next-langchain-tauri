@@ -128,3 +128,10 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+*/.env
+.env
+/build
+/src-tauri/target/
+/src-tauri/bin/
+.DS_Store
