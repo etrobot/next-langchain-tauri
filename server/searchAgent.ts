@@ -7,7 +7,7 @@ import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { nanoid } from '../lib/utils';
 import { LLMResult } from '@langchain/core/outputs';
 import { AgentExecutor, createReactAgent } from "langchain/agents";
-import { BingSerpAPI } from "@langchain/community/tools/bingserpapi";
+import { SerpAPI } from "@langchain/community/tools/serpapi";
 import { TextEncoder } from 'util';
 import{ FastifyRequest } from 'fastify';
 
@@ -60,7 +60,10 @@ export async function searchAgent(request:FastifyRequest) {
     const messages = body.messages;
     const previousMessages = messages.slice(0, -1).map(convertVercelMessageToLangChainMessage);
     const currentMessageContent = messages[messages.length - 1].content;
-    const tools = [new BingSerpAPI(body.previewToken.serp_api_key)];
+
+    process.env.SERPAPI_API_KEY = body.previewToken.serp_api_key
+
+    const tools = [new SerpAPI()];
     const prompt = await pull<PromptTemplate>("hwchase17/react");
     const model = new ChatOpenAI({
       temperature: 0.1,

@@ -21,9 +21,10 @@ import { cn } from '@/lib/utils'
 interface SidebarItemProps {
   index: number
   chat: string
+  children: React.ReactNode
 }
 
-export function SidebarItem({ index, chat }: SidebarItemProps) {
+export function SidebarItem({ index, chat, children }: SidebarItemProps) {
   const pathname = usePathname()
 
   const isActive = pathname === chat
@@ -68,6 +69,7 @@ export function SidebarItem({ index, chat }: SidebarItemProps) {
           {chat}
         </div>
       </Link>
+      <div className="absolute right-2 top-1">{children}</div>
     </motion.div>
   )
 }

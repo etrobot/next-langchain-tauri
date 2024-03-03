@@ -24,13 +24,11 @@ import {
 } from '@/components/ui/tooltip'
 
 interface SidebarActionsProps {
-  chat: Chat
-  removeChat: (args: { id: string; path: string }) => void
+  chatId: string
 }
 
 export function SidebarActions({
-  chat,
-  removeChat,
+  chatId,
 }: SidebarActionsProps) {
   const router = useRouter()
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
@@ -75,11 +73,7 @@ export function SidebarActions({
                 event.preventDefault()
                 // @ts-ignore
                 startRemoveTransition(async () => {
-                  const result = await removeChat({
-                    id: chat.id,
-                    path: chat.path
-                  })
-
+                  localStorage.removeItem(chatId)
                   setDeleteDialogOpen(false)
                   router.push('/')
                   router.refresh()

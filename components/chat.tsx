@@ -30,14 +30,15 @@ export function Chat({ id, className }: ChatProps) {
   const [initialMessages, setInitialMessages] = useState<Message[] | undefined>(undefined);
 
   useEffect(() => {
-    if (id){
+    if (id) {
       const storedData = localStorage.getItem(id);
       if (storedData) {
         const parsedData = JSON.parse(storedData);
         setInitialMessages(parsedData);
+      }else{
+        setInitialMessages([]);
       }
     }else{
-      setInitialMessages([]);
       id=`chatid_${nanoid()}`;
     }
   }, [id]);
@@ -83,7 +84,7 @@ export function Chat({ id, className }: ChatProps) {
           role: 'assistant',
           content: response.content
         })
-        localStorage.setItem(id || `chatid_${nanoid()}`, JSON.stringify(msg))
+        if(id!==undefined)localStorage.setItem(id, JSON.stringify(msg))
       }
     })
   return (
@@ -143,7 +144,7 @@ export function Chat({ id, className }: ChatProps) {
         />
         <Input
           value={previewTokenInput.serp_api_key}
-          placeholder="SERP API Key"
+          placeholder="SERP API Key , from https://serpapi.com"
           onChange={e => setPreviewTokenInput(prevState => ({
             ...prevState,
             serp_api_key: e.target.value

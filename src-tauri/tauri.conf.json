@@ -7,7 +7,7 @@
     "distDir": "../out"
   },
   "package": {
-    "productName": "tauri-langchain",
+    "productName": "next-langchain-tauri",
     "version": "0.1.0"
   },
   "tauri": {
@@ -36,7 +36,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "com.stackai.nextlang",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -66,7 +66,7 @@
         "fullscreen": false,
         "height": 800,
         "resizable": true,
-        "title": "tauri-langchain",
+        "title": "next-langchain-tauri",
         "width": 1280
       }
     ]
