@@ -42,7 +42,10 @@ export function Chat({ id, className }: ChatProps) {
       id=`chatid_${nanoid()}`;
     }
   }, [id]);
-
+  const [apiname, setApiName] = useState('chat')
+  const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setApiName(event.target.value);
+  };
   const [previewToken, setPreviewToken] = useLocalStorage<{
     llm_api_key: string;
     llm_base_url: string;
@@ -65,7 +68,7 @@ export function Chat({ id, className }: ChatProps) {
   
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
-      api:'http://localhost:6677/api/chat',
+      api:process.env.NEXT_PUBLIC_API_URL+'/api/'+apiname,
       initialMessages,
       id,
       body: {
@@ -79,6 +82,14 @@ export function Chat({ id, className }: ChatProps) {
       },
       onFinish(response) {
         const msg = initialMessages??[];
+        const latestMsg = localStorage.getItem('latestMsg')
+        if(latestMsg){
+          msg.push({
+            id: nanoid(),
+            role: 'user',
+            content: latestMsg
+          })
+        }
         msg.push({
           id: response.id,
           role: 'assistant',
@@ -159,7 +170,26 @@ export function Chat({ id, className }: ChatProps) {
         </DialogFooter>
       </DialogContent>
       </Dialog>
-
+      <div className='w-full pb-3 fixed bottom-0 z-50 text-center'>
+      <label className='mx-2'>
+        <input
+          type="radio"
+          value="chat"
+          checked={apiname === 'chat'}
+          onChange={handleRadioChange}
+        />
+        Chat
+      </label>
+      <label className='mx-2'>
+        <input
+          type="radio"
+          value="search"
+          checked={apiname === 'search'}
+          onChange={handleRadioChange}
+        />
+        Search
+      </label>
+      </div>
     </>
   )
 }

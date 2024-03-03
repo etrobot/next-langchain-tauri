@@ -43,5 +43,5 @@
     "**/*.tsx",
     "../dist/types/**/*.ts",
     ".next/types/**/*.ts"
-  ]
+, "../app/api/searchAgent/route.ts"  ]
 }

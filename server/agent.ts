@@ -1,4 +1,4 @@
-import { Message as VercelChatMessage, StreamingTextResponse } from 'ai';
+import { Message as VercelChatMessage, StreamingTextResponse,OpenAIStream } from 'ai';
 import { AIMessage, ChatMessage, HumanMessage } from "@langchain/core/messages";
 import { pull } from "langchain/hub";
 import { ChatOpenAI } from '@langchain/openai';
@@ -8,8 +8,7 @@ import { nanoid } from '../lib/utils';
 import { LLMResult } from '@langchain/core/outputs';
 import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { SerpAPI } from "@langchain/community/tools/serpapi";
-import { TextEncoder } from 'util';
-import{ FastifyRequest } from 'fastify';
+import OpenAI from 'openai'
 
 const convertVercelMessageToLangChainMessage = (message: VercelChatMessage) => {
   if (message.role === "user") {
@@ -53,10 +52,22 @@ class MyCallbackHandler extends BaseCallbackHandler {
   }
 }
 // Assuming your utility and class definitions remain unchanged
+const openai = new OpenAI({ apiKey: 'dummy' })
+export async function pureChat(body:any) {
+  openai.apiKey=body.previewToken.llm_api_key;
+  openai.baseURL = body.previewToken.llm_base_url || 'https://api.openai.com/v1' ;
+  const res = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo-0125',
+    messages:body.messages,
+    temperature: 0.7,
+    stream: true
+  })
+  const stream = OpenAIStream(res)
+  return new StreamingTextResponse(stream)
+}
 
-export async function searchAgent(request:FastifyRequest) {
-    console.log(request.body)
-    const body = request.body as any; // Ensure proper typing
+export async function searchAgent(body:any) {
+    console.log(body)
     const messages = body.messages;
     const previousMessages = messages.slice(0, -1).map(convertVercelMessageToLangChainMessage);
     const currentMessageContent = messages[messages.length - 1].content;
@@ -95,24 +106,23 @@ export async function searchAgent(request:FastifyRequest) {
         callbacks: [myCallback]
     });
   
-    const textEncoder = new TextEncoder();
-        const transformStream = new ReadableStream({
-          async start(controller) {
-            for await (const chunk of logStream) {
-              if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
-                const addOp = chunk.ops[0];
-                if (
-                  addOp.path.startsWith("/logs/ChatOpenAI") &&
-                  typeof addOp.value === "string" &&
-                  addOp.value.length
-                ) {
-                  controller.enqueue(textEncoder.encode(addOp.value));
-                }
-              }
+    const transformStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of logStream) {
+          if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
+            const addOp = chunk.ops[0];
+            if (
+              addOp.path.startsWith("/logs/ChatOpenAI") &&
+              typeof addOp.value === "string" &&
+              addOp.value.length
+            ) {
+              controller.enqueue(addOp.value);
             }
-            controller.close();
-          },
-        });
-  
-        return new StreamingTextResponse(transformStream);
+          }
+        }
+        controller.close();
+      },
+    });
+
+    return new StreamingTextResponse(transformStream);
 }
