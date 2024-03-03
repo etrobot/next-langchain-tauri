@@ -1,7 +1,6 @@
 'use client'
-
+import { nanoid } from '../lib/utils';
 import { useChat, type Message } from 'ai/react'
-import { nanoid } from 'nanoid'
 import { cn } from '@/lib/utils'
 import { ChatList } from '@/components/chat-list'
 import { ChatPanel } from '@/components/chat-panel'
@@ -26,9 +25,8 @@ export interface ChatProps extends React.ComponentProps<'div'> {
 }
 
 export function Chat({ id, className }: ChatProps) {
-
+  const timestamp = `${new Date(2024, 0, 1, 11, 23).toISOString().replace(/[-:]/g, '').replace('T', '')}`
   const [initialMessages, setInitialMessages] = useState<Message[] | undefined>(undefined);
-
   useEffect(() => {
     if (id) {
       const storedData = localStorage.getItem(id);
@@ -39,7 +37,7 @@ export function Chat({ id, className }: ChatProps) {
         setInitialMessages([]);
       }
     }else{
-      id=`chatid_${nanoid()}`;
+      id=`cid_${timestamp}`;
     }
   }, [id]);
   const [apiname, setApiName] = useState('chat')

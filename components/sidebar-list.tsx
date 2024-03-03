@@ -12,7 +12,7 @@ interface SidebarListProps {
 
 export async function SidebarList({ userId }: SidebarListProps) {
 
-  const chats: string[] =  Object.keys(localStorage).filter(key => key.startsWith('chatid_'))
+  const chats: string[] =  Object.keys(localStorage).filter(key => key.startsWith('cid_'))
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
