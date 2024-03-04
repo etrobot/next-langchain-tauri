@@ -8,7 +8,7 @@
     "start": "next start -p 3100",
     "lint": "next lint",
     "build-server": "esbuild ./server/server.ts --bundle --platform=node --outfile=./build/server.js",
-    "pkg-server": "pnpm build-server && pkg build/server.js -o ./src-tauri/bin/server-x86_64-apple-darwin"
+    "pkg-server": "pnpm build-server && pkg build/server.js -o ./src-tauri/bin/server-aarch64-apple-darwin"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",

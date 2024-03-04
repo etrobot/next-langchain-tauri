@@ -7,7 +7,7 @@ import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { nanoid } from '../lib/utils';
 import { LLMResult } from '@langchain/core/outputs';
 import { AgentExecutor, createReactAgent } from "langchain/agents";
-import { SerpAPI } from "@langchain/community/tools/serpapi";
+import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import OpenAI from 'openai'
 
 const convertVercelMessageToLangChainMessage = (message: VercelChatMessage) => {
@@ -67,14 +67,13 @@ export async function pureChat(body:any) {
 }
 
 export async function searchAgent(body:any) {
-    console.log(body)
     const messages = body.messages;
     const previousMessages = messages.slice(0, -1).map(convertVercelMessageToLangChainMessage);
     const currentMessageContent = messages[messages.length - 1].content;
 
-    process.env.SERPAPI_API_KEY = body.previewToken.serp_api_key
+    process.env.TAVILY_API_KEY = body.previewToken.search_api_key
 
-    const tools = [new SerpAPI()];
+    const tools = [new TavilySearchResults({maxResults:5})];
     const prompt = await pull<PromptTemplate>("hwchase17/react");
     const model = new ChatOpenAI({
       temperature: 0.1,

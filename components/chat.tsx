@@ -25,16 +25,15 @@ export interface ChatProps extends React.ComponentProps<'div'> {
 }
 
 export function Chat({ id, className }: ChatProps) {
-  const timestamp = `${new Date(2024, 0, 1, 11, 23).toISOString().replace(/[-:]/g, '').replace('T', '')}`
+  const timestamp = `${new Date().toISOString().split('.')[0]}`
   const [initialMessages, setInitialMessages] = useState<Message[] | undefined>(undefined);
   useEffect(() => {
+    setInitialMessages([]);
     if (id) {
       const storedData = localStorage.getItem(id);
       if (storedData) {
         const parsedData = JSON.parse(storedData);
         setInitialMessages(parsedData);
-      }else{
-        setInitialMessages([]);
       }
     }else{
       id=`cid_${timestamp}`;
@@ -47,13 +46,13 @@ export function Chat({ id, className }: ChatProps) {
   const [previewToken, setPreviewToken] = useLocalStorage<{
     llm_api_key: string;
     llm_base_url: string;
-    serp_api_key: string;
+    search_api_key: string;
   } | null>('ai-token', null);
   
   const initialPreviewToken = {
     llm_api_key: "",
     llm_base_url: "",
-    serp_api_key: ""
+    search_api_key: ""
   };
   
   const [previewTokenDialog, setPreviewTokenDialog] = useState(false);
@@ -137,7 +136,7 @@ export function Chat({ id, className }: ChatProps) {
         </DialogHeader>
         <Input
           value={previewTokenInput.llm_api_key}
-          placeholder="LLM API Key, like sk-xxxxx"
+          placeholder="LLM API Key,  openAI sdk format"
           onChange={e => setPreviewTokenInput(prevState => ({
             ...prevState,
             llm_api_key: e.target.value
@@ -152,11 +151,11 @@ export function Chat({ id, className }: ChatProps) {
           }))}
         />
         <Input
-          value={previewTokenInput.serp_api_key}
-          placeholder="SERP API Key , from https://serpapi.com"
+          value={previewTokenInput.search_api_key}
+          placeholder="Tavily Search API Key , from https://tavily.com/"
           onChange={e => setPreviewTokenInput(prevState => ({
             ...prevState,
-            serp_api_key: e.target.value
+            search_api_key: e.target.value
           }))}
         />
         <DialogFooter className="items-center">
@@ -169,24 +168,24 @@ export function Chat({ id, className }: ChatProps) {
       </DialogContent>
       </Dialog>
       <div className='w-full pb-3 fixed bottom-0 z-50 text-center'>
-      <label className='mx-2'>
-        <input
-          type="radio"
-          value="chat"
-          checked={apiname === 'chat'}
-          onChange={handleRadioChange}
-        />
-        Chat
-      </label>
-      <label className='mx-2'>
-        <input
-          type="radio"
-          value="search"
-          checked={apiname === 'search'}
-          onChange={handleRadioChange}
-        />
-        Search
-      </label>
+        <label className='mx-2'>
+          <input className='mx-1'
+            type="radio"
+            value="chat"
+            checked={apiname === 'chat'}
+            onChange={handleRadioChange}
+          />
+          Chat
+        </label> 
+        <label className='mx-2'>
+          <input className='mx-1'
+            type="radio"
+            value="search"
+            checked={apiname === 'search'}
+            onChange={handleRadioChange}
+          />
+          Search
+        </label>
       </div>
     </>
   )
