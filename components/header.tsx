@@ -15,9 +15,6 @@ import { SidebarMobile } from './sidebar-mobile'
 import { SidebarToggle } from './sidebar-toggle'
 import { ChatHistory } from './chat-history'
 import { open } from '@tauri-apps/api/shell';
-const openFacebookPage = () => {
-  open("https://github.com/etrobot/next-langchain-tauri")
-}
 
 
 export function Header() {
@@ -27,13 +24,15 @@ export function Header() {
       <span className="inline-flex items-center home-links whitespace-nowrap font-bold">▲ Next.js x Langchain.js 🦜🔗</span>
       </div>
       <div className="flex items-center justify-end space-x-2">
-        <Button
-          onClick={openFacebookPage}
+        <a
+          target="_blank"
+          href="https://github.com/etrobot/next-langchain-tauri"
+          rel="noopener noreferrer"
           className={cn(buttonVariants({ variant: 'outline' }))}
-        >
+          >
           <IconGitHub />
           <span className="hidden ml-2 md:flex">GitHub</span>
-        </Button>
+        </a>
         <ThemeToggle/>
       </div>
     </header>

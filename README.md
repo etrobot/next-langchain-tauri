@@ -2,7 +2,7 @@
 
 Next-Langchain-Tauri is a desktop application that combines the power of Next.js for frontend development, Langchain.js for AI processing, and Tauri for packaging the application as a desktop app.
 
-![](https://github.com/etrobot/next-langchain-tauri/assets/3889058/33f556bb-b498-44a7-8464-54354cd9220b)
+![](https://github.com/etrobot/next-langchain-tauri/assets/3889058/a50640eb-ae60-4685-9b2d-7f6f715d821a)
 
 ## How to use
 
@@ -28,7 +28,8 @@ then change the word ```server-x86_64-apple-darwin``` to ```server-yours``` in p
 
 save and run:
 ``` bash
-   pnpm pack-server
+   pnpm install -g @yao-pkg/pkg
+   pnpm pkg-server
 ```
 
 4. Run in dev mode

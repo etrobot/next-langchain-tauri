@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { searchAgent,pureChat } from 'agent';
+import { searchAgent,pureChat } from './agent';
 
 const fastify = Fastify({
   logger: true,
