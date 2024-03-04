@@ -67,7 +67,7 @@ export function ChatPanel({
         <div className="px-4 py-2 space-y-4 border-t shadow-lg bg-background sm:rounded-t-xl sm:border md:py-4">
           <PromptForm
             onSubmit={async value => {
-              localStorage.setItem('latestMsg', value);
+              localStorage.setItem('latestAsk', value);
               await append({
                 id,
                 content: value,

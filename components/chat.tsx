@@ -19,7 +19,7 @@ import { useState,useEffect } from 'react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { toast } from 'react-hot-toast'
-
+import { useRouter } from 'next/navigation'
 export interface ChatProps extends React.ComponentProps<'div'> {
   id?: string
 }
@@ -45,12 +45,14 @@ export function Chat({ id, className }: ChatProps) {
   };
   const [previewToken, setPreviewToken] = useLocalStorage<{
     llm_api_key: string;
+    llm_model:string;
     llm_base_url: string;
     search_api_key: string;
   } | null>('ai-token', null);
   
   const initialPreviewToken = {
     llm_api_key: "",
+    llm_model: "",
     llm_base_url: "",
     search_api_key: ""
   };
@@ -79,12 +81,12 @@ export function Chat({ id, className }: ChatProps) {
       },
       onFinish(response) {
         const msg = initialMessages??[];
-        const latestMsg = localStorage.getItem('latestMsg')
-        if(latestMsg){
+        const latestAsk = localStorage.getItem('latestAsk')
+        if(latestAsk){
           msg.push({
             id: nanoid(),
             role: 'user',
-            content: latestMsg
+            content: latestAsk
           })
         }
         msg.push({
@@ -92,7 +94,10 @@ export function Chat({ id, className }: ChatProps) {
           role: 'assistant',
           content: response.content
         })
-        if(id!==undefined)localStorage.setItem(id, JSON.stringify(msg))
+        if(id!==undefined){
+          localStorage.setItem(id, JSON.stringify(msg))
+          useRouter().push(`/?cid=${id}`)
+        }
       }
     })
   return (
@@ -143,8 +148,16 @@ export function Chat({ id, className }: ChatProps) {
           }))}
         />
         <Input
+          value={previewTokenInput.llm_model}
+          placeholder="LLM Model (optional) , default is gpt-3.5-turbo-0125"
+          onChange={e => setPreviewTokenInput(prevState => ({
+            ...prevState,
+            llm_model: e.target.value
+          }))}
+        />
+        <Input
           value={previewTokenInput.llm_base_url}
-          placeholder="Base URL, default is https://api.openai.com/v1"
+          placeholder="Base URL  (optional) , default is https://api.openai.com/v1"
           onChange={e => setPreviewTokenInput(prevState => ({
             ...prevState,
             llm_base_url: e.target.value

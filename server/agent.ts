@@ -57,9 +57,9 @@ export async function pureChat(body:any) {
   openai.apiKey=body.previewToken.llm_api_key;
   openai.baseURL = body.previewToken.llm_base_url || 'https://api.openai.com/v1' ;
   const res = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo-0125',
+    model: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
     messages:body.messages,
-    temperature: 0.7,
+    temperature: 0.6,
     stream: true
   })
   const stream = OpenAIStream(res)
@@ -76,8 +76,8 @@ export async function searchAgent(body:any) {
     const tools = [new TavilySearchResults({maxResults:5})];
     const prompt = await pull<PromptTemplate>("hwchase17/react");
     const model = new ChatOpenAI({
-      temperature: 0.1,
-      modelName: 'gpt-3.5-turbo-0125',
+      temperature: 0.6,
+      modelName: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
       openAIApiKey: body.previewToken.llm_api_key,
       configuration: { baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1' },
       streaming: true
