@@ -97,9 +97,13 @@ export function Chat({ id, className }: ChatProps) {
         if(id!==undefined){
           localStorage.setItem(id, JSON.stringify(msg))
           useRouter().push(`/?cid=${id}`)
+          useRouter().refresh()
         }
       }
     })
+    useEffect(() => {
+      stop();
+    }, []);
   return (
     <>
       <div className={cn('pb-[200px] pt-4 md:pt-10', className)}>
@@ -138,6 +142,9 @@ export function Chat({ id, className }: ChatProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Enter your API Keys</DialogTitle>
+          <DialogDescription>
+            Keys are stored in your computer without sharing to anyone.
+          </DialogDescription>
         </DialogHeader>
         <Input
           value={previewTokenInput.llm_api_key}

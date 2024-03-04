@@ -3,19 +3,12 @@
 import * as React from 'react'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname,useRouter } from 'next/navigation'
 
 import { motion } from 'framer-motion'
 
 import { buttonVariants } from '@/components/ui/button'
-import { IconMessage, IconUsers } from '@/components/ui/icons'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger
-} from '@/components/ui/tooltip'
-import { useLocalStorage } from '@/lib/hooks/use-local-storage'
-import { type Chat } from '@/lib/types'
+
 import { cn } from '@/lib/utils'
 
 interface SidebarItemProps {
@@ -28,8 +21,8 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
   const pathname = usePathname()
 
   const isActive = pathname === chat
-  const [newChatId, setNewChatId] = useLocalStorage('newChatId', null)
-  const shouldAnimate = index === 0 && isActive && newChatId
+
+  const shouldAnimate = index === 0 && isActive 
 
   if (!chat) return null
 
@@ -55,7 +48,7 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
     >
 
       <Link
-        href={`?cid=${chat}`}
+        href={`/?cid=${chat}`}
         className={cn(
           buttonVariants({ variant: 'ghost' }),
           'group w-full px-8 transition-colors hover:bg-zinc-200/40 dark:hover:bg-zinc-300/10',

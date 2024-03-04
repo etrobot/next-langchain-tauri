@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3100",
-    "build": "next build && pnpm build-server",
+    "build": "next build && pnpm pkg-server",
     "start": "next start -p 3100",
     "lint": "next lint",
     "build-server": "esbuild ./server/server.ts --bundle --platform=node --outfile=./build/server.js",
