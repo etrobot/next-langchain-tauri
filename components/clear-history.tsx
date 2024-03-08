@@ -21,12 +21,10 @@ import { IconSpinner } from '@/components/ui/icons'
 
 interface ClearHistoryProps {
   isEnabled: boolean
-  clearChats: () => void
 }
 
 export function ClearHistory({
-  isEnabled = false,
-  clearChats
+  isEnabled = false
 }: ClearHistoryProps) {
   const [open, setOpen] = React.useState(false)
   const [isPending, startTransition] = React.useTransition()
@@ -55,7 +53,14 @@ export function ClearHistory({
             onClick={event => {
               event.preventDefault()
               startTransition(() => {
-                
+                const chats = Object.keys(localStorage).filter(key => key.startsWith('cid_'));
+                chats.forEach(key => {
+                  localStorage.removeItem(key);
+                });
+                setOpen(false)
+                router.push('/')
+                router.refresh()
+                toast.success('Chat deleted')
               })
             }}
           >
