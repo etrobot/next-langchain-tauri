@@ -10,7 +10,13 @@ import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { BingSerpAPI } from "@langchain/community/tools/bingserpapi";
 import OpenAI from 'openai'
-
+import { ToolExecutor } from "@langchain/langgraph/prebuilt";
+import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling";
+import { BaseMessage } from "@langchain/core/messages";
+import { FunctionMessage } from "@langchain/core/messages";
+import { AgentAction } from "@langchain/core/agents";
+import { StateGraph, END } from "@langchain/langgraph";
+import { RunnableLambda } from "@langchain/core/runnables";
 const convertVercelMessageToLangChainMessage = (message: VercelChatMessage) => {
   if (message.role === "user") {
     return new HumanMessage(message.content);
@@ -69,7 +75,6 @@ export async function pureChat(body: any) {
 
 export async function searchAgent(body: any) {
   const messages = body.messages;
-  const previousMessages = messages.slice(0, -1).map(convertVercelMessageToLangChainMessage);
   const currentMessageContent = messages[messages.length - 1].content;
   process.env.TAVILY_API_KEY = body.previewToken.search_api_key
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
@@ -99,7 +104,7 @@ export async function searchAgent(body: any) {
 
   const logStream = await agentExecutor.streamLog({
     input: currentMessageContent,
-    chat_history: previousMessages,
+    chat_history: [],
   }, {
     callbacks: [myCallback]
   });
@@ -125,18 +130,9 @@ export async function searchAgent(body: any) {
   return new StreamingTextResponse(transformStream);
 }
 
-import { ToolExecutor } from "@langchain/langgraph/prebuilt";
-import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling";
-import { BaseMessage } from "@langchain/core/messages";
-import { FunctionMessage } from "@langchain/core/messages";
-import { AgentAction } from "@langchain/core/agents";
-import { StateGraph, END } from "@langchain/langgraph";
-import { RunnableLambda } from "@langchain/core/runnables";
 
-
-export async function searchAgents(body: any) {
-  // process.env.TAVILY_API_KEY = body.previewToken.search_api_key
-  const tools = [new TavilySearchResults({ maxResults: 1 })];
+export async function Agents(body: any) {
+  const tools = [new BingSerpAPI(body.previewToken.bing_api_key)];
   const toolExecutor = new ToolExecutor({
     tools,
   });
@@ -265,12 +261,13 @@ export async function searchAgents(body: any) {
     messages: [new HumanMessage(body.messages[body.messages.length - 1].content)],
   };
   // const result = await app.invoke(inputs);
-  const logStream = app.streamLog(inputs)
+  const logStream = await app.streamLog(inputs)
   const transformStream = new ReadableStream({
     async start(controller) {
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
+          console.log(addOp)
           if (
             addOp.path.startsWith("/logs/ChatOpenAI") &&
             typeof addOp.value === "string" &&

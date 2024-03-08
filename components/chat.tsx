@@ -239,6 +239,15 @@ export function Chat({ id, className }: ChatProps) {
           />
           Search
         </label>
+        <label className='mx-2'>
+          <input className='mx-1'
+            type="radio"
+            value="agents"
+            checked={apiname === 'agents'}
+            onChange={handleRadioChange}
+          />
+          Agents
+        </label>
       </div>
     </>
   )
