@@ -264,6 +264,7 @@ export async function Agents(body: any) {
   const logStream = await app.streamLog(inputs)
   const transformStream = new ReadableStream({
     async start(controller) {
+      var temp=''
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
@@ -273,6 +274,10 @@ export async function Agents(body: any) {
             typeof addOp.value === "string" &&
             addOp.value.length
           ) {
+            if (temp !== addOp.value) {
+              temp=addOp.value
+              continue
+            }
             controller.enqueue(addOp.value);
           }
         }
