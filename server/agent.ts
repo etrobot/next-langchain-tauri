@@ -1,14 +1,13 @@
 import { Message as VercelChatMessage, StreamingTextResponse, OpenAIStream } from 'ai';
 import { AIMessage, ChatMessage, HumanMessage } from "@langchain/core/messages";
-import { pull } from "langchain/hub";
 import { ChatOpenAI } from '@langchain/openai';
-import { PromptTemplate } from "@langchain/core/prompts";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { nanoid } from '../lib/utils';
 import { LLMResult } from '@langchain/core/outputs';
 import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
-import { BingSerpAPI } from "@langchain/community/tools/bingserpapi";
+import { BingSerpAPI } from "./custom/bingserpapi";
 import OpenAI from 'openai'
 import { ToolExecutor } from "@langchain/langgraph/prebuilt";
 import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling";
@@ -75,10 +74,50 @@ export async function pureChat(body: any) {
 
 export async function searchAgent(body: any) {
   const messages = body.messages;
-  const currentMessageContent = messages[messages.length - 1].content;
+  const currentMessageContent = messages[messages.length - 1].content+'\n reply in'+body.locale;
   process.env.TAVILY_API_KEY = body.previewToken.search_api_key
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
-  const prompt = await pull<PromptTemplate>("hwchase17/react");
+  const SYSTEM_TEMPLATE = `Assistant is a large language model trained by OpenAI.
+
+  Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
+  
+  Assistant is constantly learning and improving, and its capabilities are constantly evolving. It is able to process and understand large amounts of text, and can use this knowledge to provide accurate and informative responses to a wide range of questions. Additionally, Assistant is able to generate its own text based on the input it receives, allowing it to engage in discussions and provide explanations and descriptions on a wide range of topics.
+  
+  Overall, Assistant is a powerful tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.
+  
+  TOOLS:
+  ------
+  
+  Assistant has access to the following tools:
+  
+  {tools}
+  
+  To use a tool, please use the following format:
+  
+  \`\`\`
+  Thought: Do I need to use a tool? Yes
+  Action: the action to take, should be one of [{tool_names}]
+  Action Input: the input to the action
+  Observation: the result of the action
+  \`\`\`
+  
+  When you have a response to say to the Human, or if you do not need to use a tool, you MUST use the format:
+  
+  \`\`\`Thought: Do I need to use a tool? No\n  \`\`\`
+
+  Final Answer: [your response here in ${body.locale}]
+
+  Begin!
+  
+  Previous conversation history:
+  {chat_history}
+  
+  New input: {input}
+  {agent_scratchpad}`
+  const prompt = ChatPromptTemplate.fromMessages([
+    ["system", SYSTEM_TEMPLATE],
+    ["human", "{input}"],
+  ]);
   const model = new ChatOpenAI({
     temperature: 0.2,
     modelName: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
@@ -114,12 +153,16 @@ export async function searchAgent(body: any) {
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
+          // console.log(addOp)
           if (
             addOp.path.startsWith("/logs/ChatOpenAI") &&
             typeof addOp.value === "string" &&
             addOp.value.length
           ) {
             controller.enqueue(addOp.value);
+          }
+          if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
+            controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
           }
         }
       }
@@ -132,7 +175,8 @@ export async function searchAgent(body: any) {
 
 
 export async function Agents(body: any) {
-  const tools = [new BingSerpAPI(body.previewToken.bing_api_key)];
+  process.env.TAVILY_API_KEY = body.previewToken.search_api_key
+  const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
   const toolExecutor = new ToolExecutor({
     tools,
   });
@@ -268,7 +312,7 @@ export async function Agents(body: any) {
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
-          console.log(addOp)
+          // console.log(addOp)
           if (
             addOp.path.startsWith("/logs/ChatOpenAI") &&
             typeof addOp.value === "string" &&
