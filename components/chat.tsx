@@ -41,9 +41,6 @@ export function Chat({ id, className }: ChatProps) {
     }
   }, [id]);
   const [apiname, setApiName] = useState('chat')
-  const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setApiName(event.target.value);
-  };
   const [previewToken, setPreviewToken] = useLocalStorage<{
     llm_api_key: string;
     llm_model: string;
@@ -68,6 +65,10 @@ export function Chat({ id, className }: ChatProps) {
     setPreviewTokenDialog(false);
   };
 
+  const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setApiName(event.target.value);
+    setInitialMessages(messages);
+  };
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
       api: process.env.NEXT_PUBLIC_API_URL + '/api/' + apiname,
@@ -98,9 +99,8 @@ export function Chat({ id, className }: ChatProps) {
           content: response.content
         })
         if (id !== undefined) {
-          localStorage.setItem(id, JSON.stringify(msg))
-          useRouter().push(`/?cid=${id}`)
-          useRouter().refresh()
+          localStorage.setItem(id, JSON.stringify(msg));
+          useRouter().replace(`/?cid=${id}`);
         }
       }
     })
@@ -238,6 +238,15 @@ export function Chat({ id, className }: ChatProps) {
             onChange={handleRadioChange}
           />
           Search
+        </label>
+        <label className='mx-2'>
+          <input className='mx-1'
+            type="radio"
+            value="agents"
+            checked={apiname === 'agents'}
+            onChange={handleRadioChange}
+          />
+          Agents
         </label>
       </div>
     </>
