@@ -76,7 +76,8 @@ export function Chat({ id, className }: ChatProps) {
       id,
       body: {
         id,
-        previewToken
+        previewToken,
+        locale:navigator.language
       },
       onResponse(response) {
         if (response.status === 401) {
@@ -246,7 +247,7 @@ export function Chat({ id, className }: ChatProps) {
             checked={apiname === 'agents'}
             onChange={handleRadioChange}
           />
-          Agents
+          Search(Langgraph)
         </label>
       </div>
     </>
