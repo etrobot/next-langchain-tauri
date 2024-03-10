@@ -10,7 +10,7 @@ interface SidebarListProps {
 }
 
 
-export async function SidebarList({ userId }: SidebarListProps) {
+export function SidebarList({ userId }: SidebarListProps) {
 
   const chats: string[] =  Object.keys(localStorage).filter(key => key.startsWith('cid_'))
   chats.sort().reverse();

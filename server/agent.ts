@@ -60,6 +60,12 @@ class MyCallbackHandler extends BaseCallbackHandler {
 // Assuming your utility and class definitions remain unchanged
 const openai = new OpenAI({ apiKey: 'dummy' })
 export async function pureChat(body: any) {
+  if(body.messages){
+    const lastMsg= body.messages.slice(-1)[0].content
+    if( lastMsg.includes('[//]: (ReAct)')){
+      return reactAgent(body)
+    }
+  } 
   openai.apiKey = body.previewToken.llm_api_key;
   openai.baseURL = body.previewToken.llm_base_url || 'https://api.openai.com/v1';
   const res = await openai.chat.completions.create({
@@ -72,9 +78,9 @@ export async function pureChat(body: any) {
   return new StreamingTextResponse(stream)
 }
 
-export async function searchAgent(body: any) {
+export async function reactAgent(body: any) {
   const messages = body.messages;
-  const currentMessageContent = messages[messages.length - 1].content+'\n reply in'+body.locale;
+  const currentMessageContent = messages.slice(-1)[0].content+'\n reply in'+body.locale;
   process.env.TAVILY_API_KEY = body.previewToken.search_api_key
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
   const SYSTEM_TEMPLATE = `Assistant is a large language model trained by OpenAI.
@@ -114,6 +120,7 @@ export async function searchAgent(body: any) {
   
   New input: {input}
   {agent_scratchpad}`
+
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", SYSTEM_TEMPLATE],
     ["human", "{input}"],

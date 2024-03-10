@@ -21,6 +21,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
+
 export interface ChatProps extends React.ComponentProps<'div'> {
   id?: string
 }
@@ -28,6 +29,7 @@ export interface ChatProps extends React.ComponentProps<'div'> {
 export function Chat({ id, className }: ChatProps) {
   const timestamp = `${new Date().toISOString().split('.')[0]}`
   const [initialMessages, setInitialMessages] = useState<Message[] | undefined>(undefined);
+  const [agentId, setAgentId] = useState('default')
   useEffect(() => {
     setInitialMessages([]);
     if (id) {
@@ -40,7 +42,6 @@ export function Chat({ id, className }: ChatProps) {
       id = `cid_${timestamp}`;
     }
   }, [id]);
-  const [apiname, setApiName] = useState('chat')
   const [previewToken, setPreviewToken] = useLocalStorage<{
     llm_api_key: string;
     llm_model: string;
@@ -65,19 +66,16 @@ export function Chat({ id, className }: ChatProps) {
     setPreviewTokenDialog(false);
   };
 
-  const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setApiName(event.target.value);
-    setInitialMessages(messages);
-  };
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
-      api: process.env.NEXT_PUBLIC_API_URL + '/api/' + apiname,
+      api: process.env.NEXT_PUBLIC_API_URL + '/api/chat',
       initialMessages,
       id,
       body: {
         id,
         previewToken,
-        locale:navigator.language
+        locale: navigator.language,
+        systemprompt:''
       },
       onResponse(response) {
         if (response.status === 401) {
@@ -127,8 +125,8 @@ export function Chat({ id, className }: ChatProps) {
                 }}
               >
                 Key Setting
-              </Button></div></>
-
+              </Button></div>
+          </>
         )}
       </div>
       <ChatPanel
@@ -155,7 +153,7 @@ export function Chat({ id, className }: ChatProps) {
               <Label htmlFor="name" className="text-right">
                 * LLM API Key
               </Label>
-              <Input  className="col-span-2"
+              <Input className="col-span-2"
                 value={previewTokenInput.llm_api_key}
                 placeholder="OpenAI sdk format"
                 onChange={e => setPreviewTokenInput(prevState => ({
@@ -167,7 +165,7 @@ export function Chat({ id, className }: ChatProps) {
               <Label htmlFor="name" className="text-right">
                 LLM Model
               </Label>
-              <Input  className="col-span-2"
+              <Input className="col-span-2"
                 value={previewTokenInput.llm_model}
                 placeholder="optional, default is gpt-3.5-turbo-0125"
                 onChange={e => setPreviewTokenInput(prevState => ({
@@ -177,9 +175,9 @@ export function Chat({ id, className }: ChatProps) {
               /></div>
             <div className="grid grid-cols-3 items-center gap-3">
               <Label htmlFor="name" className="text-right">
-                LLM Base URL 
+                LLM Base URL
               </Label>
-              <Input  className="col-span-2"
+              <Input className="col-span-2"
                 value={previewTokenInput.llm_base_url}
                 placeholder="optional, default is https://api.openai.com/v1"
                 onChange={e => setPreviewTokenInput(prevState => ({
@@ -191,7 +189,7 @@ export function Chat({ id, className }: ChatProps) {
               <Label htmlFor="name" className="text-right">
                 Bing Search API Key
               </Label>
-              <Input  className="col-span-2"
+              <Input className="col-span-2"
                 value={previewTokenInput.bing_api_key}
                 placeholder="from microsoft.com/bing/apis"
                 onChange={e => setPreviewTokenInput(prevState => ({
@@ -203,7 +201,7 @@ export function Chat({ id, className }: ChatProps) {
               <Label htmlFor="name" className="text-right">
                 Tavily Search API Key
               </Label>
-              <Input  className="col-span-2"
+              <Input className="col-span-2"
                 value={previewTokenInput.search_api_key}
                 placeholder="optional, from tavily.com"
                 onChange={e => setPreviewTokenInput(prevState => ({
@@ -221,35 +219,6 @@ export function Chat({ id, className }: ChatProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <div className='w-full pb-3 fixed bottom-0 z-50 text-center'>
-        <label className='mx-2'>
-          <input className='mx-1'
-            type="radio"
-            value="chat"
-            checked={apiname === 'chat'}
-            onChange={handleRadioChange}
-          />
-          Chat
-        </label>
-        <label className='mx-2'>
-          <input className='mx-1'
-            type="radio"
-            value="search"
-            checked={apiname === 'search'}
-            onChange={handleRadioChange}
-          />
-          Search
-        </label>
-        <label className='mx-2'>
-          <input className='mx-1'
-            type="radio"
-            value="agents"
-            checked={apiname === 'agents'}
-            onChange={handleRadioChange}
-          />
-          Search(Langgraph)
-        </label>
-      </div>
     </>
   )
 }
