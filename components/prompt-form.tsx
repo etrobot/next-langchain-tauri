@@ -9,15 +9,33 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { IconArrowElbow, IconPlus } from '@/components/ui/icons'
+import { IconArrowElbow, IconUsers } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
-
+import {useState,useEffect} from 'react'
 export interface PromptProps
   extends Pick<UseChatHelpers, 'input' | 'setInput'> {
   onSubmit: (value: string) => void
   isLoading: boolean
 }
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command"
+interface Agent {
+  id: string;
+  name: string;
+  prompt: string;
+}
 export function PromptForm({
   onSubmit,
   input,
@@ -27,13 +45,68 @@ export function PromptForm({
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
+
   React.useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus()
     }
   }, [])
 
+  const [agents, setAgents] = useState({'Search':{
+    id: '#666777',
+    name: 'Search',
+    prompt: 'Get info from Internet [//]: (ReAct-Tools)'
+  }});
+
+  useEffect(() => {
+    const storedAgents=localStorage.getItem('Agents')
+    if(storedAgents){
+      const parsedAgents = JSON.parse(storedAgents);
+      setAgents(parsedAgents);
+    }
+  }, []);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const handleAgentSelect = (agentName:string) => {
+    setInput(`@${agentName} `); // Set the selected agent name as the input value
+    setShowDropdown(false); // Hide the dropdown
+  };
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setInput(value)
+    if (value.charAt(0) === '@' && value.includes(' ') && agents) {
+      Object.entries(agents).forEach(([key, agent]) => {
+        const agentName = agent.name;
+        const agentPrompt = agent.prompt;
+        if (value.startsWith(`@${agentName}`)) {
+          console.log(agentPrompt)
+          localStorage.setItem('AgentPrompt', `${agentPrompt}`);
+          return; // Break out of the forEach loop
+        }
+      });
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+    }
+  };
   return (
+    <>
+    {/* <Popover open={showDropdown}>
+      <PopoverTrigger asChild>
+      </PopoverTrigger>
+      <PopoverContent className="w-[200px] p-0">
+      <Command>
+      {Object.entries(agents).map(([key, agent]) => (
+            <CommandItem
+            key={key}
+                value={(agent as Agent).name}
+            >
+            {'@' + (agent as Agent).name}
+            </CommandItem>
+          ))}
+      </Command>
+      </PopoverContent>
+    </Popover> */}
+
     <form
       onSubmit={async e => {
         e.preventDefault()
@@ -51,7 +124,7 @@ export function PromptForm({
             <button
               onClick={e => {
                 e.preventDefault()
-                router.push('/')
+                router.replace('/')
                 router.refresh()
               }}
               className={cn(
@@ -60,11 +133,11 @@ export function PromptForm({
               )}
               disabled={isLoading}
             >
-              <IconPlus />
+              ⌂
               <span className="sr-only">New Chat</span>
             </button>
           </TooltipTrigger>
-          <TooltipContent>New Chat</TooltipContent>
+          <TooltipContent>Agents' Home</TooltipContent>
         </Tooltip>
         <Textarea
           ref={inputRef}
@@ -72,10 +145,10 @@ export function PromptForm({
           onKeyDown={onKeyDown}
           rows={1}
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={e => handleInputChange(e)}
           placeholder="Send a message."
           spellCheck={false}
-          className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
+          className="min-h-[64px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
         />
         <div className="absolute right-0 top-4 sm:right-4">
           <Tooltip>
@@ -94,5 +167,20 @@ export function PromptForm({
         </div>
       </div>
     </form>
+    <div  className='text-sm text-muted-foreground'>
+      Tap to use: 
+    {Object.entries(agents).map(([key, agent]) => (
+            <button
+              className='mx-2'
+              key={key}
+              onClick={() => {
+                setInput(`@${(agent as Agent).name} `+input);
+                inputRef.current?.focus() ?? null
+              }}
+            >{'@' + (agent as Agent).name}
+            </button>
+    ))}
+    </div>
+    </>
   )
 }

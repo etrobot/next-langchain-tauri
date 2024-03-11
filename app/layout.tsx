@@ -6,7 +6,7 @@ import '@/app/globals.css'
 import { cn } from '@/lib/utils'
 import { TailwindIndicator } from '@/components/tailwind-indicator'
 import { Providers } from '@/components/providers'
-import { Header } from '@/components/header'
+import Header from '@/components/header'
 
 export const metadata = {
   metadataBase: new URL(`http://${process.env.VERCEL_URL}`),

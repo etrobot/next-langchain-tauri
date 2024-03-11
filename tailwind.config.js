@@ -12,7 +12,7 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ['var(--font-geist-sans)'],
+        sans: ['var(--font-geist-sans)',],
         mono: ['var(--font-geist-mono)']
       },
       colors: {

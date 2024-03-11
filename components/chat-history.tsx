@@ -11,11 +11,9 @@ interface ChatHistoryProps {
   userId?: string
 }
 
-export async function ChatHistory({ userId }: ChatHistoryProps) {
+export function ChatHistory({ userId }: ChatHistoryProps) {
   return (
-    <div className="flex flex-col h-full">
-      <div className="px-2 my-4">
-      </div>
+    <div className="flex flex-col h-full pt-3">
       <React.Suspense
         fallback={
           <div className="flex flex-col flex-1 px-4 space-y-4 overflow-auto">

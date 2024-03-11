@@ -1,13 +1,13 @@
 'use client'
 
-import { Chat } from '@/lib/types'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { SidebarActions } from '@/components/sidebar-actions'
 import { SidebarItem } from '@/components/sidebar-item'
+import { Chat } from '@/lib/types'
 
 interface SidebarItemsProps {
-  chats?: string[]
+  chats?: Chat[]
 }
 
 export function SidebarItems({ chats }: SidebarItemsProps) {
@@ -19,7 +19,7 @@ export function SidebarItems({ chats }: SidebarItemsProps) {
         (chat, index) =>
           chat && (
             <motion.div
-              key={chat}
+              key={chat.id}
               exit={{
                 opacity: 0,
                 height: 0
@@ -27,7 +27,7 @@ export function SidebarItems({ chats }: SidebarItemsProps) {
             >
               <SidebarItem index={index} chat={chat}>
                 <SidebarActions
-                    chatId={chat}
+                    chatId={chat.id}
                   />
               </SidebarItem>
             </motion.div>
