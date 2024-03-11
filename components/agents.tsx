@@ -57,9 +57,16 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [isRemovePending, startRemoveTransition] = useTransition()
   const [currentAgent, setCurrentAgent] = useState({ id: '', name: '', prompt: '' })
-  const [agents, setAgents] = useState(
-    JSON.parse(localStorage.getItem('Agents') || '{}') // Load agents from localStorage or initialize as an empty object
-  )
+  const [agents, setAgents] = useState(() => {
+    const storedAgents = localStorage.getItem('Agents');
+    if (storedAgents) {
+      return JSON.parse(storedAgents);
+    } else {
+      const newAgent = '{"#666777":{"name":"Search","prompt":"Get Info from Internet[//]: (ReAct-Tools)"}}'
+      localStorage.setItem('Agents', newAgent);
+      return JSON.parse(newAgent); // or you can return an empty object {} if that's the desired initial state
+    }
+  });
   const [usetool, setUsetool] = useState(false) // Load agents from localStorage or initialize as an empty object
 
   // Function to open the editor with the selected agent's details
@@ -70,7 +77,7 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
 
   // Function to handle saving the current agent to the local state and localStorage
   const handleSaveAgents = () => {
-    const tool = '[//]: (ReAct)'
+    const tool = '[//]: (ReAct-Tools)'
     var prmt=currentAgent.prompt
     if(usetool){
       if(!prmt.endsWith(tool)){
@@ -88,7 +95,7 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
     setAgents(updatedAgents)
     localStorage.setItem('Agents', JSON.stringify(updatedAgents)) // Save to localStorage
     setEditorOpen(false) // Close the editor
-    router.push('/')
+    router.replace('/')
     router.refresh()
   }
 
@@ -109,8 +116,8 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
             <CardDescription className='h-[64px]'>{(agent as Agent).prompt.slice(0,70)+' ...'}</CardDescription>
           </CardHeader>
           <CardFooter className="flex gap-2">
-            <Button onClick={() => handleEditAgent(key)}><IconEdit/>edit</Button>
-            <Button  variant="outline" onClick={() => setInput(`@${(agent as Agent).name} `)}>@</Button>
+            <Button onClick={() => handleEditAgent(key)}><IconEdit/></Button>
+            <Button variant="outline" onClick={() => setInput(`@${(agent as Agent).name} `)}>@</Button>
             <Button
               variant="ghost"
               className="ml-auto size-6 p-0 hover:bg-background"

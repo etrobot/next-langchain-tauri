@@ -1,11 +1,10 @@
 'use client'
-import { IconSpinner, IconTrash } from '@/components/ui/icons'
+import { IconSpinner, IconTrash, IconCopy } from '@/components/ui/icons'
 
 import { useRouter } from 'next/navigation'
 import * as React from 'react'
 import { toast } from 'react-hot-toast'
 
-import { ServerActionResult, type Chat } from '@/lib/types'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,7 +37,28 @@ export function SidebarActions({
   return (
     <>
       <div className="space-x-1">
-
+      <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              className="size-6 p-0 hover:bg-background"
+              onClick={() => {
+                const msgobj = localStorage.getItem(chatId);
+                  if (msgobj !== null) {
+                    const msg = JSON.parse(msgobj).map((msg: any) => msg.content).join('\n\n');;
+                    navigator.clipboard.writeText(msg)
+                    toast.success('Copied to clipboard')
+                  }else{
+                    toast.error('No messages found')
+                  }
+              }}
+            >
+              <IconCopy />
+              <span className="sr-only">Share</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Share chat</TooltipContent>
+        </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -75,7 +95,7 @@ export function SidebarActions({
                 startRemoveTransition(async () => {
                   localStorage.removeItem(chatId)
                   setDeleteDialogOpen(false)
-                  router.push('/')
+                  router.replace('/')
                   router.refresh()
                   toast.success('Chat deleted')
                 })

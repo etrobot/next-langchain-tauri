@@ -92,7 +92,6 @@ export default function Header() {
           className={cn(buttonVariants({ variant: 'outline' }))}
         >
           <IconGitHub />
-          <span className="hidden ml-2 md:flex">GitHub</span>
         </a>
         <ThemeToggle />
       </div>
@@ -171,7 +170,7 @@ export default function Header() {
               onClick={() => {
                 setPreviewToken(previewTokenInput);
                 setPreviewTokenDialog(false);
-                router.push('/');
+                router.replace('/');
                 router.refresh();
               }}
             >

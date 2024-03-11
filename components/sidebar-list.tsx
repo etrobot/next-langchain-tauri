@@ -1,10 +1,14 @@
 'use client'
 import { ClearHistory } from '@/components/clear-history'
 import { SidebarItems } from '@/components/sidebar-items'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { type Message } from 'ai'
 import { Chat } from '@/lib/types'
-
+import { IconRefresh } from './ui/icons'
+import { Button } from './ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip'
 interface SidebarListProps {
   userId?: string
   children?: React.ReactNode
@@ -38,7 +42,12 @@ export function SidebarList({ userId }: SidebarListProps) {
         )}
       </div>
       <div className="flex items-center justify-between p-4">
-        <ThemeToggle />
+      <Tooltip>
+          <TooltipTrigger asChild>
+            <Button onClick={() => window.location.reload()}><IconRefresh/></Button>
+        </TooltipTrigger>
+        <TooltipContent>Force Reload Page</TooltipContent>
+      </Tooltip>
         <ClearHistory isEnabled={chats?.length > 0} />
       </div>
     </div>

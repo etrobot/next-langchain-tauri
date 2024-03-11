@@ -62,7 +62,7 @@ const openai = new OpenAI({ apiKey: 'dummy' })
 export async function pureChat(body: any) {
   if(body.messages){
     const lastMsg= body.messages.slice(-1)[0].content
-    if( lastMsg.includes('[//]: (ReAct)')){
+    if( lastMsg.includes('[//]: (ReAct-Tools)')){
       return reactAgent(body)
     }
   } 

@@ -58,7 +58,7 @@ export function ClearHistory({
                   localStorage.removeItem(key);
                 });
                 setOpen(false)
-                router.push('/')
+                router.replace('/')
                 router.refresh()
                 toast.success('Chat deleted')
               })

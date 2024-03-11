@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { IconArrowElbow, IconPlus } from '@/components/ui/icons'
+import { IconArrowElbow, IconUsers } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
 import {useState,useEffect} from 'react'
 export interface PromptProps
@@ -52,10 +52,10 @@ export function PromptForm({
     }
   }, [])
 
-  const [agents, setAgents] = useState({'dummy':{
-    id: 'dummy',
-    name: 'dummy',
-    prompt: 'dummy'
+  const [agents, setAgents] = useState({'Search':{
+    id: '#666777',
+    name: 'Search',
+    prompt: 'Get info from Internet [//]: (ReAct-Tools)'
   }});
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export function PromptForm({
             <button
               onClick={e => {
                 e.preventDefault()
-                router.push('/')
+                router.replace('/')
                 router.refresh()
               }}
               className={cn(
@@ -133,11 +133,11 @@ export function PromptForm({
               )}
               disabled={isLoading}
             >
-              <IconPlus />
+              ⌂
               <span className="sr-only">New Chat</span>
             </button>
           </TooltipTrigger>
-          <TooltipContent>New Chat</TooltipContent>
+          <TooltipContent>Agents' Home</TooltipContent>
         </Tooltip>
         <Textarea
           ref={inputRef}
