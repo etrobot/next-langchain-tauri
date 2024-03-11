@@ -45,24 +45,19 @@ export function PromptForm({
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = React.useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
+
   React.useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus()
     }
   }, [])
+
   const [agents, setAgents] = useState({'dummy':{
     id: 'dummy',
     name: 'dummy',
     prompt: 'dummy'
   }});
-  const getRandomColor = () => {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
+
   useEffect(() => {
     const storedAgents=localStorage.getItem('Agents')
     if(storedAgents){
@@ -78,7 +73,7 @@ export function PromptForm({
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setInput(value)
-    if (value.charAt(0) === '@' && value.charAt(-1) === ' ' && agents) {
+    if (value.charAt(0) === '@' && value.includes(' ') && agents) {
       Object.entries(agents).forEach(([key, agent]) => {
         const agentName = agent.name;
         const agentPrompt = agent.prompt;
@@ -153,7 +148,7 @@ export function PromptForm({
           onChange={e => handleInputChange(e)}
           placeholder="Send a message."
           spellCheck={false}
-          className="min-h-[60px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
+          className="min-h-[64px] w-full resize-none bg-transparent px-4 py-[1.3rem] focus-within:outline-none sm:text-sm"
         />
         <div className="absolute right-0 top-4 sm:right-4">
           <Tooltip>
@@ -172,6 +167,20 @@ export function PromptForm({
         </div>
       </div>
     </form>
+    <div  className='text-sm text-muted-foreground'>
+      Tap to use: 
+    {Object.entries(agents).map(([key, agent]) => (
+            <button
+              className='mx-2'
+              key={key}
+              onClick={() => {
+                setInput(`@${(agent as Agent).name} `+input);
+                inputRef.current?.focus() ?? null
+              }}
+            >{'@' + (agent as Agent).name}
+            </button>
+    ))}
+    </div>
     </>
   )
 }

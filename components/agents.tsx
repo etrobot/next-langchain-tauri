@@ -1,4 +1,5 @@
 'use client'
+import { UseChatHelpers } from 'ai/react'
 import {
   Card,
   CardContent,
@@ -29,9 +30,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import { Checkbox } from "@/components/ui/checkbox"
 import { IconSpinner, IconTrash } from '@/components/ui/icons'
 import { Textarea } from "@/components/ui/textarea"
-
+import { IconEdit,IconPlus } from '@/components/ui/icons'
+import { useRouter } from 'next/navigation'
+import { ExternalLink } from '@/components/external-link'
 function getRandomColor(): string {
   const letters = '0123456789ABCDEF';
   let color = '#';
@@ -47,7 +51,8 @@ interface Agent {
   prompt: string;
 }
 
-export function Agents() {
+export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
+  const router=useRouter()
   const [editorOpen, setEditorOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [isRemovePending, startRemoveTransition] = useTransition()
@@ -55,6 +60,7 @@ export function Agents() {
   const [agents, setAgents] = useState(
     JSON.parse(localStorage.getItem('Agents') || '{}') // Load agents from localStorage or initialize as an empty object
   )
+  const [usetool, setUsetool] = useState(false) // Load agents from localStorage or initialize as an empty object
 
   // Function to open the editor with the selected agent's details
   const handleEditAgent = (agentId:string) => {
@@ -64,13 +70,26 @@ export function Agents() {
 
   // Function to handle saving the current agent to the local state and localStorage
   const handleSaveAgents = () => {
+    const tool = '[//]: (ReAct)'
+    var prmt=currentAgent.prompt
+    if(usetool){
+      if(!prmt.endsWith(tool)){
+        prmt=prmt+tool
+      }
+    }else{
+      if(prmt.endsWith(tool)){
+        prmt=prmt.replace(tool,'')
+      }
+    }
     const updatedAgents = {
       ...agents,
-      [currentAgent.id]: { name: currentAgent.name, prompt: currentAgent.prompt }
+      [currentAgent.id]: { name: currentAgent.name, prompt:prmt }
     }
     setAgents(updatedAgents)
     localStorage.setItem('Agents', JSON.stringify(updatedAgents)) // Save to localStorage
     setEditorOpen(false) // Close the editor
+    router.push('/')
+    router.refresh()
   }
 
   // Function to open the editor for creating a new agent
@@ -80,19 +99,21 @@ export function Agents() {
   }
 
   return (
+    <>
     <div className="flex flex-wrap gap-4 m-4">
       {Object.entries(agents).map(([key, agent]) => (
         <>
-        <Card key={key} className="w-[320px] h-[168px]">
+        <Card key={key} className="w-[300px] h-[200px]">
           <CardHeader>
             <CardTitle>{(agent as Agent).name}</CardTitle>
-            <CardDescription>{(agent as Agent).prompt.slice(0,70)+' ...'}</CardDescription>
+            <CardDescription className='h-[64px]'>{(agent as Agent).prompt.slice(0,70)+' ...'}</CardDescription>
           </CardHeader>
-          <CardFooter className="flex justify-between">
-            <Button onClick={() => handleEditAgent(key)}>edit</Button>
+          <CardFooter className="flex gap-2">
+            <Button onClick={() => handleEditAgent(key)}><IconEdit/>edit</Button>
+            <Button  variant="outline" onClick={() => setInput(`@${(agent as Agent).name} `)}>@</Button>
             <Button
               variant="ghost"
-              className="size-6 p-0 hover:bg-background"
+              className="ml-auto size-6 p-0 hover:bg-background"
               disabled={isRemovePending}
               onClick={() => setDeleteDialogOpen(true)}
             >
@@ -116,16 +137,13 @@ export function Agents() {
                   </AlertDialogCancel>
                   <AlertDialogAction
                     disabled={isRemovePending}
-                    onClick={event => {
-                      event.preventDefault()
-                      // @ts-ignore
-                      startRemoveTransition(async () => {
-                        const updatedAgents = { ...agents }
-                        delete updatedAgents[key] // Remove the agent from the object
-                        setAgents(updatedAgents) // Update local state
-                        localStorage.setItem('Agents', JSON.stringify(updatedAgents)) // Update localStorage
-                      })
-                    }}
+                    onClick={() => {
+                      const updatedAgents = { ...agents }
+                      delete updatedAgents[key] // Remove the agent from the object
+                      setAgents(updatedAgents) // Update local state
+                      localStorage.setItem('Agents', JSON.stringify(updatedAgents)) // Update localStorage
+                    }
+                  }
                   >
                     {isRemovePending && <IconSpinner className="mr-2 animate-spin" />}
                     Delete
@@ -161,7 +179,7 @@ export function Agents() {
               <Label htmlFor="name" className="text-right">
                 Prompt
               </Label>
-              <Textarea className="col-span-4"
+              <Textarea className="col-span-4 h-[200px]"
                 value={currentAgent.prompt}
                 placeholder="Agent System Role Prompt"
                 onChange={(e) => setCurrentAgent({ ...currentAgent, prompt: e.target.value })}
@@ -169,13 +187,34 @@ export function Agents() {
             </div>
           </div>
           <DialogFooter className="items-center">
+          <Checkbox id="usetool" checked={usetool} onCheckedChange={()=>setUsetool(!usetool)}/>
+            <label
+              htmlFor="terms"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              Use Tools
+            </label>
             <Button onClick={handleSaveAgents}>Save Agent</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Card className="w-[320px] h-[168px] text-center">
-        <button className="mt-16 text-4xl" onClick={handleNewAgent}>+</button>
+      <Card className="w-[300px] h-[200px] text-center">
+        <button className="mt-20" onClick={handleNewAgent}>+ New Agent</button>
       </Card>
     </div>
+     <div className="mx-auto px-4 text-center mt-12">
+       <p className="mb-2 leading-normal text-muted-foreground">
+         This is an open source AI app built with{' '}
+         <ExternalLink href="https://nextjs.org">▲ Next.js</ExternalLink> and{' '}
+         <ExternalLink href="https://js.langchain.com/docs">
+          LangChain.js 🦜🔗
+         </ExternalLink>
+         .
+       </p>
+       <p className="leading-normal text-muted-foreground">
+         You can add your own agents and use '@' to mention them for conversation.
+       </p>
+   </div>
+   </>
   )
 }

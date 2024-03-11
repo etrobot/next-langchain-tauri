@@ -2,8 +2,9 @@
 import { ClearHistory } from '@/components/clear-history'
 import { SidebarItems } from '@/components/sidebar-items'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { cache } from 'react'
+import { type Message } from 'ai'
 import { Chat } from '@/lib/types'
+
 interface SidebarListProps {
   userId?: string
   children?: React.ReactNode
@@ -12,8 +13,17 @@ interface SidebarListProps {
 
 export function SidebarList({ userId }: SidebarListProps) {
 
-  const chats: string[] =  Object.keys(localStorage).filter(key => key.startsWith('cid_'))
-  chats.sort().reverse();
+  const chatKeys: string[] = Object.keys(localStorage).filter(key => key.startsWith('cid_'));
+  chatKeys.sort().reverse();
+
+  const chats:Chat[] = chatKeys.map(key => {
+    const messages = JSON.parse(localStorage.getItem(key) || "");
+    return {
+      id: key,
+      messages
+    };
+  });
+
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       <div className="flex-1 overflow-auto">
