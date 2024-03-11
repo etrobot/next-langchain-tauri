@@ -77,12 +77,18 @@ export function Chat({ id, className }: ChatProps) {
         }
       }
     })
+
   useEffect(() => {
     stop();
+    const token=localStorage.getItem('ai-token')
+    if(token){
+      setPreviewToken(JSON.parse(token))
+    }
+    else{toast.error('Please set the API keys');}
   }, []);
   return (
     <>
-      <div className={cn('pb-[200px] md:pt-4', className)}>
+      <div className={cn('pb-[200px] md:pt-2', className)}>
         {messages.length ? (
           <>
             <ChatList messages={messages} />

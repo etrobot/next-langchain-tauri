@@ -6,20 +6,18 @@ import { cn } from '@/lib/utils'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
   IconGitHub,
-  IconNextChat,
-  IconSeparator,
 } from '@/components/ui/icons'
 import { SidebarMobile } from './sidebar-mobile'
 import { SidebarToggle } from './sidebar-toggle'
 import { ChatHistory } from './chat-history'
 import { useRouter } from 'next/navigation'
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import Link from 'next/link'
+// import {
+//   Tabs,
+//   TabsContent,
+//   TabsList,
+//   TabsTrigger,
+// } from "@/components/ui/tabs"
+// import Link from 'next/link'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import {
   Dialog,
@@ -30,9 +28,10 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { Label } from "@/components/ui/label"
-import { redirect } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Input } from './ui/input'
+import { toast } from 'react-hot-toast'
+
 export default function Header() {
   const router = useRouter();
   const [previewToken, setPreviewToken] = useLocalStorage<{
@@ -54,11 +53,6 @@ export default function Header() {
   const [previewTokenDialog, setPreviewTokenDialog] = useState(false);
   const [previewTokenInput, setPreviewTokenInput] = useState(previewToken ?? initialPreviewToken);
 
-  const handleSaveToken = () => {
-    setPreviewToken(previewTokenInput);
-    setPreviewTokenDialog(false);
-    window.location.reload();
-  };
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between w-full h-12 p-2 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl">
       <SidebarToggle />

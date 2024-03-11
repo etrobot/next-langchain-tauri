@@ -62,7 +62,7 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
     if (storedAgents) {
       return JSON.parse(storedAgents);
     } else {
-      const newAgent = '{"#666777":{"name":"Search","prompt":"Get Info from Internet[//]: (ReAct-Tools)"}}'
+      const newAgent = `{"#666666":{"name":"Search","prompt":"Get Info from Internet[//]: (ReAct-Tools)"},"#666777":{"name":"CoT","prompt":"Let's think step by step."}}`
       localStorage.setItem('Agents', newAgent);
       return JSON.parse(newAgent); // or you can return an empty object {} if that's the desired initial state
     }
