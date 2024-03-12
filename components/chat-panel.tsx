@@ -83,7 +83,7 @@ export function ChatPanel({
               if(token){
                 var tokenjson=JSON.parse(token)
                 tokenjson['usetool']=localStorage.getItem('usetool')
-                console.log(tokenjson)
+                // console.log(tokenjson)
                 setPreviewToken(tokenjson)
               }
               await append({
@@ -91,7 +91,6 @@ export function ChatPanel({
                 content: prompt,
                 role: 'user'
               })
-              localStorage.removeItem('usetool')
             }}
             input={input}
             setInput={setInput}

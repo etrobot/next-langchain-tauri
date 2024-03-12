@@ -63,6 +63,10 @@ export function PromptForm({
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setInput(value)
+    if(value.charAt(0) !== '@'){
+      localStorage.removeItem('agentPrompt');
+      localStorage.removeItem('usetool');
+    }
     if (value.split(' ')[0] === '@' || value === '@'){
       const storedAgents=localStorage.getItem('Agents')
       if(storedAgents){

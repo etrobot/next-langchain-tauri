@@ -53,8 +53,10 @@ export function Chat({ id, className }: ChatProps) {
         locale: navigator.language,
       },
       onResponse(response) {
-        if (response.status === 401) {
+        if (response.status !== 200) {
           toast.error(response.statusText)
+          localStorage.removeItem('agentPrompt');
+          localStorage.removeItem('usetool');
         }
       },
       onFinish(response) {
@@ -72,8 +74,6 @@ export function Chat({ id, className }: ChatProps) {
           role: 'assistant',
           content: response.content
         })
-        localStorage.removeItem('agentPrompt');
-        localStorage.removeItem('usetool');
         if (id !== undefined) {
           localStorage.setItem(id, JSON.stringify(msg));
           useRouter().replace(`/?cid=${id}`);
