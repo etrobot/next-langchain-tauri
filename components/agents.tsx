@@ -112,7 +112,7 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
 
   return (
     <>
-    <div className="flex flex-wrap gap-4 m-4">
+    <div className="flex flex-wrap gap-4 m-4 justify-center">
       {Object.entries(agents).map(([key, agent]) => (
         <>
         <Card key={key} className="w-[300px] h-[200px]">

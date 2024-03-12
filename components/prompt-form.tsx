@@ -105,7 +105,7 @@ export function PromptForm({
                 key={key}
                 value={(agent as Agent).name}
                 onSelect={(currentValue) =>{
-                    setInput(`@${currentValue} ` + input.slice(1))
+                    setInput(`@${(agent as Agent).name} ` + input.slice(1))
                     setshowPopup(false)
                   }
                 }
