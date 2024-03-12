@@ -19,6 +19,9 @@
         "scope": [
           { "name": "bin/server", "sidecar": true }
         ]
+      },
+      "os": {
+        "all": true
       }
     },
     "bundle": {
