@@ -17,7 +17,7 @@ fastify.post('/api/chat', async (request, reply) => {
 
 // Start server
 fastify.listen({ port: 6677 }, (err, address) => {
-  console.log(`Server listening at ${address}`);
+  // console.log(`Server listening at ${address}`);
   if (err) {
     throw err
   }

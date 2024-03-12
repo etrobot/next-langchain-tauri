@@ -30,6 +30,7 @@ interface Agent {
   id: string;
   name: string;
   prompt: string;
+  usetool?: boolean;
 }
 export function PromptForm({
   onSubmit,
@@ -45,7 +46,8 @@ export function PromptForm({
   const [agents, setAgents] = useState({'Search':{
     id: '#666777',
     name: 'Search',
-    prompt: 'Get info from Internet [//]: (ReAct-Tools)'
+    prompt: 'Get info from Internet',
+    usetool:false
   }});
 
   useEffect(() => {
@@ -76,7 +78,9 @@ export function PromptForm({
         const agentName = agent.name;
         const agentPrompt = agent.prompt;
         if (value.startsWith(`@${agentName}`)) {
-          console.log(agentPrompt)
+          // console.log(agent)
+          if(agent.usetool){localStorage.setItem('usetool', 'true');}else{localStorage.removeItem('usetool')}
+          // console.log(agentPrompt)
           localStorage.setItem('AgentPrompt', `${agentPrompt}`);
           return; // Break out of the forEach loop
         }
@@ -110,7 +114,7 @@ export function PromptForm({
                   }
                 }
               >
-                {'@' + (agent as Agent).name}
+                {'@' + (agent as Agent).name} {(agent as Agent).usetool&&<span className="text-xs text-muted-foreground">-usetool</span>}
               </CommandItem>
             ))}
           </CommandGroup>

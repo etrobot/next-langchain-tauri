@@ -49,6 +49,7 @@ interface Agent {
   id: string;
   name: string;
   prompt: string;
+  usetool?: boolean
 }
 
 export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
@@ -62,7 +63,7 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
     if (storedAgents) {
       return JSON.parse(storedAgents);
     } else {
-      const newAgent = `{"#666666":{"name":"Search","prompt":"Get Info from Internet[//]: (ReAct-Tools)"},"#666777":{"name":"CoT","prompt":"Let's think step by step."}}`
+      const newAgent = `{"#666666":{"name":"Search","prompt":"Get Info from Internet","usetool":true},"#666777":{"name":"CoT","prompt":"Let's think step by step."}}`
       localStorage.setItem('Agents', newAgent);
       return JSON.parse(newAgent); // or you can return an empty object {} if that's the desired initial state
     }
@@ -73,7 +74,7 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
   const handleEditAgent = (agentId:string) => {
     setCurrentAgent({ ...agents[agentId], id: agentId })
     setEditorOpen(true)
-    if(agents[agentId].prompt.endsWith('[//]: (ReAct-Tools)')){
+    if(agents[agentId].usetool){
       setUsetool(true)
     }else{
       setUsetool(false)
@@ -82,20 +83,9 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
 
   // Function to handle saving the current agent to the local state and localStorage
   const handleSaveAgents = () => {
-    const tool = '[//]: (ReAct-Tools)'
-    var prmt=currentAgent.prompt
-    if(usetool){
-      if(!prmt.endsWith(tool)){
-        prmt=prmt+tool
-      }
-    }else{
-      if(prmt.endsWith(tool)){
-        prmt=prmt.replace(tool,'')
-      }
-    }
     const updatedAgents = {
       ...agents,
-      [currentAgent.id]: { name: currentAgent.name, prompt:prmt }
+      [currentAgent.id]: { name: currentAgent.name, prompt:currentAgent.prompt,usetool:usetool }
     }
     setAgents(updatedAgents)
     localStorage.setItem('Agents', JSON.stringify(updatedAgents)) // Save to localStorage
@@ -117,7 +107,8 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
         <>
         <Card key={key} className="w-[300px] h-[200px]">
           <CardHeader>
-            <CardTitle>{(agent as Agent).name}</CardTitle>
+            <CardTitle>{(agent as Agent).name} {(agent as Agent).usetool&&<span className="text-xs text-muted-foreground"> usetool</span>}
+            </CardTitle>
             <CardDescription className='h-[64px]'>{(agent as Agent).prompt.slice(0,70)+' ...'}</CardDescription>
           </CardHeader>
           <CardFooter className="flex gap-2">

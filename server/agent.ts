@@ -60,12 +60,10 @@ class MyCallbackHandler extends BaseCallbackHandler {
 // Assuming your utility and class definitions remain unchanged
 const openai = new OpenAI({ apiKey: 'dummy' })
 export async function pureChat(body: any) {
-  if(body.messages){
-    const lastMsg= body.messages.slice(-1)[0].content
-    if( lastMsg.includes('[//]: (ReAct-Tools)')){
+  console.log(body.previewToken)
+  if(body.previewToken.usetool){
       return reactAgent(body)
-    }
-  } 
+  }
   openai.apiKey = body.previewToken.llm_api_key;
   openai.baseURL = body.previewToken.llm_base_url || 'https://api.openai.com/v1';
   const res = await openai.chat.completions.create({

@@ -39,6 +39,7 @@ export function Chat({ id, className }: ChatProps) {
     llm_base_url: string;
     search_api_key: string;
     bing_api_key: string;
+    usetool?: boolean
   } | null>('ai-token', null);
 
   const { messages, append, reload, stop, isLoading, input, setInput } =
@@ -109,6 +110,7 @@ export function Chat({ id, className }: ChatProps) {
         messages={messages}
         input={input}
         setInput={setInput}
+        setPreviewToken={setPreviewToken}
       />
 
     </>

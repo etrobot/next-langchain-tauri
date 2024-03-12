@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { type UseChatHelpers } from 'ai/react'
+import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 
 import { Button } from '@/components/ui/button'
 import { PromptForm } from '@/components/prompt-form'
@@ -21,6 +22,7 @@ export interface ChatPanelProps
   > {
   id?: string
   title?: string
+  setPreviewToken: ({ llm_api_key, llm_model, llm_base_url, search_api_key, bing_api_key }: { llm_api_key: string, llm_model: string, llm_base_url: string, search_api_key: string, bing_api_key: string }) => void
 }
 
 export function ChatPanel({
@@ -33,6 +35,7 @@ export function ChatPanel({
   input,
   setInput,
   messages,
+  setPreviewToken
 }: ChatPanelProps) {
 
   return (
@@ -76,11 +79,19 @@ export function ChatPanel({
               }else{
                 localStorage.setItem('latestAsk', value);
               }
+              const token=localStorage.getItem('ai-token')
+              if(token){
+                var tokenjson=JSON.parse(token)
+                tokenjson['usetool']=localStorage.getItem('usetool')
+                console.log(tokenjson)
+                setPreviewToken(tokenjson)
+              }
               await append({
                 id,
                 content: prompt,
                 role: 'user'
               })
+              localStorage.removeItem('usetool')
             }}
             input={input}
             setInput={setInput}
