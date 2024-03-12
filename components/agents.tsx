@@ -221,6 +221,9 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
        <p className="leading-normal text-muted-foreground">
          You can add your own agents and use '@' to mention them for conversation.
        </p>
+       <p className="leading-normal text-muted-foreground mt-2">
+         if agents are not updated after editting, please try <Button variant={"outline"} onClick={() => window.location.reload()}>Reload Page</Button>
+       </p>
    </div>
    </>
   )
