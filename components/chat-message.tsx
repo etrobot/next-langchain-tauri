@@ -10,6 +10,7 @@ import { CodeBlock } from '@/components/ui/codeblock'
 import { MemoizedReactMarkdown } from '@/components/markdown'
 import { IconOpenAI, IconUser } from '@/components/ui/icons'
 import { ChatMessageActions } from '@/components/chat-message-actions'
+import rehypeExternalLinks from "rehype-external-links";
 
 export interface ChatMessageProps {
   message: Message
@@ -35,6 +36,7 @@ export function ChatMessage({ message, ...props }: ChatMessageProps) {
         <MemoizedReactMarkdown
           // className="prose break-words dark:prose-invert prose-p:leading-relaxed prose-pre:p-0"
           remarkPlugins={[remarkGfm, remarkMath]}
+          rehypePlugins={[[rehypeExternalLinks, { target: "_blank" }]]}
           components={{
             p({ children }) {
               return <p className="mb-2 last:mb-0">{children}</p>

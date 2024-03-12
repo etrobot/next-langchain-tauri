@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation'
 //   TabsList,
 //   TabsTrigger,
 // } from "@/components/ui/tabs"
-// import Link from 'next/link'
+import Link from 'next/link'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import {
   Dialog,
@@ -61,7 +61,7 @@ export default function Header() {
       </SidebarMobile>
       <div className="hidden md:flex"> ▲ Next.js × Langchain.js 🦜🔗</div>
       <div className="flex items-center mx-auto">
-        <span className='title font-bold'>AICube.fun</span>
+        <Link target='_blank' href={"https://aicube.fun"} className='title font-bold'>AICube.fun</Link>
         {/* <Tabs defaultValue="account" className="w-[200px]">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="account"><Link href="/">Chat</Link></TabsTrigger>
