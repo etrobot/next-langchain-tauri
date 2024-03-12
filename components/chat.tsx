@@ -72,6 +72,8 @@ export function Chat({ id, className }: ChatProps) {
           role: 'assistant',
           content: response.content
         })
+        localStorage.removeItem('agentPrompt');
+        localStorage.removeItem('usetool');
         if (id !== undefined) {
           localStorage.setItem(id, JSON.stringify(msg));
           useRouter().replace(`/?cid=${id}`);
