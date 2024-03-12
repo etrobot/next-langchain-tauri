@@ -73,6 +73,11 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
   const handleEditAgent = (agentId:string) => {
     setCurrentAgent({ ...agents[agentId], id: agentId })
     setEditorOpen(true)
+    if(agents[agentId].prompt.endsWith('[//]: (ReAct-Tools)')){
+      setUsetool(true)
+    }else{
+      setUsetool(false)
+    }
   }
 
   // Function to handle saving the current agent to the local state and localStorage
@@ -117,7 +122,6 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
           </CardHeader>
           <CardFooter className="flex gap-2">
             <Button onClick={() => handleEditAgent(key)}><IconEdit/></Button>
-            <Button variant="outline" onClick={() => setInput(`@${(agent as Agent).name} `)}>@</Button>
             <Button
               variant="ghost"
               className="ml-auto size-6 p-0 hover:bg-background"
