@@ -54,7 +54,7 @@ export function Chat({ id, className }: ChatProps) {
       },
       onResponse(response) {
         if (response.status !== 200) {
-          toast.error(response.statusText)
+          toast.error(`${response.status} ${response.statusText}`)
           localStorage.removeItem('agentPrompt');
           localStorage.removeItem('usetool');
         }

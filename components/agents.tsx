@@ -120,11 +120,11 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
     <div className="flex flex-wrap gap-4 mx-4 justify-center">
       {Object.entries(agents).map(([key, agent]) => (
         <>
-        <Card key={key} className="w-[300px] h-[200px]">
+        <Card key={key} className="w-[300px] h-[180px]">
           <CardHeader>
             <CardTitle>{(agent as Agent).name} {(agent as Agent).usetool&&<span className="text-xs text-muted-foreground"> usetool</span>}
             </CardTitle>
-            <CardDescription className='h-[64px]'>{(agent as Agent).prompt.slice(0,70)+' ...'}</CardDescription>
+            <CardDescription className='h-[42px]'>{(agent as Agent).prompt.slice(0,70)+' ...'}</CardDescription>
           </CardHeader>
           <CardFooter className="flex gap-2">
             <Button onClick={() => handleEditAgent(key)}><IconEdit/></Button>
@@ -228,7 +228,7 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
             <Button variant="outline" onClick={()=>setAgentsText(newAgent)}>Reset to Default</Button>
           </DialogContent>
       </Dialog>
-      <Card className="w-[300px] h-[200px] text-center">
+      <Card className="w-[300px] h-[180px] text-center">
         <button className="mt-20" onClick={handleNewAgent}>+ New Agent</button>
       </Card>
     </div>
