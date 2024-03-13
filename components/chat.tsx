@@ -33,7 +33,13 @@ export function Chat({ id, className }: ChatProps) {
       id = `cid_${timestamp}`;
     }
   }, [id]);
-  const [previewToken, setPreviewToken] = useState(JSON.parse(localStorage.getItem('ai-token')||"{}"));
+  const [previewToken, setPreviewToken] = useLocalStorage<{
+    llm_api_key: string;
+    llm_model: string;
+    llm_base_url: string;
+    search_api_key: string;
+    bing_api_key: string;
+  } | null>('ai-token', null);
 
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
@@ -94,7 +100,6 @@ export function Chat({ id, className }: ChatProps) {
         setMessages={setInitialMessages}
         input={input}
         setInput={setInput}
-        setPreviewToken={setPreviewToken}
       />
 
     </>

@@ -40,7 +40,6 @@ export default function Header() {
     llm_base_url: string;
     search_api_key: string;
     bing_api_key: string;
-    usetool: boolean
   } | null>('ai-token', null);
 
   const initialPreviewToken = {
@@ -49,7 +48,6 @@ export default function Header() {
     llm_base_url: "",
     search_api_key: "",
     bing_api_key: "",
-    usetool: false
   };
 
   const [previewTokenDialog, setPreviewTokenDialog] = useState(false);
