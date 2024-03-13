@@ -1,71 +1,31 @@
-import { StreamingTextResponse, Message as VercelChatMessage} from 'ai';
-import { HumanMessage,} from "@langchain/core/messages";
+import { StreamingTextResponse,Message} from 'ai';
 import { ChatOpenAI } from '@langchain/openai';
-import { ChatPromptTemplate,PromptTemplate } from "@langchain/core/prompts";
-import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
-import { nanoid } from '../lib/utils';
-import { LLMResult } from '@langchain/core/outputs';
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { BingSerpAPI } from "./custom/tools/bing/bingserpapi";
-import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { ToolExecutor } from "@langchain/langgraph/prebuilt";
 import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling";
-import { BaseMessage } from "@langchain/core/messages";
-import { FunctionMessage } from "@langchain/core/messages";
+import { FunctionMessage,BaseMessage,HumanMessage} from "@langchain/core/messages";
 import { AgentAction } from "@langchain/core/agents";
 import { StateGraph, END } from "@langchain/langgraph";
 import { RunnableLambda } from "@langchain/core/runnables";
 import { ChatGoogleGenerativeAI } from "./custom/llm/gemini";
-
-
-class MyCallbackHandler extends BaseCallbackHandler {
-  private body: any;
-  private userId: string;
-  constructor(requestBody: any, userId: string) {
-    super();
-    this.body = requestBody;
-    this.userId = userId;
-  }
-  name = "MyCallbackHandler";
-  async handleLLMEnd(output: LLMResult, runId: string, parentRunId?: string | undefined, tags?: string[] | undefined) {
-    const title = this.body.messages[0].content.substring(0, 100)
-    const id = this.body.id ?? nanoid()
-    const createdAt = Date.now()
-    const path = `/chat/${id}`
-    const payload = {
-      id,
-      title,
-      userId: this.userId,
-      createdAt,
-      path,
-      messages: [
-        ...this.body.messages,
-        {
-          content: output.generations[0][0].text,
-          role: 'assistant'
-        }
-      ]
-    }
-    // console.log(payload)
-  }
-}
+import { StringOutputParser } from "@langchain/core/output_parsers";
 
 
 export async function Chat(body: any) {
   console.log(body)
-  const formatMessage = (message: VercelChatMessage) => {
-    return `${message.role}: ${message.content}`;
-  };
-  const messages = body.messages;
-  const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
-  const currentMessageContent = messages.slice(-1)[0].content+'\n reply in'+body.locale;
+  const messages = body.messages.map((message:any) => {
+      return [message.role,message.content]
+    });
+  const currentMessageContent = messages.slice(-1)[0]+'\n reply in'+body.locale;
   process.env.TAVILY_API_KEY = body.previewToken.search_api_key
   var model:any
   if(body.previewToken.llm_model==='gemini-pro'){
       model = new ChatGoogleGenerativeAI({
         apiKey: body.previewToken.llm_api_key,
-        baseURL: body.previewToken?.llm_base_url || 'https://generativelanguage.googleapis.com',
+        baseURL: body.previewToken?.llm_base_url || null,
         modelName: "gemini-pro",
         maxOutputTokens: 8192,
     });
@@ -79,17 +39,12 @@ export async function Chat(body: any) {
     });
   }
   if(!body.previewToken.usetool){
-    const outputParser = new HttpResponseOutputParser();
-    const prompt = PromptTemplate.fromTemplate('');
-    const chain = prompt.pipe(model).pipe(outputParser);
-    const stream = await chain.stream({
-      chat_history: formattedPreviousMessages.join("\n"),
-      input: currentMessageContent,
-    });
-
+    const parser = new StringOutputParser();
+    const stream = await model.pipe(parser).stream(messages);
     return new StreamingTextResponse(stream);
+  }else if(!body.previewToken.bing_api_key&&!body.previewToken.search_api_key){
+    return { error: "Unauthorized Search Key", status: 401 };
   }
-
 
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
   var SYSTEM_TEMPLATE = `
@@ -120,8 +75,6 @@ export async function Chat(body: any) {
   
   const userId = '123456789';
 
-  const myCallback = new MyCallbackHandler(body, userId);
-
   const agent = await createReactAgent({
     llm: model,
     tools,
@@ -136,9 +89,7 @@ export async function Chat(body: any) {
 
   const logStream = await agentExecutor.streamLog({
     input: currentMessageContent,
-    chat_history: [],
-  }, {
-    callbacks: [myCallback]
+    chat_history: messages.slice(1)
   });
 
   const transformStream = new ReadableStream({
