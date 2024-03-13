@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { pureChat } from './agent';
+import { Chat } from './agent';
 
 const fastify = Fastify({
   logger: true,
@@ -12,7 +12,7 @@ fastify.register(cors,{
 });
 
 fastify.post('/api/chat', async (request, reply) => {
-  return pureChat(request.body);
+  return Chat(request.body);
 });
 
 // Start server

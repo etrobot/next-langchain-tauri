@@ -1,14 +1,14 @@
-import { Message as VercelChatMessage, StreamingTextResponse, OpenAIStream } from 'ai';
-import { AIMessage, ChatMessage, HumanMessage } from "@langchain/core/messages";
+import { StreamingTextResponse, Message as VercelChatMessage} from 'ai';
+import { HumanMessage,} from "@langchain/core/messages";
 import { ChatOpenAI } from '@langchain/openai';
-import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { ChatPromptTemplate,PromptTemplate } from "@langchain/core/prompts";
 import { BaseCallbackHandler } from "@langchain/core/callbacks/base";
 import { nanoid } from '../lib/utils';
 import { LLMResult } from '@langchain/core/outputs';
 import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
-import { BingSerpAPI } from "./custom/bingserpapi";
-import OpenAI from 'openai'
+import { BingSerpAPI } from "./custom/tools/bing/bingserpapi";
+import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { ToolExecutor } from "@langchain/langgraph/prebuilt";
 import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling";
 import { BaseMessage } from "@langchain/core/messages";
@@ -16,15 +16,8 @@ import { FunctionMessage } from "@langchain/core/messages";
 import { AgentAction } from "@langchain/core/agents";
 import { StateGraph, END } from "@langchain/langgraph";
 import { RunnableLambda } from "@langchain/core/runnables";
-const convertVercelMessageToLangChainMessage = (message: VercelChatMessage) => {
-  if (message.role === "user") {
-    return new HumanMessage(message.content);
-  } else if (message.role === "assistant") {
-    return new AIMessage(message.content);
-  } else {
-    return new ChatMessage(message.content, message.role);
-  }
-};
+import { ChatGoogleGenerativeAI } from "./custom/llm/gemini";
+
 
 class MyCallbackHandler extends BaseCallbackHandler {
   private body: any;
@@ -57,31 +50,49 @@ class MyCallbackHandler extends BaseCallbackHandler {
     // console.log(payload)
   }
 }
-// Assuming your utility and class definitions remain unchanged
-const openai = new OpenAI({ apiKey: 'dummy' })
-export async function pureChat(body: any) {
-  console.log(body.previewToken)
-  if(body.previewToken.usetool){
-      return reactAgent(body)
-  }
-  openai.apiKey = body.previewToken.llm_api_key;
-  openai.baseURL = body.previewToken.llm_base_url || 'https://api.openai.com/v1';
-  const res = await openai.chat.completions.create({
-    model: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
-    messages: body.messages,
-    temperature: 0.6,
-    stream: true
-  })
-  const stream = OpenAIStream(res)
-  return new StreamingTextResponse(stream)
-}
 
-export async function reactAgent(body: any) {
+
+export async function Chat(body: any) {
+  console.log(body)
+  const formatMessage = (message: VercelChatMessage) => {
+    return `${message.role}: ${message.content}`;
+  };
   const messages = body.messages;
+  const formattedPreviousMessages = messages.slice(0, -1).map(formatMessage);
   const currentMessageContent = messages.slice(-1)[0].content+'\n reply in'+body.locale;
   process.env.TAVILY_API_KEY = body.previewToken.search_api_key
+  var model:any
+  if(body.previewToken.llm_model==='gemini-pro'){
+      model = new ChatGoogleGenerativeAI({
+        apiKey: body.previewToken.llm_api_key,
+        baseURL: body.previewToken?.llm_base_url || 'https://generativelanguage.googleapis.com',
+        modelName: "gemini-pro",
+        maxOutputTokens: 8192,
+    });
+  }else{
+    model = new ChatOpenAI({
+      temperature: 0.2,
+      modelName: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
+      openAIApiKey: body.previewToken.llm_api_key,
+      configuration: { baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1' },
+      streaming: true
+    });
+  }
+  if(!body.previewToken.usetool){
+    const outputParser = new HttpResponseOutputParser();
+    const prompt = PromptTemplate.fromTemplate('');
+    const chain = prompt.pipe(model).pipe(outputParser);
+    const stream = await chain.stream({
+      chat_history: formattedPreviousMessages.join("\n"),
+      input: currentMessageContent,
+    });
+
+    return new StreamingTextResponse(stream);
+  }
+
+
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
-  const SYSTEM_TEMPLATE = `
+  var SYSTEM_TEMPLATE = `
   you has access to the following tools:
   {tools}
   To use a tool in neccessary, please use the following format:
@@ -106,13 +117,7 @@ export async function reactAgent(body: any) {
     ["system", SYSTEM_TEMPLATE],
     ["human", "{input}"],
   ]);
-  const model = new ChatOpenAI({
-    temperature: 0.2,
-    modelName: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
-    openAIApiKey: body.previewToken.llm_api_key,
-    configuration: { baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1' },
-    streaming: true
-  });
+  
   const userId = '123456789';
 
   const myCallback = new MyCallbackHandler(body, userId);

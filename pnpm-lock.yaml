@@ -8,12 +8,18 @@ dependencies:
   '@fastify/cors':
     specifier: ^9.0.1
     version: 9.0.1
+  '@fuyun/generative-ai':
+    specifier: ^0.2.1
+    version: 0.2.1
   '@langchain/community':
     specifier: ^0.0.32
     version: 0.0.32
   '@langchain/core':
     specifier: ^0.1.32
     version: 0.1.40
+  '@langchain/google-genai':
+    specifier: ^0.0.10
+    version: 0.0.10
   '@langchain/langgraph':
     specifier: ^0.0.9
     version: 0.0.9
@@ -571,6 +577,16 @@ packages:
 
   /@floating-ui/utils@0.2.1:
     resolution: {integrity: sha512-9TANp6GPoMtYzQdt54kfAyMmz1+osLlXdg2ENroU7zzrtflTLrrC/lgrIfaSe+Wu0b89GKccT7vxXA0MoAIO+Q==}
+    dev: false
+
+  /@fuyun/generative-ai@0.2.1:
+    resolution: {integrity: sha512-F8MJOxEIujaILJUaDKQ74ANKN+GTe+HeErJxtrCxWN5UnSOfFoxhb9sqo0ytXkmlFc0k5GGB6f0uAUdwMcQGXg==}
+    engines: {node: '>=18.0.0'}
+    dev: false
+
+  /@fuyun/generative-ai@0.1.3:
+    resolution: {integrity: sha512-Cm4uJX1sKarpm1mje/MiOIinM7zdUUrQp/5/qGPAgznbdd/B9zup5ehT6c1qGqycFcSopTA1J1HpqHS5kJR8hQ==}
+    engines: {node: '>=18.0.0'}
     dev: false
 
   /@humanwhocodes/config-array@0.11.14:
@@ -1180,6 +1196,14 @@ packages:
       uuid: 9.0.1
       zod: 3.22.4
       zod-to-json-schema: 3.22.4(zod@3.22.4)
+    dev: false
+
+  /@langchain/google-genai@0.0.10:
+    resolution: {integrity: sha512-neFuCoMew9t8IYM5srh6RVUFQsZxqPtAFVJ0mWtZqHXtb627MECs5FYr+xw1ptPKSbhIAN5H8sgdObqes4bN3A==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@fuyun/generative-ai': 0.1.3
+      '@langchain/core': 0.1.40
     dev: false
 
   /@langchain/langgraph@0.0.9:

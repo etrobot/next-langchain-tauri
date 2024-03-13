@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
+    "@fuyun/generative-ai": "^0.2.1",
     "@langchain/community": "^0.0.32",
     "@langchain/core": "^0.1.32",
+    "@langchain/google-genai": "^0.0.10",
     "@langchain/langgraph": "^0.0.9",
     "@langchain/openai": "^0.0.14",
     "@radix-ui/react-alert-dialog": "^1.0.5",
