@@ -1,12 +1,14 @@
 import * as React from 'react'
 import { type UseChatHelpers } from 'ai/react'
-import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 
 import { Button } from '@/components/ui/button'
 import { PromptForm } from '@/components/prompt-form'
 import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
-import { IconRefresh, IconStop,IconSpinner } from '@/components/ui/icons'
-import { FooterText } from '@/components/footer'
+import { IconRefresh, IconStop, IconSpinner } from '@/components/ui/icons'
+import { Agent, getAgentsText } from '@/components/agents'
+import { nanoid } from 'nanoid'
+import { Message } from 'ai'
+import { useState } from 'react'
 
 export interface ChatPanelProps
   extends Pick<
@@ -15,14 +17,13 @@ export interface ChatPanelProps
     | 'isLoading'
     | 'reload'
     | 'messages'
+    | 'setMessages'
     | 'stop'
     | 'input'
     | 'setInput'
-    | 'data'
   > {
   id?: string
   title?: string
-  setPreviewToken: ({ llm_api_key, llm_model, llm_base_url, search_api_key, bing_api_key }: { llm_api_key: string, llm_model: string, llm_base_url: string, search_api_key: string, bing_api_key: string }) => void
 }
 
 export function ChatPanel({
@@ -35,8 +36,9 @@ export function ChatPanel({
   input,
   setInput,
   messages,
-  setPreviewToken
+  setMessages,
 }: ChatPanelProps) {
+  const [useTool,setUseTool]=useState('tool')
 
   return (
     <div className="fixed inset-x-0 bottom-0 w-full bg-gradient-to-b from-muted/30 from-0% to-muted/30 to-50% animate-in duration-300 ease-in-out dark:from-background/10 dark:from-10% dark:to-background/80 peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]">
@@ -61,7 +63,7 @@ export function ChatPanel({
                 </Button>
                 {id && title ? (
                   <>
-                    
+
                   </>
                 ) : null}
               </div>
@@ -71,26 +73,31 @@ export function ChatPanel({
         <div className="px-4 py-2 space-y-4 border-t shadow-lg bg-background sm:rounded-t-xl sm:border md:py-4">
           <PromptForm
             onSubmit={async value => {
-              var prompt=value
-              if(value.startsWith('@')){
-                prompt=value.slice(prompt.split(' ')[0].length+1)
-                localStorage.setItem('latestAsk', prompt);
-                prompt = localStorage.getItem('AgentPrompt')+':\n'+prompt
-              }else{
-                localStorage.setItem('latestAsk', value);
+              var prompt = value
+              var function_call=null as any
+                const storedAgents = getAgentsText();
+                if (storedAgents) {
+                  const agents = JSON.parse(storedAgents);
+                  const found = input.split(' ')[0];
+                  if (agents && found.charAt(0) === '@') {
+                    Object.entries(agents).forEach(([key, agent]) => {
+                      const agentName = (agent as Agent).name;
+                      if (value.startsWith(`@${agentName}`)) {
+                        prompt = (agent as Agent).prompt + value.slice(agentName.length + 1);
+                        function_call = (agent as Agent).usetool?'tool':function_call
+                      }
+                      return; // Break out of the forEach loop
+                    });
+                }
+                const newMsg = {
+                  id: nanoid(),
+                  content: prompt,
+                  role: 'user',
+                  function_call:function_call
+                } as Message
+                setMessages([...messages, newMsg])
+                await append(newMsg)
               }
-              const token=localStorage.getItem('ai-token')
-              if(token){
-                var tokenjson=JSON.parse(token)
-                tokenjson['usetool']=localStorage.getItem('usetool')
-                // console.log(tokenjson)
-                setPreviewToken(tokenjson)
-              }
-              await append({
-                id,
-                content: prompt,
-                role: 'user'
-              })
             }}
             input={input}
             setInput={setInput}

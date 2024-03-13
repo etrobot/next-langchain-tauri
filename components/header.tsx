@@ -47,7 +47,7 @@ export default function Header() {
     llm_model: "",
     llm_base_url: "",
     search_api_key: "",
-    bing_api_key: ""
+    bing_api_key: "",
   };
 
   const [previewTokenDialog, setPreviewTokenDialog] = useState(false);
@@ -104,7 +104,7 @@ export default function Header() {
               </Label>
               <Input className="col-span-2"
                 value={previewTokenInput.llm_api_key}
-                placeholder="OpenAI sdk format"
+                placeholder="API KEY of LLM like OpenAI GPT or Gemini"
                 onChange={e => setPreviewTokenInput(prevState => ({
                   ...prevState,
                   llm_api_key: e.target.value

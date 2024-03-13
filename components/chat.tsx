@@ -39,7 +39,6 @@ export function Chat({ id, className }: ChatProps) {
     llm_base_url: string;
     search_api_key: string;
     bing_api_key: string;
-    usetool?: boolean
   } | null>('ai-token', null);
 
   const { messages, append, reload, stop, isLoading, input, setInput } =
@@ -55,39 +54,27 @@ export function Chat({ id, className }: ChatProps) {
       onResponse(response) {
         if (response.status !== 200) {
           toast.error(`${response.status} ${response.statusText}`)
-          localStorage.removeItem('agentPrompt');
-          localStorage.removeItem('usetool');
         }
       },
       onFinish(response) {
         const msg = initialMessages ?? [];
-        const latestAsk = localStorage.getItem('latestAsk')
-        if (latestAsk) {
-          msg.push({
-            id: nanoid(),
-            role: 'user',
-            content: latestAsk
-          })
-        }
         msg.push({
-          id: response.id,
+          id: nanoid(),
           role: 'assistant',
           content: response.content
         })
-        if (id !== undefined) {
-          localStorage.setItem(id, JSON.stringify(msg));
-          useRouter().replace(`/?cid=${id}`);
-        }
+        localStorage.setItem(id||`cid_${timestamp}`, JSON.stringify(msg));
+        useRouter().replace(`/?cid=${id}`);
       }
     })
 
   useEffect(() => {
     stop();
-    const token=localStorage.getItem('ai-token')
-    if(token){
+    const token = localStorage.getItem('ai-token')
+    if (token) {
       setPreviewToken(JSON.parse(token))
     }
-    else{toast.error('Please set the API keys');}
+    else { toast.error('Please set the API keys'); }
   }, []);
   return (
     <>
@@ -110,9 +97,9 @@ export function Chat({ id, className }: ChatProps) {
         append={append}
         reload={reload}
         messages={messages}
+        setMessages={setInitialMessages}
         input={input}
         setInput={setInput}
-        setPreviewToken={setPreviewToken}
       />
 
     </>
