@@ -164,8 +164,9 @@ export default function Header() {
               onClick={() => {
                 setPreviewToken(previewTokenInput);
                 setPreviewTokenDialog(false);
-                router.replace('/');
-                router.refresh();
+                // router.replace('/');
+                // router.refresh();
+                window.location.reload();
               }}
             >
               Save Token
