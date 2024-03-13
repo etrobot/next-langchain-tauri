@@ -44,7 +44,7 @@ export function SidebarList({ userId }: SidebarListProps) {
       <div className="flex items-center justify-between p-4">
       <Tooltip>
           <TooltipTrigger asChild>
-            <Button onClick={() => window.location.reload()}><IconRefresh/></Button>
+            <Button variant="outline" onClick={() => window.location.reload()}><IconRefresh/></Button>
         </TooltipTrigger>
         <TooltipContent>Force Reload Page</TooltipContent>
       </Tooltip>

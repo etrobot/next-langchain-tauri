@@ -47,7 +47,7 @@ export function SidebarActions({
                   if (msgobj !== null) {
                     const msg = JSON.parse(msgobj).map((msg: any) => msg.content).join('\n\n');;
                     navigator.clipboard.writeText(msg)
-                    toast.success('Copied to clipboard')
+                    toast.success('Messages are copied to clipboard')
                   }else{
                     toast.error('No messages found')
                   }

@@ -31,11 +31,13 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 import { Checkbox } from "@/components/ui/checkbox"
-import { IconSpinner, IconTrash } from '@/components/ui/icons'
+import { IconSpinner, IconTrash,IconSeparator } from '@/components/ui/icons'
 import { Textarea } from "@/components/ui/textarea"
 import { IconEdit,IconPlus } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
 import { ExternalLink } from '@/components/external-link'
+import { toast } from 'react-hot-toast'
+
 function getRandomColor(): string {
   const letters = '0123456789ABCDEF';
   let color = '#';
@@ -52,18 +54,27 @@ interface Agent {
   usetool?: boolean
 }
 
+function getAgentsText(){
+  const storedAgents = localStorage.getItem('Agents');
+    if (storedAgents) {
+      return storedAgents
+    }else{return null}
+}
+
 export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
+  const newAgent = `{"#666666":{"name":"Search","prompt":"Get Info from Internet","usetool":true},"#666777":{"name":"CoT","prompt":"Let's think step by step."}}`
   const router=useRouter()
+  const [agentsText, setAgentsText] = useState(getAgentsText());
   const [editorOpen, setEditorOpen] = useState(false)
+  const [allAgentEditorOpen, setallAgentEditorOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [isRemovePending, startRemoveTransition] = useTransition()
   const [currentAgent, setCurrentAgent] = useState({ id: '', name: '', prompt: '' })
   const [agents, setAgents] = useState(() => {
-    const storedAgents = localStorage.getItem('Agents');
-    if (storedAgents) {
-      return JSON.parse(storedAgents);
+    const atext=getAgentsText()
+    if (atext) {
+      return JSON.parse(atext);
     } else {
-      const newAgent = `{"#666666":{"name":"Search","prompt":"Get Info from Internet","usetool":true},"#666777":{"name":"CoT","prompt":"Let's think step by step."}}`
       localStorage.setItem('Agents', newAgent);
       return JSON.parse(newAgent); // or you can return an empty object {} if that's the desired initial state
     }
@@ -102,7 +113,11 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
 
   return (
     <>
-    <div className="flex flex-wrap gap-4 m-4 justify-center">
+    <div className='w-full flex justify-end'>
+    <Button variant={"link"} className='text-xs text-muted-foreground' onClick={()=>{navigator.clipboard.writeText(localStorage.getItem('Agents')||''); toast.success('Agents data is copied to clipboard')}}>Export</Button>
+    <IconSeparator className='my-2'/><Button className='text-xs text-muted-foreground' variant={"link"} onClick={()=>{setAgentsText(getAgentsText());setallAgentEditorOpen(true)}}>Import</Button>
+    </div>
+    <div className="flex flex-wrap gap-4 mx-4 justify-center">
       {Object.entries(agents).map(([key, agent]) => (
         <>
         <Card key={key} className="w-[300px] h-[200px]">
@@ -199,6 +214,19 @@ export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
             <Button onClick={handleSaveAgents}>Save Agent</Button>
           </DialogFooter>
         </DialogContent>
+      </Dialog>
+      <Dialog open={allAgentEditorOpen} onOpenChange={setallAgentEditorOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Import Agents</DialogTitle>
+          </DialogHeader>
+          <Textarea className="col-span-4 h-[200px]"
+                value={agentsText||''}
+                onChange={(e)=>{setAgentsText(e.target.value)}}
+          />
+            <Button onClick={()=>{localStorage.setItem('Agents',agentsText||getAgentsText()||'');window.location.reload()}}>Save Agents</Button>
+            <Button variant="outline" onClick={()=>setAgentsText(newAgent)}>Reset to Default</Button>
+          </DialogContent>
       </Dialog>
       <Card className="w-[300px] h-[200px] text-center">
         <button className="mt-20" onClick={handleNewAgent}>+ New Agent</button>
