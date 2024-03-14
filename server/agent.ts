@@ -5,15 +5,30 @@ import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { BingSerpAPI } from "./custom/tools/bing/bingserpapi";
 import { ChatGoogleGenerativeAI } from "./custom/llm/gemini";
-import { StringOutputParser } from "@langchain/core/output_parsers";
+import { HttpResponseOutputParser } from "langchain/output_parsers";
+import { AIMessage, ChatMessage, HumanMessage } from "@langchain/core/messages";
 
+
+const convertMessageToLangChainMessage = (message: any) => {
+  if (message.role === "user") {
+    return new HumanMessage(message.content);
+  } else if (message.role === "assistant") {
+    return new AIMessage(message.content);
+  } else {
+    return new ChatMessage(message.content, message.role);
+  }
+};
 
 export async function Chat(body: any) {
   console.log(body)
-  const messages = body.messages.map((message:any) => {
-      return [message.role,message.content]
-    });
-  const currentMessageContent = messages.slice(-1)[0];
+  const messages = (body.messages ?? []).filter(
+    (message: any) =>
+      message.role === "user" || message.role === "assistant",
+  );
+  const previousMessages = messages
+    .slice(0, -1)
+    .map(convertMessageToLangChainMessage);
+  const currentMessageContent = messages[messages.length - 1].content;
   process.env.TAVILY_API_KEY = body.previewToken.search_api_key
   var model:any
   if(body.previewToken.llm_model==='gemini-pro'){
@@ -29,36 +44,41 @@ export async function Chat(body: any) {
       modelName: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
       openAIApiKey: body.previewToken.llm_api_key,
       configuration: { baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1' },
+      maxTokens: 2048,
       streaming: true
     });
   }
+  
   if(!body.messages.slice(-1)[0].function_call){
-    const parser = new StringOutputParser();
-    const stream = await model.pipe(parser).stream(messages);
+    const outputParser = new HttpResponseOutputParser()
+    const stream = await model.pipe(outputParser).stream(messages);
     return new StreamingTextResponse(stream);
   }
 
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
   var SYSTEM_TEMPLATE = `
-  you has access to the following tools:
-  {tools}
-  To use a tool in neccessary, please use the following format:
-  \`\`\`markdown
-  Thought: Do I need to use a tool? Yes
-  Action: the action to take, should be one of [{tool_names}]
-  Action Input: the input to the action
-  Observation: the result of the action
-  \`\`\`
-  When you have a response to say to the Human, or if you do not need to use a tool, you MUST use the format:
-  \`\`\`markdown
-  Thought: Do I need to use a tool? No
-  \`\`\`
-  ### Final Answer:\n\n [your response here in ${body.locale}]
-  Begin!
-  Previous conversation history:
-  {chat_history}
-  New input: {input}
-  {agent_scratchpad}`
+You are a helpful AI assistant has access to the following tools:{tools}
+
+Answer with these steps (MUST):
+\`\`\`
+Thought: Do I need to use a tool? Yes
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action (different input)
+Observation: the result of the action (include urls if any)
+\`\`\`
+
+Last step:
+
+\`\`\`
+Thought: Do I need to use a tool? No
+Final Answer:  [your response here in ${body.locale}]
+\`\`\`
+
+Begin!
+Previous conversation history:
+{chat_history}
+New Human Input: {input}
+{agent_scratchpad}`
 
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", SYSTEM_TEMPLATE],
@@ -79,9 +99,9 @@ export async function Chat(body: any) {
 
   const logStream = await agentExecutor.streamLog({
     input: currentMessageContent,
-    chat_history: messages.slice(0, -1),
+    chat_history: previousMessages,
   });
-
+  // const encoder = new TextEncoder()
   const transformStream = new ReadableStream({
     async start(controller) {
       for await (const chunk of logStream) {
@@ -95,9 +115,9 @@ export async function Chat(body: any) {
           ) {
             controller.enqueue(addOp.value);
           }
-          if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
-            controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
-          }
+          // if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
+          //   controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
+          // }
         }
       }
       controller.close();

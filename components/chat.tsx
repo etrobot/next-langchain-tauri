@@ -9,10 +9,8 @@ import { ChatScrollAnchor } from '@/components/chat-scroll-anchor'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 
 import { useState, useEffect } from 'react'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
 import { toast } from 'react-hot-toast'
-import { redirect, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Agents from '@/components/agents'
 export interface ChatProps extends React.ComponentProps<'div'> {
   id?: string

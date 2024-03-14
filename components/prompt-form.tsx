@@ -10,39 +10,36 @@ import {
 } from '@/components/ui/tooltip'
 import { IconArrowElbow } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
-import { useState, useRef } from 'react'
-export interface PromptProps
-  extends Pick<UseChatHelpers, 'input' | 'setInput'> {
-  onSubmit: (value: string) => void
-  isLoading: boolean
-}
+import { useState, useRef, useEffect } from 'react'
+
+import { getAgentsText } from '@/components/agents'
 import { FooterText } from '@/components/footer'
-import { Agent, getAgentsText } from '@/components/agents'
+import { Agent } from '@/components/agents'
 import {
   Command,
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command"
 
+export interface PromptProps
+  extends Pick<UseChatHelpers, 'input' | 'setInput'> {
+  onSubmit: (value: string) => void
+  isLoading: boolean,
+  agents: any,
+  setAgents:(value: any) => void
+}
 export function PromptForm({
   onSubmit,
   input,
   setInput,
-  isLoading
+  isLoading,
+  agents,
+  setAgents
 }: PromptProps) {
   const { formRef, onKeyDown } = useEnterSubmit()
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const router = useRouter()
-
-  const [agents, setAgents] = useState({
-    'Search': {
-      id: '#666777',
-      name: 'Search',
-      prompt: 'Get info from Internet',
-      usetool: true
-    } as Agent
-  });
 
   const [showPopup, setshowPopup] = useState(false);
 
@@ -50,9 +47,9 @@ export function PromptForm({
     const value = e.target.value;
     setInput(value)
     if (value.split(' ')[0] === '@' || value === '@') {
-      const storedAgents = getAgentsText()
-      if (storedAgents) {
-        setAgents(JSON.parse(storedAgents));
+      const storedAgents=getAgentsText()
+      if(storedAgents){
+        setAgents(JSON.parse(storedAgents))
       }
       setshowPopup(true);
     } else {
@@ -79,9 +76,9 @@ export function PromptForm({
               {Object.entries(agents).map(([key, agent]) => (
                 <CommandItem
                   key={key}
-                  value={agent.name}
+                  value={(agent as Agent).name}
                   onSelect={(currentValue) => {
-                    setInput(`@${agent.name} ` + input.slice(1))
+                    setInput(`@${(agent as Agent).name} ` + input.slice(1))
                     setshowPopup(false)
                   }
                   }

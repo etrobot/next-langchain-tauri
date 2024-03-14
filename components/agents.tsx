@@ -61,8 +61,9 @@ export function getAgentsText() {
   } else { return null }
 }
 
+export const newAgent = `{"#666666":{"name":"Search","prompt":"Get Info from Internet","usetool":true},"#666777":{"name":"CoT","prompt":"Let's think step by step."}}`
+
 export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
-  const newAgent = `{"#666666":{"name":"Search","prompt":"Get Info from Internet","usetool":true},"#666777":{"name":"CoT","prompt":"Let's think step by step."}}`
   const router = useRouter()
   const [agentsText, setAgentsText] = useState(getAgentsText());
   const [editorOpen, setEditorOpen] = useState(false)
