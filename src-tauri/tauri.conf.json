@@ -7,7 +7,7 @@
     "distDir": "../out"
   },
   "package": {
-    "productName": "next-langchain-tauri",
+    "productName": "Next-Langchain-Tauri",
     "version": "0.2.0"
   },
   "tauri": {
@@ -69,7 +69,7 @@
         "fullscreen": false,
         "height": 800,
         "resizable": true,
-        "title": "next-langchain-tauri",
+        "title": "Next-Langchain-Tauri",
         "width": 1280
       }
     ]

@@ -1,6 +1,6 @@
 import { StreamingTextResponse} from 'ai';
 import { ChatOpenAI } from '@langchain/openai';
-import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { ChatPromptTemplate,  MessagesPlaceholder} from "@langchain/core/prompts";
 import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { BingSerpAPI } from "./custom/tools/bing/bingserpapi";
@@ -20,15 +20,11 @@ const convertMessageToLangChainMessage = (message: any) => {
 };
 
 export async function Chat(body: any) {
-  console.log(body)
+  // console.log(body)
   const messages = (body.messages ?? []).filter(
     (message: any) =>
       message.role === "user" || message.role === "assistant",
-  );
-  const previousMessages = messages
-    .slice(0, -1)
-    .map(convertMessageToLangChainMessage);
-  const currentMessageContent = messages[messages.length - 1].content;
+  ).map(convertMessageToLangChainMessage);;
   process.env.TAVILY_API_KEY = body.previewToken.search_api_key
   var model:any
   if(body.previewToken.llm_model==='gemini-pro'){
@@ -60,25 +56,22 @@ export async function Chat(body: any) {
 You are a helpful AI assistant has access to the following tools:{tools}
 
 Answer with these steps (MUST):
-\`\`\`
+
 Thought: Do I need to use a tool? Yes
 Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action (different input)
-Observation: the result of the action (include urls if any)
-\`\`\`
+Action Input: the input to the action
+Observation: the input to the action
 
 Last step:
 
-\`\`\`
+
 Thought: Do I need to use a tool? No
-Final Answer:  [your response here in ${body.locale}]
-\`\`\`
+Final Answer: [your response here in ${body.locale}]
+
 
 Begin!
-Previous conversation history:
-{chat_history}
-New Human Input: {input}
-{agent_scratchpad}`
+{agent_scratchpad}
+`
 
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", SYSTEM_TEMPLATE],
@@ -94,14 +87,19 @@ New Human Input: {input}
   const agentExecutor = new AgentExecutor({
     agent,
     tools,
-    returnIntermediateSteps: false,
+    returnIntermediateSteps: true,
+    verbose: false
   });
-
+  const previousMessages = messages.slice(0, -1)
+  const currentMessageContent = messages[messages.length - 1].content;
   const logStream = await agentExecutor.streamLog({
     input: currentMessageContent,
     chat_history: previousMessages,
+    handle_parsing_errors: false,
+    verbose: false
   });
-  // const encoder = new TextEncoder()
+  const encoder = new TextEncoder()
+  
   const transformStream = new ReadableStream({
     async start(controller) {
       for await (const chunk of logStream) {
@@ -113,7 +111,7 @@ New Human Input: {input}
             typeof addOp.value === "string" &&
             addOp.value.length
           ) {
-            controller.enqueue(addOp.value);
+            controller.enqueue(encoder.encode(addOp.value));
           }
           // if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
           //   controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');

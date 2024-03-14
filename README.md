@@ -2,13 +2,13 @@
 
 Next-Langchain-Tauri is a desktop application that combines the power of Next.js for frontend development, Langchain.js for AI processing, and Tauri for packaging the application as a desktop app.
 
-<img width="1392" alt="Screenshot 2024-03-12 at 10 34 59 AM" src="https://github.com/etrobot/next-langchain-tauri/assets/3889058/97a7b3e9-653e-4e10-afc2-9b9326a5ee1c">
+<img width="1392" alt="Screenshot 2024-03-12 at 10 34 59 AM" src="https://github.com/etrobot/Next-Langchain-Tauri/assets/3889058/97a7b3e9-653e-4e10-afc2-9b9326a5ee1c">
 
 ## How to use
 
 Click the ``` Key Setting``` button to enter API keys, which are only stored in your computer, and then start to chat.
 
-<img width="1392" alt="Screenshot 2024-03-06 at 12 00 48 AM" src="https://github.com/etrobot/next-langchain-tauri/assets/3889058/8bb2b96e-3a57-45f1-a134-7ebfa9cbeffd">
+<img width="1392" alt="Screenshot 2024-03-06 at 12 00 48 AM" src="https://github.com/etrobot/Next-Langchain-Tauri/assets/3889058/8bb2b96e-3a57-45f1-a134-7ebfa9cbeffd">
 
 ## Development
 
