@@ -53,17 +53,16 @@ export async function Chat(body: any) {
 
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
   var SYSTEM_TEMPLATE = `
-You are a helpful AI assistant has access to the following tools:{tools}
+You are a helpful AI assistant has access to the following tools:{tools} in two steps:
 
-Answer with these steps (MUST):
+1. First step MUST output in the following format:
 
-Thought: Do I need to use a tool? Yes
 Action: the action to take, should be one of [{tool_names}]
 Action Input: the input to the action
 Observation: the input to the action
 
-Last step:
 
+2. Second step MUST output in the following format:
 
 Thought: Do I need to use a tool? No
 Final Answer: [your response here in ${body.locale}]
