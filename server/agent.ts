@@ -57,6 +57,7 @@ You are a helpful AI assistant has access to the following tools:{tools} in two 
 
 1. First step MUST output in the following format:
 
+Thought: Do I need to use a tool? Yes
 Action: the action to take, should be one of [{tool_names}]
 Action Input: the input to the action
 Observation: the input to the action
