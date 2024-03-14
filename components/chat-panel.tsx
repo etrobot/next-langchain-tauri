@@ -78,7 +78,7 @@ export function ChatPanel({
                     Object.entries(agents).forEach(([key, agent]) => {
                       const agentName = (agent as unknown as Agent).name;
                       if (value.startsWith(`@${agentName}`)) {
-                        prompt = (agent as unknown as Agent).prompt + value.slice(agentName.length + 1);
+                        prompt = (agent as unknown as Agent).prompt+':\n' + value.slice(agentName.length + 1);
                         function_call = (agent as unknown as Agent).usetool?'tool':function_call
                       }
                       return; // Break out of the forEach loop

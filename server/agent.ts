@@ -105,7 +105,6 @@ Begin!
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
-          // console.log(addOp)
           if (
             addOp.path.startsWith("/logs/ChatOpenAI") &&
             typeof addOp.value === "string" &&
@@ -113,9 +112,9 @@ Begin!
           ) {
             controller.enqueue(encoder.encode(addOp.value));
           }
-          // if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
-          //   controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
-          // }
+          if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
+            controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
+          }
         }
       }
       controller.close();
