@@ -1,14 +1,13 @@
 import { StreamingTextResponse} from 'ai';
 import { ChatOpenAI } from '@langchain/openai';
-import { ChatPromptTemplate,  MessagesPlaceholder} from "@langchain/core/prompts";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { AgentExecutor, createReactAgent } from "langchain/agents";
-import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
+import { TavilySearchResults } from "./custom/tools/tavily/tavily_search";
 import { BingSerpAPI } from "./custom/tools/bing/bingserpapi";
 import { GoogleCustomSearch } from "./custom/tools/google/google_custom_search";
 import { ChatGoogleGenerativeAI } from "./custom/llm/gemini";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { AIMessage, ChatMessage, HumanMessage } from "@langchain/core/messages";
-
 
 const convertMessageToLangChainMessage = (message: any) => {
   if (message.role === "user") {
@@ -54,28 +53,29 @@ export async function Chat(body: any) {
     return new StreamingTextResponse(stream);
   }
 
-  var tools: (BingSerpAPI | TavilySearchResults | GoogleCustomSearch)[] = [];
+  var tools: (BingSerpAPI | TavilySearchResults | GoogleCustomSearch )[] = [];
   if (body.previewToken.tavilyserp_api_key) {
-    tools=[new TavilySearchResults({maxResults: 5})];
+    tools.push(new TavilySearchResults({maxResults: 5}));
   }
   if (body.previewToken.bing_api_key) {
-    tools=[new BingSerpAPI(body.previewToken.bing_api_key)];
+    tools.push(new BingSerpAPI(body.previewToken.bing_api_key));
   }
   if (body.previewToken.google_api_key) {
-    tools=[new GoogleCustomSearch()];
+    tools.push(new GoogleCustomSearch());
   }
 
-  var SYSTEM_TEMPLATE = `You are an helpful assistant with Thought:{tools}
+  var SYSTEM_TEMPLATE = `You are a cautious assistant with Thought:{tools}
 
 Now Think: do I need a tool? if yes:
-call a tool name of {tool_names} and MUST in format:
+call one of {tool_names} in format:
+
 \`\`\`
 Action: a tool name (just text , no need brackets)
 Action Input: key words ripped from {input}
  \`\`\`
 
-then stop output and wait for user input,
-if NO,output final answer , MUST begin with **Final Answer:**:
+then stop output anything, wait for the user input,
+if NO, output answer startswith "**Final Answer:**" (MUST)
 
 ---
 {agent_scratchpad}
@@ -105,7 +105,6 @@ Now think on the query:
   const logStream = await agentExecutor.streamLog({
     input: currentMessageContent,
     chat_history: previousMessages,
-    handle_parsing_errors: false,
     verbose: false
   });
   const encoder = new TextEncoder()
@@ -123,11 +122,9 @@ Now think on the query:
           ) {
             controller.enqueue(encoder.encode(addOp.value));
           }
-          if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
-            controller.enqueue(encoder.encode('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n'));
-          }
-          if(addOp.path.startsWith('/logs/GoogleCustomSearch/final_output')){
-            controller.enqueue(encoder.encode('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n'));
+          if(addOp.path.startsWith('/logs/BingSerpAPI/final_output') || addOp.path.startsWith('/logs/GoogleCustomSearch/final_output') || addOp.path.startsWith('/logs/TavilySearchResults/final_output')){
+            const lines = addOp.value.output.split(')\n\n').map((p:string)=>'['+p.split(']')[1].slice(1)+']'+p.split(']')[1]+')').slice(0,-1)
+            controller.enqueue(encoder.encode('\n\n---\n\n'+ lines.join('\n\n') +'\n\n---\n\n'));
           }
         }
       }

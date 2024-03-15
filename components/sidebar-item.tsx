@@ -57,7 +57,7 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
         )}
       >
         <div className="relative select-none overflow-hidden whitespace-nowrap overflow-ellipsis">
-          {chat.messages.slice(-1)[0].content.split('Final Answer:').slice(-1)[0].slice(0, 50)}
+          {chat.messages.slice(-1)[0].content.split('Final Answer:').slice(-1)[0].slice(0, 50).replace('**','')}
         </div>
       </Link>
       <div className="absolute right-1 top-1">{children}</div>
