@@ -52,17 +52,15 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
         href={`/?cid=${chat.id}`}
         className={cn(
           buttonVariants({ variant: 'ghost' }),
-          'group w-full px-8 transition-colors hover:bg-zinc-200/40 dark:hover:bg-zinc-300/10',
+          'group w-[230px] transition-colors hover:bg-zinc-200/40 dark:hover:bg-zinc-300/10',
           isActive && 'bg-zinc-200 pr-16 font-semibold dark:bg-zinc-800'
         )}
       >
-        <div
-          className="relative max-h-5 flex-1 select-none overflow-hidden text-ellipsis break-all"
-        >
-          {chat.messages.slice(-1)[0].content.split('Final Answer:').slice(-1)[0].slice(0, 28)}
+        <div className="relative select-none overflow-hidden whitespace-nowrap overflow-ellipsis">
+          {chat.messages.slice(-1)[0].content.split('Final Answer:').slice(-1)[0].slice(0, 50)}
         </div>
       </Link>
-      <div className="absolute right-2 top-1">{children}</div>
+      <div className="absolute right-1 top-1">{children}</div>
     </motion.div>
   )
 }

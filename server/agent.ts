@@ -52,10 +52,10 @@ export async function Chat(body: any) {
   }
 
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
-  var SYSTEM_TEMPLATE = `
+  var SYSTEM_TEMPLATE = `You are an helpful assistant with Thought:
+{tools}
 
-You are a helpful assistant with tools {tool_names}
-Think: do I need a tool? if yes:
+Now Think: do I need a tool? if yes:
 call a tool name of {tool_names} and MUST in format:
 \`\`\`
 Action: a tool name (just text , no need brackets)
@@ -68,7 +68,6 @@ if NO,output in format(MUST):
 Final Answer: final answer in ${body.locale}
 \`\`\`
 
-Thought:{tools}
 {agent_scratchpad}
 
 Now think on the query:
@@ -106,7 +105,7 @@ Now think on the query:
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
-          if (addOp.path.startsWith("/logs/googlegenerativeai:2/streamed_output_str") ||
+          if (addOp.path.startsWith("/logs/googlegenerativeai:2/stream") ||
             addOp.path.startsWith("/logs/ChatOpenAI") &&
             typeof addOp.value === "string" &&
             addOp.value.length
