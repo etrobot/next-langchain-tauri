@@ -53,25 +53,25 @@ export async function Chat(body: any) {
 
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
   var SYSTEM_TEMPLATE = `
-You are a helpful AI assistant has access to the following tools:{tools}
 
-When you need a tool, MUST use it in the following format:
+You are a helpful assistant with tools {tool_names}
+Think: do I need a tool? if yes:
+call a tool name of {tool_names} and MUST in format:
 \`\`\`
-Thought: Do I need to use a tool? Yes
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
+Action: a tool name (just text , no need brackets)
+Action Input: key words of {input}
 \`\`\`
+then stop output and wait for user input.
 
-when you finish the action and get the final answer,you MUST out put in this format:
-
+if NO,output in format(MUST):
 \`\`\`
-Thought: Do I need to use a tool? No
-Final Answer: [your response here in ${body.locale}]
+Final Answer: final answer in ${body.locale}
 \`\`\`
 
-Begin!
+Thought:{tools}
 {agent_scratchpad}
+
+Now think on the query:
 `
 
   const prompt = ChatPromptTemplate.fromMessages([
@@ -106,8 +106,8 @@ Begin!
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
-          if (addOp.path.startsWith("/logs/googlegenerativeai/streamed_output_str") ||
-            addOp.path.startsWith("/logs/ChatOpenAI/streamed_output_str") &&
+          if (addOp.path.startsWith("/logs/googlegenerativeai:2/streamed_output_str") ||
+            addOp.path.startsWith("/logs/ChatOpenAI") &&
             typeof addOp.value === "string" &&
             addOp.value.length
           ) {

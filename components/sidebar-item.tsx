@@ -59,7 +59,7 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
         <div
           className="relative max-h-5 flex-1 select-none overflow-hidden text-ellipsis break-all"
         >
-          {chat.messages[0].content.slice(0, 30)}
+          {chat.messages.slice(-1)[0].content.split('Final Answer:').slice(-1)[0].slice(0, 28)}
         </div>
       </Link>
       <div className="absolute right-2 top-1">{children}</div>
