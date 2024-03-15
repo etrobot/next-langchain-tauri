@@ -123,8 +123,7 @@ Now think on the query:
             controller.enqueue(encoder.encode(addOp.value));
           }
           if(addOp.path.startsWith('/logs/BingSerpAPI/final_output') || addOp.path.startsWith('/logs/GoogleCustomSearch/final_output') || addOp.path.startsWith('/logs/TavilySearchResults/final_output')){
-            const lines = addOp.value.output.split(')\n\n').map((p:string)=>'['+p.split(']')[1].slice(1)+']'+p.split(']')[1]+')').slice(0,-1)
-            controller.enqueue(encoder.encode('\n\n---\n\n'+ lines.join('\n\n') +'\n\n---\n\n'));
+            controller.enqueue(encoder.encode('\n\n---\n\n'+ addOp.value.output.split('\n\n').map((line:string)=>line.split(']')[1]).join('\n\n') +'\n\n---\n\n'));
           }
         }
       }
