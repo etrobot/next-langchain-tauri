@@ -38,7 +38,9 @@ export default function Header() {
     llm_api_key: string;
     llm_model: string;
     llm_base_url: string;
-    search_api_key: string;
+    tavilyserp_api_key: string;
+    google_api_key: string;
+    google_cse_id: string;
     bing_api_key: string;
   } | null>('ai-token', null);
 
@@ -46,7 +48,9 @@ export default function Header() {
     llm_api_key: "",
     llm_model: "",
     llm_base_url: "",
-    search_api_key: "",
+    tavilyserp_api_key: "",
+    google_api_key: "",
+    google_cse_id: "",
     bing_api_key: "",
   };
 
@@ -68,17 +72,17 @@ export default function Header() {
             <TabsTrigger value="password"><Link href="/agents">Agents</Link></TabsTrigger>
           </TabsList>
         </Tabs>*/}
-      </div> 
+      </div>
 
       <div className="flex items-center justify-end space-x-2">
-      <Button
-                onClick={() => {
-                  setPreviewTokenDialog(true);
-                  setPreviewTokenInput(previewToken ?? initialPreviewToken);
-                }}
-              >
-                Key Setting
-              </Button>
+        <Button
+          onClick={() => {
+            setPreviewTokenDialog(true);
+            setPreviewTokenInput(previewToken ?? initialPreviewToken);
+          }}
+        >
+          Key Setting
+        </Button>
         <a
           target="_blank"
           href="https://github.com/etrobot/next-langchain-tauri"
@@ -148,14 +152,38 @@ export default function Header() {
               /></div>
             <div className="grid grid-cols-3 items-center gap-3">
               <Label htmlFor="name" className="text-right">
+                Google Search API Key
+              </Label>
+              <Input className="col-span-2"
+                value={previewTokenInput.google_api_key}
+                placeholder="optional, from cloud.google.com"
+                onChange={e => setPreviewTokenInput(prevState => ({
+                  ...prevState,
+                  google_api_key: e.target.value
+                }))}
+              /></div>
+              <div className="grid grid-cols-3 items-center gap-3">
+              <Label htmlFor="name" className="text-right">
+                Google custom engine id
+              </Label>
+              <Input className="col-span-2"
+                value={previewTokenInput.google_cse_id}
+                placeholder="optional, from cloud.google.com"
+                onChange={e => setPreviewTokenInput(prevState => ({
+                  ...prevState,
+                  google_cse_id: e.target.value
+                }))}
+              /></div>
+            <div className="grid grid-cols-3 items-center gap-3">
+              <Label htmlFor="name" className="text-right">
                 Tavily Search API Key
               </Label>
               <Input className="col-span-2"
-                value={previewTokenInput.search_api_key}
+                value={previewTokenInput.tavilyserp_api_key}
                 placeholder="optional, from tavily.com"
                 onChange={e => setPreviewTokenInput(prevState => ({
                   ...prevState,
-                  search_api_key: e.target.value
+                  tavilyserp_api_key: e.target.value
                 }))}
               /></div>
           </div>

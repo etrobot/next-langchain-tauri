@@ -4,6 +4,7 @@ import { ChatPromptTemplate,  MessagesPlaceholder} from "@langchain/core/prompts
 import { AgentExecutor, createReactAgent } from "langchain/agents";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
 import { BingSerpAPI } from "./custom/tools/bing/bingserpapi";
+import { GoogleCustomSearch } from "./custom/tools/google/google_custom_search";
 import { ChatGoogleGenerativeAI } from "./custom/llm/gemini";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { AIMessage, ChatMessage, HumanMessage } from "@langchain/core/messages";
@@ -25,7 +26,9 @@ export async function Chat(body: any) {
     (message: any) =>
       message.role === "user" || message.role === "assistant",
   ).map(convertMessageToLangChainMessage);;
-  process.env.TAVILY_API_KEY = body.previewToken.search_api_key
+  process.env.TAVILY_API_KEY = body.previewToken.tavilyserp_api_key
+  process.env.GOOGLE_API_KEY = body.previewToken.google_api_key
+  process.env.GOOGLE_CSE_ID = body.previewToken.google_cse_id
   var model:any
   if(body.previewToken.llm_model==='gemini-pro'){
       model = new ChatGoogleGenerativeAI({
@@ -51,7 +54,17 @@ export async function Chat(body: any) {
     return new StreamingTextResponse(stream);
   }
 
-  const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
+  var tools: (BingSerpAPI | TavilySearchResults | GoogleCustomSearch)[] = [];
+  if (body.previewToken.tavilyserp_api_key) {
+    tools=[new TavilySearchResults({maxResults: 5})];
+  }
+  if (body.previewToken.bing_api_key) {
+    tools=[new BingSerpAPI(body.previewToken.bing_api_key)];
+  }
+  if (body.previewToken.google_api_key) {
+    tools=[new GoogleCustomSearch()];
+  }
+
   var SYSTEM_TEMPLATE = `You are an helpful assistant with Thought:{tools}
 
 Now Think: do I need a tool? if yes:
@@ -59,17 +72,16 @@ call a tool name of {tool_names} and MUST in format:
 \`\`\`
 Action: a tool name (just text , no need brackets)
 Action Input: key words ripped from {input}
-\`\`\`
-then stop output and wait for user input.
+ \`\`\`
 
+then stop output and wait for user input,
 if NO,output in format(MUST):
 
-Final Answer: final answer in ${body.locale}
+** Final Answer: final answer in ${body.locale} **
 
 ---
 {agent_scratchpad}
 ---
-
 Now think on the query:
 `
 
@@ -105,6 +117,7 @@ Now think on the query:
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
+          // console.log(addOp.path,addOp.value)
           if (addOp.path.startsWith("/logs/googlegenerativeai:2/stream") ||
             addOp.path.startsWith("/logs/ChatOpenAI") &&
             typeof addOp.value === "string" &&
@@ -113,6 +126,9 @@ Now think on the query:
             controller.enqueue(encoder.encode(addOp.value));
           }
           if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
+            controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
+          }
+          if(addOp.path.startsWith('/logs/GoogleCustomSearch/final_output')){
             controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
           }
         }

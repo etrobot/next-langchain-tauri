@@ -35,7 +35,7 @@ export function Chat({ id, className }: ChatProps) {
     llm_api_key: string;
     llm_model: string;
     llm_base_url: string;
-    search_api_key: string;
+    tavilyserp_api_key: string;
     bing_api_key: string;
   } | null>('ai-token', null);
 
