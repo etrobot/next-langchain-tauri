@@ -63,7 +63,7 @@ Action Input: the input to the action
 Observation: the result of the action
 \`\`\`
 
-when you finish the action and get the final answer,skip outputing the result from previous anction and Observation, you MUST out put in this format:
+when you finish the action and get the final answer,you MUST out put in this format:
 
 \`\`\`
 Thought: Do I need to use a tool? No
