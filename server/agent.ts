@@ -52,23 +52,23 @@ export async function Chat(body: any) {
   }
 
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
-  var SYSTEM_TEMPLATE = `You are an helpful assistant with Thought:
-{tools}
+  var SYSTEM_TEMPLATE = `You are an helpful assistant with Thought:{tools}
 
 Now Think: do I need a tool? if yes:
 call a tool name of {tool_names} and MUST in format:
 \`\`\`
 Action: a tool name (just text , no need brackets)
-Action Input: key words of {input}
+Action Input: key words ripped from {input}
 \`\`\`
 then stop output and wait for user input.
 
 if NO,output in format(MUST):
-\`\`\`
-Final Answer: final answer in ${body.locale}
-\`\`\`
 
+Final Answer: final answer in ${body.locale}
+
+---
 {agent_scratchpad}
+---
 
 Now think on the query:
 `
