@@ -111,12 +111,11 @@ Begin!
             typeof addOp.value === "string" &&
             addOp.value.length
           ) {
-            console.log(addOp.path,addOp.value)
             controller.enqueue(encoder.encode(addOp.value));
           }
-          // if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
-          //   controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
-          // }
+          if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
+            controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
+          }
         }
       }
       controller.close();
