@@ -75,9 +75,7 @@ Action Input: key words ripped from {input}
  \`\`\`
 
 then stop output and wait for user input,
-if NO,output in format(MUST):
-
-** Final Answer: final answer in ${body.locale} **
+if NO,output final answer , MUST begin with **Final Answer:**:
 
 ---
 {agent_scratchpad}
@@ -126,10 +124,10 @@ Now think on the query:
             controller.enqueue(encoder.encode(addOp.value));
           }
           if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
-            controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
+            controller.enqueue(encoder.encode('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n'));
           }
           if(addOp.path.startsWith('/logs/GoogleCustomSearch/final_output')){
-            controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
+            controller.enqueue(encoder.encode('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n'));
           }
         }
       }
