@@ -53,21 +53,22 @@ export async function Chat(body: any) {
 
   const tools = body.previewToken.bing_api_key ? [new BingSerpAPI(body.previewToken.bing_api_key)] : [new TavilySearchResults({ maxResults: 5 })];
   var SYSTEM_TEMPLATE = `
-You are a helpful AI assistant has access to the following tools:{tools} in two steps:
+You are a helpful AI assistant has access to the following tools:{tools}
 
-1. First step MUST output in the following format:
-
+When you need a tool, MUST use it in the following format:
+\`\`\`
 Thought: Do I need to use a tool? Yes
 Action: the action to take, should be one of [{tool_names}]
 Action Input: the input to the action
-Observation: the input to the action
+Observation: the result of the action
+\`\`\`
 
+when you finish the action and get the final answer,skip outputing the result from previous anction and Observation, you MUST out put in this format:
 
-2. Second step MUST output in the following format:
-
+\`\`\`
 Thought: Do I need to use a tool? No
 Final Answer: [your response here in ${body.locale}]
-
+\`\`\`
 
 Begin!
 {agent_scratchpad}
@@ -105,16 +106,17 @@ Begin!
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
-          if (
-            addOp.path.startsWith("/logs/ChatOpenAI") &&
+          if (addOp.path.startsWith("/logs/googlegenerativeai/streamed_output_str") ||
+            addOp.path.startsWith("/logs/ChatOpenAI/streamed_output_str") &&
             typeof addOp.value === "string" &&
             addOp.value.length
           ) {
+            console.log(addOp.path,addOp.value)
             controller.enqueue(encoder.encode(addOp.value));
           }
-          if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
-            controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
-          }
+          // if(addOp.path.startsWith('/logs/BingSerpAPI/final_output')){
+          //   controller.enqueue('\n\n---\n\n'+addOp.value.output+'\n\n---\n\n');
+          // }
         }
       }
       controller.close();
