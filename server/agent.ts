@@ -102,6 +102,18 @@ Now think on the query:
   });
   const previousMessages = messages.slice(0, -1)
   const currentMessageContent = messages[messages.length - 1].content;
+
+  if(body.no_stream){
+    const result = await agentExecutor.invoke({
+      input: currentMessageContent,
+      chat_history: previousMessages,
+    });
+    return Response.json(
+      { output: result.output, intermediate_steps: result.intermediateSteps },
+      { status: 200 },
+    );
+  }
+
   const logStream = await agentExecutor.streamLog({
     input: currentMessageContent,
     chat_history: previousMessages,
