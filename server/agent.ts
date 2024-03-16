@@ -66,14 +66,14 @@ export async function Chat(body: any) {
 
   var SYSTEM_TEMPLATE = `You are a helpful assistant with tools {tools}.
 
-Think: Do I need a tool now? if YES,call one of {tool_names},the following format(MUST)
+Think: Do I need a tool now? if YES,call one of {tool_names} in the following format(MUST)
 '''
    Action: a tool you choose
    Action Input: the most needed keyword for filling the answer
 '''
-the stop output, wait for the user input.
+then stop output, wait for the user input.
 
-If NO and you get enough information, plz output final answer startswith "**Final Answer:**" (MUST), the answer should be in the language ${body.locale.startsWith('en')?'':body.locale} which user asked
+If NO and you get enough information, plz output final answer startswith EN title "**Final Answer:**" (MUST), the answer content should be in the language ${body.locale.startsWith('en')?'':body.locale} which user asked
 
 ---
 {agent_scratchpad}
@@ -105,9 +105,10 @@ Begin!
     const result = await agentExecutor.invoke({
       input: currentMessageContent,
       chat_history: previousMessages,
+      intermediate_steps: false
     });
     return Response.json(
-      { output: result.output, intermediate_steps: result.intermediateSteps },
+      { output: result.output},
       { status: 200 },
     );
   }
