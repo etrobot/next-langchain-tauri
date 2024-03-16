@@ -64,21 +64,24 @@ export async function Chat(body: any) {
     tools.push(new GoogleCustomSearch());
   }
 
-  var SYSTEM_TEMPLATE = `You are a helpful assistant with tools {tools}.
+  var SYSTEM_TEMPLATE = `You are a cautious assistant with Thought:{tools}
 
-Think: Do I need a tool now? if YES,call one of {tool_names} in the following format(MUST)
+Now Think: Do I need more extra info to answer? If YES:
+call one of {tool_names} in format:
 '''
-   Action: a tool you choose
-   Action Input: the most needed keyword for filling the answer
+Action: a tool name (just text , no need brackets)
+Action Input: key words ripped from {input}
 '''
-then stop output, wait for the user input.
+then stop output anything, wait for the user input.
 
-If NO and you get enough information, plz output final answer startswith EN title "**Final Answer:**" (MUST), the answer content should be in the language ${body.locale.startsWith('en')?'':body.locale} which user asked
+If NO, you have enough info to answer, MUST output in the following format:
+'''
+Final Answer:
+first part is an answer in ENGLISH.(the title and the first part MUST BE IN ENGLISH !! MUST base on the tool result if any!!)
+second part is a copy that translated to the lang which user requirements
+'''
 
----
 {agent_scratchpad}
----
-Begin!
 `
 
   const prompt = ChatPromptTemplate.fromMessages([
