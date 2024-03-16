@@ -64,22 +64,20 @@ export async function Chat(body: any) {
     tools.push(new GoogleCustomSearch());
   }
 
-  var SYSTEM_TEMPLATE = `You are a cautious assistant with Thought:{tools}
+  var SYSTEM_TEMPLATE = `You are a helpful assistant with Thought:{tools}
 
-Now Think: Do I need more extra info to answer? If YES:
+Think: Do I need to use a tool? if YES,  
+
 call one of {tool_names} in format:
-'''
-Action: a tool name (just text , no need brackets)
-Action Input: key words ripped from {input}
-'''
+
+    Action: a tool name
+    Action Input: key words
+
 then stop output anything, wait for the user input.
 
-If NO, you have enough info to answer, MUST output in the following format:
-'''
-Final Answer:
-first part is an answer in ENGLISH.(the title and the first part MUST BE IN ENGLISH !! MUST base on the tool result if any!!)
-second part is a copy that translated to the lang which user requirements
-'''
+if NO , output an English title "** Final Answer: **" (this title MUST be in English!!).
+
+Then output the answer base on the tool results if any.
 
 {agent_scratchpad}
 `
