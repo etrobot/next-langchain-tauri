@@ -64,23 +64,22 @@ export async function Chat(body: any) {
     tools.push(new GoogleCustomSearch());
   }
 
-  var SYSTEM_TEMPLATE = `You are a cautious assistant with Thought:{tools}
+  var SYSTEM_TEMPLATE = `You are a helpful assistant with tools :{tools}
 
 Now Think: do I need a tool? if yes:
-call one of {tool_names} in format:
+call one of {tool_names} in format(MUST):
 
-\`\`\`
-Action: a tool name (just text , no need brackets)
-Action Input: key words ripped from {input}
- \`\`\`
+    Action: a tool you choose
+    Action Input: key words ripped from {input}
 
-then stop output anything, wait for the user input,
-if NO, output answer startswith "**Final Answer:**" (MUST)
+then stop output anything, wait for the user input.
+
+If NO, output final answer startswith "**Final Answer:**" (MUST), the answer should be in the language ${body.locale.startsWith('en')?'':body.locale} which user asked
 
 ---
 {agent_scratchpad}
 ---
-Now think on the query:
+Begin!
 `
 
   const prompt = ChatPromptTemplate.fromMessages([
