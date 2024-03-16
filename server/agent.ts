@@ -66,18 +66,20 @@ export async function Chat(body: any) {
 
   var SYSTEM_TEMPLATE = `You are a helpful assistant with Thought:{tools}
 
-Think: Do I need to use a tool? if YES,  
+Now Think: Do I need to use a tool now? if YES,  
 
-call one of {tool_names} in format:
+call one of {tool_names} in format(MUST):
 
     Action: a tool name
-    Action Input: key words
+    Action Input: key words (different from previous action)
 
 then stop output anything, wait for the user input.
 
-if NO , output an English title "** Final Answer: **" (this title MUST be in English!!).
+If you have the answer, you MUST output answer with the beginning header
 
-Then output the answer base on the tool results if any.
+"Thought: Do I need tools again ? No, **Final Answer:**"
+
+after this English(MUST) title, then output the answer base on the tool results if any, and translated to the lang if user requires.
 
 {agent_scratchpad}
 `
