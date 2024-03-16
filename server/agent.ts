@@ -38,7 +38,7 @@ export async function Chat(body: any) {
     });
   }else{
     model = new ChatOpenAI({
-      temperature: 0.2,
+      temperature: 0.7,
       modelName: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
       openAIApiKey: body.previewToken.llm_api_key,
       configuration: { baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1' },
@@ -64,17 +64,16 @@ export async function Chat(body: any) {
     tools.push(new GoogleCustomSearch());
   }
 
-  var SYSTEM_TEMPLATE = `You are a helpful assistant with tools :{tools}
+  var SYSTEM_TEMPLATE = `You are a helpful assistant with tools {tools}.
 
-Now Think: do I need a tool? if yes:
-call one of {tool_names} in format(MUST):
+Think: Do I need a tool now? if YES,call one of {tool_names},the following format(MUST)
+'''
+   Action: a tool you choose
+   Action Input: the most needed keyword for filling the answer
+'''
+the stop output, wait for the user input.
 
-    Action: a tool you choose
-    Action Input: key words ripped from {input}
-
-then stop output anything, wait for the user input.
-
-If NO, output final answer startswith "**Final Answer:**" (MUST), the answer should be in the language ${body.locale.startsWith('en')?'':body.locale} which user asked
+If NO and you get enough information, plz output final answer startswith "**Final Answer:**" (MUST), the answer should be in the language ${body.locale.startsWith('en')?'':body.locale} which user asked
 
 ---
 {agent_scratchpad}

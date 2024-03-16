@@ -29,7 +29,7 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
 
   return (
     <motion.div
-      className="relative h-8"
+      className="relative h-12"
       variants={{
         initial: {
           height: 0,
@@ -57,8 +57,11 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
         )}
       >
         <div className="relative select-none overflow-hidden whitespace-nowrap overflow-ellipsis">
+         
           {chat.messages.slice(-1)[0].content.split('Final Answer:').slice(-1)[0].slice(0, 50).replace('**','')}
+          <p className='text-xs text-muted-foreground'>{chat.id.slice(4)}</p>
         </div>
+        
       </Link>
       <div className="absolute right-1 top-1">{children}</div>
     </motion.div>
