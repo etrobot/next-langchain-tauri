@@ -23,7 +23,7 @@ Click the ``` Key Setting``` button to enter API keys, which are only stored in 
 ``` bash
    rustc -Vv | grep host | cut -f2 -d' '
 ```
-then change the word ```server-x86_64-apple-darwin``` to ```server-yours``` in packages.json
+then change the word ```server-aarch64-apple-darwin``` to ```server-yours``` in packages.json, for example ```server-x86_64-apple-darwin```
 
 save and run:
 ``` bash
