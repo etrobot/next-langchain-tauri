@@ -126,7 +126,7 @@ after this English(MUST) title, then output the answer base on the tool results 
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
-          console.log(addOp.path,addOp.value)
+          // console.log(addOp.path,addOp.value)
           if (addOp.path.startsWith("/logs/googlegenerativeai") ||
             addOp.path.startsWith("/logs/ChatOpenAI") && addOp.path.includes("stream") &&
             typeof addOp.value === "string" &&
