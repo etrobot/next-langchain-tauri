@@ -64,14 +64,8 @@ export async function Chat(body: any) {
     tools.push(new GoogleCustomSearch());
   }
 
-  var SYSTEM_TEMPLATE = `You are a helpful assistant with Thought:{tools}
-
-Now Think: Do I need to use a tool now? if YES,  
-
-call one of {tool_names} in format(MUST):
-
-    Action: a tool name
-    Action Input: key words (different from previous action)
+  var SYSTEM_TEMPLATE = `You are a helpful assistant with tools: {tools}
+Think and answer following the rules below.
 
 If you have the answer, you MUST output answer with the beginning header
 
@@ -79,7 +73,16 @@ If you have the answer, you MUST output answer with the beginning header
 
 after this English(MUST) title, then output the answer base on the tool results if any, and translated to the lang if user requires.
 
+if you need more extra info, call one of {tool_names} in format(MUST):
+
+    Action: a tool name
+    Action Input: key words rippied from user input
+
+then stop output, wait for the response.
+
+Start:
 {agent_scratchpad}
+
 `
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", SYSTEM_TEMPLATE],
