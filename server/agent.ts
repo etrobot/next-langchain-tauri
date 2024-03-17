@@ -64,32 +64,26 @@ export async function Chat(body: any) {
     tools.push(new GoogleCustomSearch());
   }
 
-  var SYSTEM_TEMPLATE = `Answer the following questions as best you can. You have access 
-to the following tools:
+  var SYSTEM_TEMPLATE = `You are a helpful assistant with Thought:{tools}
 
-{tools}
+Now Think: Do I need to use a tool now? if YES,  
 
-Thought:{agent_scratchpad}
+call one of {tool_names} in format(MUST):
 
-Use the following format to call a tool in necessary:
+    Action: a tool name
+    Action Input: key words (different from previous action)
 
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
+If you have the answer, you MUST output answer with the beginning header
 
-when you want to answer, use this format
-Thought: I now know the final answer
-** Final Answer: **
-the final answer to the original input question
+"Thought: Do I need tools again ? No, **Final Answer:**"
 
-Begin!
+after this English(MUST) title, then output the answer base on the tool results if any, and translated to the lang if user requires.
 
-Question: {input}
+{agent_scratchpad}
 `
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", SYSTEM_TEMPLATE],
-    ["human", "{input}"],
+    ["human","{input}"]
   ]);
   
   const agent = await createReactAgent({
@@ -101,7 +95,7 @@ Question: {input}
   const agentExecutor = new AgentExecutor({
     agent,
     tools,
-    returnIntermediateSteps: true,
+    returnIntermediateSteps: false,
     verbose: false,
     maxIterations:4
   });
@@ -123,8 +117,6 @@ Question: {input}
 
   const logStream = await agentExecutor.streamLog({
     input: currentMessageContent,
-    // chat_history: previousMessages,
-    verbose: false,
     maxIterations:4
   });
   const encoder = new TextEncoder()
@@ -134,9 +126,9 @@ Question: {input}
       for await (const chunk of logStream) {
         if (chunk.ops?.length > 0 && chunk.ops[0].op === "add") {
           const addOp = chunk.ops[0];
-          // console.log(addOp.path,addOp.value)
-          if (addOp.path.startsWith("/logs/googlegenerativeai:2/stream") ||
-            addOp.path.startsWith("/logs/ChatOpenAI") &&
+          console.log(addOp.path,addOp.value)
+          if (addOp.path.startsWith("/logs/googlegenerativeai") ||
+            addOp.path.startsWith("/logs/ChatOpenAI") && addOp.path.includes("stream") &&
             typeof addOp.value === "string" &&
             addOp.value.length
           ) {
