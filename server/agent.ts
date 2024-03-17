@@ -1,4 +1,4 @@
-import { StreamingTextResponse} from 'ai';
+import { StreamingTextResponse } from 'ai';
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { AgentExecutor, createReactAgent } from "langchain/agents";
@@ -8,6 +8,14 @@ import { GoogleCustomSearch } from "./custom/tools/google/google_custom_search";
 import { ChatGoogleGenerativeAI } from "./custom/llm/gemini";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { AIMessage, ChatMessage, HumanMessage } from "@langchain/core/messages";
+import { ToolExecutor } from "@langchain/langgraph/prebuilt";
+import { convertToOpenAIFunction } from "@langchain/core/utils/function_calling";
+import { BaseMessage } from "@langchain/core/messages";
+import { FunctionMessage } from "@langchain/core/messages";
+import { AgentAction } from "@langchain/core/agents";
+import { StateGraph, END } from "@langchain/langgraph";
+import { RunnableLambda } from "@langchain/core/runnables";
+
 
 const convertMessageToLangChainMessage = (message: any) => {
   if (message.role === "user") {
@@ -28,34 +36,24 @@ export async function Chat(body: any) {
   process.env.TAVILY_API_KEY = body.previewToken.tavilyserp_api_key
   process.env.GOOGLE_API_KEY = body.previewToken.google_api_key
   process.env.GOOGLE_CSE_ID = body.previewToken.google_cse_id
-  var model:any
-  if(body.previewToken.llm_model==='gemini-pro'){
-      model = new ChatGoogleGenerativeAI({
-        apiKey: body.previewToken.llm_api_key,
-        baseURL: body.previewToken?.llm_base_url || null,
-        modelName: "gemini-pro",
-        maxOutputTokens: 8192,
-    });
-  }else{
-    model = new ChatOpenAI({
-      temperature: 0.7,
-      modelName: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
-      openAIApiKey: body.previewToken.llm_api_key,
-      configuration: { baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1' },
-      maxTokens: 2048,
-      streaming: true
-    });
-  }
-  
-  if(!body.messages.slice(-1)[0].function_call){
+  const model = new ChatOpenAI({
+    temperature: 0.2,
+    modelName: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
+    openAIApiKey: body.previewToken.llm_api_key,
+    configuration: { baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1' },
+    streaming: true
+  });
+
+  if (!body.messages.slice(-1)[0].function_call) {
     const outputParser = new HttpResponseOutputParser()
     const stream = await model.pipe(outputParser).stream(messages);
     return new StreamingTextResponse(stream);
   }
 
-  var tools: (BingSerpAPI | TavilySearchResults | GoogleCustomSearch )[] = [];
+
+  var tools: (BingSerpAPI | TavilySearchResults | GoogleCustomSearch)[] = [];
   if (body.previewToken.tavilyserp_api_key) {
-    tools.push(new TavilySearchResults({maxResults: 5}));
+    tools.push(new TavilySearchResults({ maxResults: 5 }));
   }
   if (body.previewToken.bing_api_key) {
     tools.push(new BingSerpAPI(body.previewToken.bing_api_key));
@@ -64,66 +62,131 @@ export async function Chat(body: any) {
     tools.push(new GoogleCustomSearch());
   }
 
-  var SYSTEM_TEMPLATE = `You are a helpful assistant with tools: {tools}
-Think and answer following the rules below.
 
-If you have the answer, you MUST output answer with the beginning header
-
-"Thought: Do I need tools again ? No, **Final Answer:**"
-
-after this English(MUST) title, then output the answer base on the tool results if any, and translated to the lang if user requires.
-
-if you need more extra info, call one of {tool_names} in format(MUST):
-
-    Action: a tool name
-    Action Input: key words rippied from user input
-
-then stop output, wait for the response.
-
-Start:
-{agent_scratchpad}
-
-`
-  const prompt = ChatPromptTemplate.fromMessages([
-    ["system", SYSTEM_TEMPLATE],
-    ["human","{input}"]
-  ]);
-  
-  const agent = await createReactAgent({
-    llm: model,
+  const toolExecutor = new ToolExecutor({
     tools,
-    prompt,
   });
 
-  const agentExecutor = new AgentExecutor({
-    agent,
-    tools,
-    returnIntermediateSteps: false,
-    verbose: false,
-    maxIterations:4
+  const toolsAsOpenAIFunctions = tools.map((tool) =>
+    convertToOpenAIFunction(tool)
+  );
+  const newModel = model.bind({
+    functions: toolsAsOpenAIFunctions,
   });
-  // const previousMessages = messages.slice(0, -1)
-  const currentMessageContent = messages[messages.length - 1].content;
+  const agentState = {
+    messages: {
+      value: (x: BaseMessage[], y: BaseMessage[]) => x.concat(y),
+      default: () => [],
+    },
+  };
 
-  if(body.no_stream){
-    const result = await agentExecutor.invoke({
-      input: currentMessageContent,
-      // chat_history: previousMessages,
-      intermediate_steps: false,
-      maxIterations:4
+  // Define the function that determines whether to continue or not
+  const shouldContinue = (state: { messages: Array<BaseMessage> }) => {
+    const { messages } = state;
+    const lastMessage = messages[messages.length - 1];
+    // If there is no function call, then we finish
+    if (
+      !("function_call" in lastMessage.additional_kwargs) ||
+      !lastMessage.additional_kwargs.function_call
+    ) {
+      return "end";
+    }
+    // Otherwise if there is, we continue
+    return "continue";
+  };
+
+  // Define the function to execute tools
+  const _getAction = (state: { messages: Array<BaseMessage> }): AgentAction => {
+    const { messages } = state;
+    // Based on the continue condition
+    // we know the last message involves a function call
+    const lastMessage = messages[messages.length - 1];
+    if (!lastMessage) {
+      throw new Error("No messages found.");
+    }
+    if (!lastMessage.additional_kwargs.function_call) {
+      throw new Error("No function call found in message.");
+    }
+    // We construct an AgentAction from the function_call
+    return {
+      tool: lastMessage.additional_kwargs.function_call.name,
+      toolInput: JSON.stringify(
+        lastMessage.additional_kwargs.function_call.arguments
+      ),
+      log: "",
+    };
+  };
+
+  // Define the function that calls the model
+  const callModel = async (state: { messages: Array<BaseMessage> }) => {
+    const { messages } = state;
+    const response = await newModel.invoke(messages);
+    // We return a list, because this will get added to the existing list
+    return {
+      messages: [response],
+    };
+  };
+
+  const callTool = async (state: { messages: Array<BaseMessage> }) => {
+    const action = _getAction(state);
+    // We call the tool_executor and get back a response
+    const response = await toolExecutor.invoke(action);
+    // We use the response to create a FunctionMessage
+    const functionMessage = new FunctionMessage({
+      content: response,
+      name: action.tool,
     });
-    return Response.json(
-      { output: result.output},
-      { status: 200 },
-    );
-  }
-
-  const logStream = await agentExecutor.streamLog({
-    input: currentMessageContent,
-    maxIterations:4
+    // We return a list, because this will get added to the existing list
+    return { messages: [functionMessage] };
+  };
+  // Define a new graph
+  const workflow = new StateGraph({
+    channels: agentState,
   });
-  const encoder = new TextEncoder()
+
+  // Define the two nodes we will cycle between
+  workflow.addNode("agent", new RunnableLambda({ func: callModel }));
+  workflow.addNode("action", new RunnableLambda({ func: callTool }));
+
+  // Set the entrypoint as `agent`
+  // This means that this node is the first one called
+  workflow.setEntryPoint("agent");
+
+  // We now add a conditional edge
+  workflow.addConditionalEdges(
+    // First, we define the start node. We use `agent`.
+    // This means these are the edges taken after the `agent` node is called.
+    "agent",
+    // Next, we pass in the function that will determine which node is called next.
+    shouldContinue,
+    // Finally we pass in a mapping.
+    // The keys are strings, and the values are other nodes.
+    // END is a special node marking that the graph should finish.
+    // What will happen is we will call `should_continue`, and then the output of that
+    // will be matched against the keys in this mapping.
+    // Based on which one it matches, that node will then be called.
+    {
+      // If `tools`, then we call the tool node.
+      continue: "action",
+      // Otherwise we finish.
+      end: END,
+    }
+  );
+
+  // We now add a normal edge from `tools` to `agent`.
+  // This means that after `tools` is called, `agent` node is called next.
+  workflow.addEdge("action", "agent");
+
+  // Finally, we compile it!
+  // This compiles it into a LangChain Runnable,
+  // meaning you can use it as you would any other runnable
+  const app = workflow.compile();
+  const inputs = {
+    messages: [new HumanMessage(body.messages[body.messages.length - 1].content)],
+  };
   
+  const logStream = await app.streamLog(inputs)
+  const encoder = new TextEncoder()
   const transformStream = new ReadableStream({
     async start(controller) {
       for await (const chunk of logStream) {
@@ -137,8 +200,8 @@ Start:
           ) {
             controller.enqueue(encoder.encode(addOp.value));
           }
-          if(addOp.path.startsWith('/logs/BingSerpAPI/final_output') || addOp.path.startsWith('/logs/GoogleCustomSearch/final_output') || addOp.path.startsWith('/logs/TavilySearchResults/final_output')){
-            controller.enqueue(encoder.encode('\n\n---\n\n'+ addOp.value.output.split('\n\n').map((line:string)=>line.split(']')[1]).join('\n\n') +'\n\n---\n\n'));
+          if (addOp.path.startsWith('/logs/BingSerpAPI/final_output') || addOp.path.startsWith('/logs/GoogleCustomSearch/final_output') || addOp.path.startsWith('/logs/TavilySearchResults/final_output')) {
+            controller.enqueue(encoder.encode('\n\n---\n\n' + addOp.value.output.split('\n\n').map((line: string) => line.split(']')[1]).join('\n\n') + '\n\n---\n\n'));
           }
         }
       }
