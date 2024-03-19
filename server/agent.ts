@@ -42,6 +42,7 @@ export async function Chat(body: any) {
       const stream = await model.pipe(outputParser).stream(messages);
       return new StreamingTextResponse(stream);
     }
+    console.log(body)
     const previousMessages = messages
       .slice(0, -1)
     const currentMessageContent = messages[messages.length - 1].content;
