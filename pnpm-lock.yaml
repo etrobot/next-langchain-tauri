@@ -21,8 +21,8 @@ dependencies:
     specifier: ^0.0.10
     version: 0.0.10
   '@langchain/langgraph':
-    specifier: ^0.0.9
-    version: 0.0.9
+    specifier: ^0.0.10
+    version: 0.0.10
   '@langchain/openai':
     specifier: ^0.0.14
     version: 0.0.14
@@ -102,8 +102,8 @@ dependencies:
     specifier: ^1.2.2
     version: 1.2.2(next@14.1.1)
   langchain:
-    specifier: ^0.1.24
-    version: 0.1.25(axios@1.6.7)(cheerio@1.0.0-rc.12)
+    specifier: ^0.1.28
+    version: 0.1.28(axios@1.6.7)(cheerio@1.0.0-rc.12)
   langsmith:
     specifier: ^0.1.8
     version: 0.1.8
@@ -924,8 +924,8 @@ packages:
       - encoding
     dev: false
 
-  /@langchain/community@0.0.34:
-    resolution: {integrity: sha512-eU3VyK7dZ3S05E4IQ3IVb3B8Ja/GaNDHaXhfjUJfZLOwyZrrLMhshGRIbbO+iMqJz8omGK761QK14v0G0/U3iw==}
+  /@langchain/community@0.0.41:
+    resolution: {integrity: sha512-8QvA/Gx95ijUxmH3amj1La6Rl9NmMCnif802q/Y2zze+SW2bgeF7brC6n2BIui2GYUQlCDBoga/QZ2lPqPM6vg==}
     engines: {node: '>=18'}
     peerDependencies:
       '@aws-crypto/sha256-js': ^5.0.0
@@ -975,12 +975,14 @@ packages:
       '@zilliz/milvus2-sdk-node': '>=2.2.7'
       better-sqlite3: ^9.4.0
       cassandra-driver: ^4.7.2
+      cborg: ^4.1.1
       chromadb: '*'
       closevector-common: 0.1.3
       closevector-node: 0.1.6
       closevector-web: 0.1.6
       cohere-ai: '*'
       convex: ^1.3.1
+      couchbase: ^4.3.0
       discord.js: ^14.14.1
       dria: ^0.0.3
       faiss-node: ^0.5.1
@@ -989,8 +991,11 @@ packages:
       googleapis: ^126.0.1
       hnswlib-node: ^1.4.2
       html-to-text: ^9.0.5
+      interface-datastore: ^8.2.11
       ioredis: ^5.3.2
+      it-all: ^3.0.4
       jsdom: '*'
+      jsonwebtoken: ^9.0.2
       llmonitor: ^0.5.9
       lodash: ^4.17.21
       lunary: ^0.6.11
@@ -1107,6 +1112,8 @@ packages:
         optional: true
       cassandra-driver:
         optional: true
+      cborg:
+        optional: true
       chromadb:
         optional: true
       closevector-common:
@@ -1118,6 +1125,8 @@ packages:
       cohere-ai:
         optional: true
       convex:
+        optional: true
+      couchbase:
         optional: true
       discord.js:
         optional: true
@@ -1135,9 +1144,15 @@ packages:
         optional: true
       html-to-text:
         optional: true
+      interface-datastore:
+        optional: true
       ioredis:
         optional: true
+      it-all:
+        optional: true
       jsdom:
+        optional: true
+      jsonwebtoken:
         optional: true
       llmonitor:
         optional: true
@@ -1182,8 +1197,9 @@ packages:
       ws:
         optional: true
     dependencies:
-      '@langchain/core': 0.1.40
-      '@langchain/openai': 0.0.14
+      '@langchain/core': 0.1.48
+      '@langchain/openai': 0.0.22
+      expr-eval: 2.0.2
       flat: 5.0.2
       langsmith: 0.1.8
       uuid: 9.0.1
@@ -1209,6 +1225,23 @@ packages:
       zod-to-json-schema: 3.22.4(zod@3.22.4)
     dev: false
 
+  /@langchain/core@0.1.48:
+    resolution: {integrity: sha512-kGggyDbaYzCIPGkzvMvm/v0+lcTy1jlX6QZ7PSzUQFYJg5JK399x3AOYIDkbbUVxBAyHRgrWlxVQXH0FW3N6Bg==}
+    engines: {node: '>=18'}
+    dependencies:
+      ansi-styles: 5.2.0
+      camelcase: 6.3.0
+      decamelize: 1.2.0
+      js-tiktoken: 1.0.10
+      langsmith: 0.1.8
+      ml-distance: 4.0.1
+      p-queue: 6.6.2
+      p-retry: 4.6.2
+      uuid: 9.0.1
+      zod: 3.22.4
+      zod-to-json-schema: 3.22.4(zod@3.22.4)
+    dev: false
+
   /@langchain/google-genai@0.0.10:
     resolution: {integrity: sha512-neFuCoMew9t8IYM5srh6RVUFQsZxqPtAFVJ0mWtZqHXtb627MECs5FYr+xw1ptPKSbhIAN5H8sgdObqes4bN3A==}
     engines: {node: '>=18'}
@@ -1218,8 +1251,8 @@ packages:
       '@langchain/core': 0.1.40
     dev: false
 
-  /@langchain/langgraph@0.0.9:
-    resolution: {integrity: sha512-ErqU7gpSYIwRH0bGPgH7jRBhho4rb7koXQXFSIH2TmIbt+ZSojaIXtp+iQbLp0/Jt1pD2EZwlMkQ2hAmTH1zZA==}
+  /@langchain/langgraph@0.0.10:
+    resolution: {integrity: sha512-sNSJeeq3GEDKXYrtZ72g7R76ANEsAWJhT/yHuk26rwmnDRqZYP4bxsm/FGluHSlADQb1WxqGS9h8Vk6sg27SaA==}
     engines: {node: '>=18'}
     dependencies:
       '@langchain/core': 0.1.40
@@ -1230,6 +1263,19 @@ packages:
     engines: {node: '>=18'}
     dependencies:
       '@langchain/core': 0.1.40
+      js-tiktoken: 1.0.10
+      openai: 4.28.4
+      zod: 3.22.4
+      zod-to-json-schema: 3.22.4(zod@3.22.4)
+    transitivePeerDependencies:
+      - encoding
+    dev: false
+
+  /@langchain/openai@0.0.22:
+    resolution: {integrity: sha512-mkXRSeedwCzPnfvp1kvaGBXyVWTB86n77pUyw5bC9ka43/cPBHZdHlSnTZMuJi3H4RnV4CMxunaOlm+s7NWfxQ==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@langchain/core': 0.1.48
       js-tiktoken: 1.0.10
       openai: 4.28.4
       zod: 3.22.4
@@ -4884,8 +4930,8 @@ packages:
       json-buffer: 3.0.1
     dev: true
 
-  /langchain@0.1.25(axios@1.6.7)(cheerio@1.0.0-rc.12):
-    resolution: {integrity: sha512-sfEChvr4H2CklHdSByNBbytwBrFhgtA5kPOnwcBrxuXGg1iOaTzhVxQA0QcNcQucI3hZrsNbZjxGp+Can1ooZQ==}
+  /langchain@0.1.28(axios@1.6.7)(cheerio@1.0.0-rc.12):
+    resolution: {integrity: sha512-LNuILtOSFptfOqDwUwQAl7B0dYrBtxzVZ6lDhc5DA8rk+pyTCy12HQO7t8bGqC8oQlEPYPKaom8VRlvfupUBTw==}
     engines: {node: '>=18'}
     peerDependencies:
       '@aws-sdk/client-s3': ^3.310.0
@@ -4913,7 +4959,7 @@ packages:
       d3-dsv: ^2.0.0
       epub2: ^3.0.1
       faiss-node: '*'
-      fast-xml-parser: ^4.2.7
+      fast-xml-parser: '*'
       google-auth-library: ^8.9.0
       handlebars: ^4.7.8
       html-to-text: ^9.0.5
@@ -5044,9 +5090,9 @@ packages:
         optional: true
     dependencies:
       '@anthropic-ai/sdk': 0.9.1
-      '@langchain/community': 0.0.34
-      '@langchain/core': 0.1.40
-      '@langchain/openai': 0.0.14
+      '@langchain/community': 0.0.41
+      '@langchain/core': 0.1.48
+      '@langchain/openai': 0.0.22
       axios: 1.6.7
       binary-extensions: 2.2.0
       cheerio: 1.0.0-rc.12
@@ -5101,6 +5147,7 @@ packages:
       - '@zilliz/milvus2-sdk-node'
       - better-sqlite3
       - cassandra-driver
+      - cborg
       - closevector-common
       - closevector-node
       - closevector-web
@@ -5111,6 +5158,9 @@ packages:
       - firebase-admin
       - googleapis
       - hnswlib-node
+      - interface-datastore
+      - it-all
+      - jsonwebtoken
       - llmonitor
       - lodash
       - lunary
