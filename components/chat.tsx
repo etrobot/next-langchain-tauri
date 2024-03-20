@@ -55,7 +55,7 @@ export function Chat({ id, className }: ChatProps) {
         }
       },
       onFinish(response) {
-        const msg = messages ?? [];
+        const msg =  messages ?? initialMessages;
         msg.push({
           id: nanoid(),
           role: 'assistant',
