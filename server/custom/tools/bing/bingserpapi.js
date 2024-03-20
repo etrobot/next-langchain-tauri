@@ -62,7 +62,6 @@ class BingSerpAPI extends Tool {
             throw new Error(`HTTP error ${response.status} ${response.statusText}`);
         }
         const res = await response.json();
-        // console.log(res)
         const results = res.webPages.value;
         if (results.length === 0) {
             return "No good results found.";
