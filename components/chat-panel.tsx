@@ -77,9 +77,12 @@ export function ChatPanel({
                   if (found.charAt(0) === '@') {
                     Object.entries(agents).forEach(([key, agent]) => {
                       const agentName = (agent as unknown as Agent).name;
+                      const agentPrompt = (agent as unknown as Agent).prompt
                       if (value.startsWith(`@${agentName}`)) {
-                        prompt = `{"${agentName.slice(1)}:"`+":『"+(agent as unknown as Agent).prompt+'』}:\n' + value;
-                        function_call = (agent as unknown as Agent).usetool?'tool':function_call
+                        if(!JSON.stringify(messages).includes(agentPrompt)){
+                          prompt = `("${agentName}:"`+":『"+(agent as unknown as Agent).prompt+'』)\n' + value;
+                        }
+                        function_call = (agent as unknown as Agent).usetool?'tool':null
                       }
                       return; // Break out of the forEach loop
                     });
