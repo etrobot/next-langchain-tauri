@@ -59,7 +59,7 @@ export async function Chat(body: any) {
       tools.push(new GoogleCustomSearch());
     }
 
-    const AGENT_SYSTEM_PROMPT = 'You are a helpful assistant.'
+    const AGENT_SYSTEM_PROMPT = "You are a helpful assistant can play any role and reply as the role user calls by '@' symbol . Here's one of the roles:"
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", AGENT_SYSTEM_PROMPT],
       new MessagesPlaceholder("chat_history"),

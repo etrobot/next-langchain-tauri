@@ -70,15 +70,15 @@ export function ChatPanel({
         <div className="px-4 py-2 space-y-4 shadow-lg bg-background sm:rounded-t-xl md:py-4">
           <PromptForm
             onSubmit={async value => {
-              var prompt = value
-              var function_call=null as any
+                var prompt = value
+                var function_call=null as any
                 if (agents) {
                   const found = input.split(' ')[0];
                   if (found.charAt(0) === '@') {
                     Object.entries(agents).forEach(([key, agent]) => {
                       const agentName = (agent as unknown as Agent).name;
                       if (value.startsWith(`@${agentName}`)) {
-                        prompt = (agent as unknown as Agent).prompt+':\n' + value.slice(agentName.length + 1);
+                        prompt = `{"${agentName.slice(1)}:"`+":『"+(agent as unknown as Agent).prompt+'』}:\n' + value;
                         function_call = (agent as unknown as Agent).usetool?'tool':function_call
                       }
                       return; // Break out of the forEach loop
