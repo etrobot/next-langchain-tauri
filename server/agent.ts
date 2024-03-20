@@ -48,7 +48,7 @@ export async function Chat(body: any) {
     const currentMessageContent = messages[messages.length - 1].content;
     console.log(previousMessages,currentMessageContent)
 
-    var tools: (BingSerpAPI | TavilySearchResults | GoogleCustomSearch )[] = [];
+    var tools: any[] = [];
     if (body.previewToken.tavilyserp_api_key) {
       tools.push(new TavilySearchResults({maxResults: 5}));
     }
@@ -59,23 +59,23 @@ export async function Chat(body: any) {
       tools.push(new GoogleCustomSearch());
     }
 
+    const AGENT_SYSTEM_PROMPT = 'You are a helpful assistant.'
     const prompt = ChatPromptTemplate.fromMessages([
-      ["system", 'You are a helpful assistant.'],
+      ["system", AGENT_SYSTEM_PROMPT],
       new MessagesPlaceholder("chat_history"),
       ["human", "{input}"],
       new MessagesPlaceholder("agent_scratchpad"),
     ]);
 
     const agent = await createOpenAIFunctionsAgent({
-      llm: model,
+      llm:model,
       tools,
       prompt,
     });
-
+    
     const agentExecutor = new AgentExecutor({
       agent,
       tools,
-      // returnIntermediateSteps:true,
     });
 
 
