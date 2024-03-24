@@ -3,7 +3,6 @@ import { UseChatHelpers } from 'ai/react'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -12,7 +11,6 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle
@@ -172,7 +170,7 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
     try {
       const cardElement = document.getElementById(`cover-${key}`) as HTMLElement;
       if (cardElement) {
-        const buttons = [...cardElement.querySelectorAll('CardFooter')] as HTMLElement[];
+        const buttons = [...cardElement.querySelectorAll('button')] as HTMLElement[];
         buttons.forEach(btn => btn.style.visibility = 'hidden');
         const dataUrl = await toPng(cardElement);
         download(dataUrl, `card-${key}.png`);
