@@ -48,7 +48,6 @@ function getRandomColor(): string {
 }
 
 export interface Agent {
-  id: string;
   name: string;
   prompt: string;
   usetool?: boolean
@@ -63,7 +62,7 @@ export function getAgentsText() {
 
 export const newAgent = `{"#666666":{"name":"Search","prompt":"Get Info from Internet","usetool":true},"#666777":{"name":"CoT","prompt":"Let's think step by step."}}`
 
-export default function Agents({ setInput }: Pick<UseChatHelpers, 'setInput'>) {
+export default function Agents() {
   const router = useRouter()
   const [agentsText, setAgentsText] = useState(getAgentsText());
   const [editorOpen, setEditorOpen] = useState(false)

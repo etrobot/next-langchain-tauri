@@ -31,12 +31,13 @@ save and run:
    pnpm pkg-server
 ```
 
-4. Run in dev mode
-``` bash
-   pnpm tauri dev
-```
+4. Change 'next.config.mjs' to the part for tarui
 
-5. The langchain part is in ./server , you need to run ```pnpm build-server``` after development, and run ```node ./build/server.js``` to test.
+
+5. Build
+``` bash
+   pnpm tauri build
+```
 
 ## Credits
 

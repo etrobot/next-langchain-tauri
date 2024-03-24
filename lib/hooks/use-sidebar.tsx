@@ -27,7 +27,7 @@ interface SidebarProviderProps {
 }
 
 export function SidebarProvider({ children }: SidebarProviderProps) {
-  const [isSidebarOpen, setSidebarOpen] = React.useState(true)
+  const [isSidebarOpen, setSidebarOpen] = React.useState(false)
   const [isLoading, setLoading] = React.useState(true)
 
   React.useEffect(() => {

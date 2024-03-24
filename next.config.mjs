@@ -5,10 +5,9 @@ const nextConfig = {
     NEXT_PUBLIC_API_URL: ''
   }
 }
-
 export default nextConfig;
 
-//for tauri use this part:
+// //for tauri use this part:
 // /** @type {import('next').NextConfig} */
 // const nextConfig = {
 //   env: {
@@ -18,5 +17,4 @@ export default nextConfig;
 //     output: 'export',
 //   }),
 // }
-
 // export default nextConfig;

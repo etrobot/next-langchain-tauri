@@ -11,12 +11,13 @@ import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
-import Agents from '@/components/agents'
+import Covers from '@/components/covers'
 export interface ChatProps extends React.ComponentProps<'div'> {
   id?: string
 }
 
 export function Chat({ id, className }: ChatProps) {
+  const [showPinnedOnly, setShowPinnedOnly] = useState(true);
   const timestamp = `${new Date().toISOString().split('.')[0]}`
   const [initialMessages, setInitialMessages] = useState<Message[] | undefined>(undefined);
   useEffect(() => {
@@ -84,7 +85,7 @@ export function Chat({ id, className }: ChatProps) {
           </>
         ) : (
           <>
-            <Agents setInput={setInput} />
+            <Covers setInput={setInput} showPinnedOnly={showPinnedOnly}/>
           </>
         )}
       </div>

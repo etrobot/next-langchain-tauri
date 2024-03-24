@@ -8,7 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger
 } from '@/components/ui/tooltip'
-import { IconArrowElbow } from '@/components/ui/icons'
+import { IconArrowElbow,IconPlus } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 
@@ -103,11 +103,11 @@ export function PromptForm({
                   )}
                   disabled={isLoading}
                 >
-                  ⌂
+                  <IconPlus />
                   <span className="sr-only">New Chat</span>
                 </button>
               </TooltipTrigger>
-              <TooltipContent>Agents' Home</TooltipContent>
+              <TooltipContent>New Chat</TooltipContent>
             </Tooltip>
 
             <Textarea
