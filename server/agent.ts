@@ -22,6 +22,7 @@ const convertMessageToLangChainMessage = (message: any) => {
 
 
 export async function Chat(body: any) {
+    // console.log(body);
     process.env.TAVILY_API_KEY = body.previewToken.tavilyserp_api_key;
     process.env.GOOGLE_API_KEY = body.previewToken.google_api_key;
     process.env.GOOGLE_CSE_ID = body.previewToken.google_cse_id;

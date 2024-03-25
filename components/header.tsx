@@ -89,7 +89,6 @@ export default function Header() {
   };
 
   const [previewTokenDialog, setPreviewTokenDialog] = useState(false);
-  const [previewTokenInput, setPreviewTokenInput] = useState(keyScheme.current ?? initialPreviewToken);
 
   const frameworks = [
     {
@@ -159,7 +158,10 @@ export default function Header() {
           variant={'outline'}
           onClick={() => {
             setPreviewTokenDialog(true);
-            setPreviewTokenInput(keyScheme.current ?? initialPreviewToken);
+            const schemeText=localStorage.getItem('ai-token');
+            if (schemeText) {
+              setKeyScheme(JSON.parse(schemeText));
+            }
           }}
         >
           Setting
@@ -198,10 +200,11 @@ export default function Header() {
                   <Input className="col-span-2"
                     value={keyScheme[framework.value].llm_api_key}
                     placeholder="API KEY of LLM like OpenAI GPT or Gemini"
-                    onChange={e => setPreviewTokenInput(prevState => ({
-                      ...prevState,
-                      llm_api_key: e.target.value
-                    }))}
+                    onChange={e => {
+                      const newKeyScheme = {...keyScheme};
+                      newKeyScheme[framework.value].llm_api_key = e.target.value;
+                      setKeyScheme(newKeyScheme);
+                    }}
                   /></div>
                 <div className="grid grid-cols-3 items-center gap-3">
                   <Label htmlFor="name" className="text-right">
@@ -210,10 +213,11 @@ export default function Header() {
                   <Input className="col-span-2"
                     value={keyScheme[framework.value].llm_model}
                     placeholder="optional, default is gpt-3.5-turbo-0125"
-                    onChange={e => setPreviewTokenInput(prevState => ({
-                      ...prevState,
-                      llm_model: e.target.value
-                    }))}
+                    onChange={e => {
+                      const newKeyScheme = {...keyScheme};
+                      newKeyScheme[framework.value].llm_model = e.target.value;
+                      setKeyScheme(newKeyScheme);
+                    }}
                   /></div>
                 <div className="grid grid-cols-3 items-center gap-3">
                   <Label htmlFor="name" className="text-right">
@@ -222,10 +226,11 @@ export default function Header() {
                   <Input className="col-span-2"
                     value={keyScheme[framework.value].llm_base_url}
                     placeholder="optional, default is https://api.openai.com/v1"
-                    onChange={e => setPreviewTokenInput(prevState => ({
-                      ...prevState,
-                      llm_base_url: e.target.value
-                    }))}
+                    onChange={e => {
+                      const newKeyScheme = {...keyScheme};
+                      newKeyScheme[framework.value].llm_base_url = e.target.value;
+                      setKeyScheme(newKeyScheme);
+                    }}
                   /></div>
                 <div className="grid grid-cols-3 items-center gap-3">
                   <Label htmlFor="name" className="text-right">
@@ -234,10 +239,11 @@ export default function Header() {
                   <Input className="col-span-2"
                     value={keyScheme[framework.value].bing_api_key}
                     placeholder="from microsoft.com/bing/apis"
-                    onChange={e => setPreviewTokenInput(prevState => ({
-                      ...prevState,
-                      bing_api_key: e.target.value
-                    }))}
+                    onChange={e => {
+                      const newKeyScheme = {...keyScheme};
+                      newKeyScheme[framework.value].bing_api_key = e.target.value;
+                      setKeyScheme(newKeyScheme);
+                    }}
                   /></div>
                 <div className="grid grid-cols-3 items-center gap-3">
                   <Label htmlFor="name" className="text-right">
@@ -246,10 +252,11 @@ export default function Header() {
                   <Input className="col-span-2"
                     value={keyScheme[framework.value].google_api_key}
                     placeholder="optional, from cloud.google.com"
-                    onChange={e => setPreviewTokenInput(prevState => ({
-                      ...prevState,
-                      google_api_key: e.target.value
-                    }))}
+                    onChange={e => {
+                      const newKeyScheme = {...keyScheme};
+                      newKeyScheme[framework.value].google_api_key = e.target.value;
+                      setKeyScheme(newKeyScheme);
+                    }}
                   /></div>
                 <div className="grid grid-cols-3 items-center gap-3">
                   <Label htmlFor="name" className="text-right">
@@ -258,10 +265,11 @@ export default function Header() {
                   <Input className="col-span-2"
                     value={keyScheme[framework.value].google_cse_id}
                     placeholder="optional, from cloud.google.com"
-                    onChange={e => setPreviewTokenInput(prevState => ({
-                      ...prevState,
-                      google_cse_id: e.target.value
-                    }))}
+                    onChange={e => {
+                      const newKeyScheme = {...keyScheme};
+                      newKeyScheme[framework.value].google_cse_id = e.target.value;
+                      setKeyScheme(newKeyScheme);
+                    }}
                   /></div>
                 <div className="grid grid-cols-3 items-center gap-3">
                   <Label htmlFor="name" className="text-right">
@@ -270,10 +278,11 @@ export default function Header() {
                   <Input className="col-span-2"
                     value={keyScheme[framework.value].tavilyserp_api_key}
                     placeholder="optional, from tavily.com"
-                    onChange={e => setPreviewTokenInput(prevState => ({
-                      ...prevState,
-                      tavilyserp_api_key: e.target.value
-                    }))}
+                    onChange={e => {
+                      const newKeyScheme = {...keyScheme};
+                      newKeyScheme[framework.value].tavilyserp_api_key = e.target.value;
+                      setKeyScheme(newKeyScheme);
+                    }}
                   /></div>
               </div>
               <DialogFooter className="items-center">
@@ -282,17 +291,12 @@ export default function Header() {
                 setKeyScheme({
                   ...keyScheme,
                   [framework.value]: {
-                    ...keyScheme[framework.value], // Get the current values
-                    llm_api_key: previewTokenInput.llm_api_key,
-                    llm_model: previewTokenInput.llm_model,
-                    llm_base_url: previewTokenInput.llm_base_url,
-                    tavilyserp_api_key: previewTokenInput.tavilyserp_api_key,
-                    google_api_key: previewTokenInput.google_api_key,
-                    google_cse_id: previewTokenInput.google_cse_id,
-                    bing_api_key: previewTokenInput.bing_api_key,
+                    ...keyScheme[framework.value]
                   },
                 });
                 setPreviewTokenDialog(false);
+                localStorage.setItem('ai-token', JSON.stringify(keyScheme));
+                keyScheme.current.scheme = framework.value;
                 window.location.reload();
               }}
             >

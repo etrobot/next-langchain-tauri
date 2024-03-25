@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from './ui/input'
 import { Label } from "@/components/ui/label"
-import { useState, useTransition,useEffect } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,13 +46,16 @@ function getRandomColor(): string {
 }
 
 export interface Cover {
+  name: string;
   title: string;
+  disc: string;
   prompt: string;
-  bg:string;
+  bg: string;
   pin: boolean;
   dark: boolean;
+  usetool: boolean;
 }
-type Covers= {
+type Covers = {
   [key: string]: Cover
 }
 
@@ -64,10 +67,10 @@ export function getCoversText() {
 }
 
 
-function getRandomGradient(dark:boolean): string {
+function getRandomGradient(dark: boolean): string {
   const randomHue = (): number => Math.floor(Math.random() * 360);
   const randomSaturation = (): number => Math.floor(Math.random() * 100);
-  const fixedLightness = dark? 60 : 90; 
+  const fixedLightness = dark ? 60 : 90;
 
   const color1 = `hsl(${randomHue()}, ${randomSaturation()}%, ${fixedLightness}%)`;
   const color2 = `hsl(${randomHue()}, ${randomSaturation()}%, ${fixedLightness}%)`;
@@ -86,7 +89,7 @@ function getRandomGradient(dark:boolean): string {
   }
 }
 
-export const newCover = `{"#666666":{"title":"Search","prompt":"Get Info from Internet","bg":"#ababab","dark":true,"pin":true},"#666777":{"title":"CoT","prompt":"Let's think step by step.","dark":true,"bg":"#ababab","pin":true}}`
+export const newCover = `{"#666666":{"title":"Search","disc":"Get Info from Internet","prompt":"","bg":"#ababab","dark":true,"pin":true,"usetool":true},"#666777":{"title":"CoT","disc":"Let's think step by step.","prompt":"","dark":true,"bg":"#ababab","pin":true,"usetool":true}}`
 
 export interface CoversProps extends Partial<Pick<UseChatHelpers, 'setInput'>> {
   showPinnedOnly: boolean;
@@ -101,8 +104,8 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
   const [editorOpen, setEditorOpen] = useState(false)
   const [allCoverEditorOpen, setallCoverEditorOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [isRemovePending, startRemoveTransition] = useTransition()
-  const [currentCover, setCurrentCover] = useState({ id: '', title: '', prompt: '' ,bg:'',pin:false})
+  const initCover: Cover = { title: '', name: '', disc: '', prompt: '', bg: '', pin: false, usetool: false, dark: true }
+  const [currentCover, setCurrentCover] = useState(initCover)
   const [covers, setCovers] = useState(() => {
     const atext = getCoversText()
     if (atext) {
@@ -122,7 +125,7 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
   const handlePinned = (CoverId: string) => {
     const updatedCovers = {
       ...covers,
-      [CoverId]: { ...covers[CoverId], pin:!covers[CoverId].pin }
+      [CoverId]: { ...covers[CoverId], pin: !covers[CoverId].pin }
     }
     setCovers(updatedCovers)
     saveCovers(updatedCovers);
@@ -131,7 +134,7 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
   const toggleDark = (CoverId: string) => {
     const updatedCovers = {
       ...covers,
-      [CoverId]: { ...covers[CoverId],bg:covers[CoverId].dark?covers[CoverId].bg.replace(/60%\)/g,'90%)'):covers[CoverId].bg.replace(/90%\)/g,'60%)'), dark:!covers[CoverId].dark }
+      [CoverId]: { ...covers[CoverId], bg: covers[CoverId].dark ? covers[CoverId].bg.replace(/60%\)/g, '90%)') : covers[CoverId].bg.replace(/90%\)/g, '60%)'), dark: !covers[CoverId].dark }
     }
     setCovers(updatedCovers)
     saveCovers(updatedCovers);
@@ -140,14 +143,14 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
   const changeCoverBg = (CoverId: string) => {
     const updatedCovers = {
       ...covers,
-      [CoverId]: { ...covers[CoverId], bg:getRandomGradient(covers[CoverId].dark) }
+      [CoverId]: { ...covers[CoverId], bg: getRandomGradient(covers[CoverId].dark) }
     }
     setCovers(updatedCovers)
     saveCovers(updatedCovers);
   }
 
   const handleNewCover = () => {
-    setCurrentCover({ id: getRandomColor(), title: '', prompt: '',bg:getRandomGradient(true),pin:false});
+    setCurrentCover({ ...initCover, bg: getRandomGradient(true) });
     setEditorOpen(true);
   }
 
@@ -155,7 +158,7 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
   const handleSaveCovers = () => {
     const updatedCovers = {
       ...covers,
-      [currentCover.id]: {...covers[currentCover.id], title: currentCover.title, prompt: currentCover.prompt, bg:currentCover.bg }
+      [currentCover.name]: { ...covers[currentCover.name], title: currentCover.title, prompt: currentCover.disc, bg: currentCover.bg }
     }
     setCovers(updatedCovers)
     saveCovers(updatedCovers);
@@ -186,30 +189,30 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
         <Button variant="link" className='text-xs ' onClick={() => { navigator.clipboard.writeText(localStorage.getItem('Covers') || ''); toast.success('Covers data is copied to clipboard') }}>Export</Button>
         <IconSeparator className='my-2' /><Button className='text-xs ' variant={"link"} onClick={() => { setCoversText(getCoversText()); setallCoverEditorOpen(true) }}>Import</Button>
       </div>
-      <div className={showPinnedOnly? "flex overflow-x-auto gap-3 mx-3":"flex flex-wrap gap-3 mx-3"}>
+      <div className={showPinnedOnly ? "flex overflow-x-auto gap-3 mx-3" : "flex flex-wrap gap-3 mx-3"}>
         {Object.entries(covers as Covers).filter(([key, cover]: [string, Cover]) => !showPinnedOnly || cover.pin).map(([key, cover]: [string, Cover]) => (
           <>
-            <Card id={`cover-${key}`} key={key} 
-            className={cover.dark?"w-[300px] h-[400px] flex-shrink-0 text-white z-99":"w-[300px] h-[400px] flex-shrink-0 text-black z-99"}
-             style={{ background: cover.bg }}>
+            <Card id={`cover-${key}`} key={key}
+              className={cover.dark ? "w-[300px] h-[400px] flex-shrink-0 text-white z-99" : "w-[300px] h-[400px] flex-shrink-0 text-black z-99"}
+              style={{ background: cover.bg }}>
               <CardHeader>
                 <CardTitle>{cover.title}
                 </CardTitle>
               </CardHeader>
-              <CardContent className='flex flex-col h-[290px] justify-end'><pre>{cover.prompt}</pre></CardContent>
+              <CardContent className='flex flex-col h-[290px] justify-end'><pre>{cover.disc}</pre></CardContent>
               <CardFooter className="flex gap-1">
                 <Button variant="ghost" size="icon" onClick={() => handleEditCover(key)}><IconEdit /></Button>
                 <Button variant="ghost" size="icon" onClick={() => changeCoverBg(key)}>🎨</Button>
-                <Button variant="ghost" size="icon" onClick={() => toggleDark(key)}>{cover.dark?"☀️":"🌙"}</Button>
-                <Button variant="ghost" size="icon" onClick={() => handleDownloadImage(key)}><IconDownload/></Button>
-                {setInput ? <Button variant="ghost" size="icon" onClick={() => setInput(`#${cover.title}\n\n${cover.prompt}`)}>#</Button>:null}
+                <Button variant="ghost" size="icon" onClick={() => toggleDark(key)}>{cover.dark ? "☀️" : "🌙"}</Button>
+                <Button variant="ghost" size="icon" onClick={() => handleDownloadImage(key)}><IconDownload /></Button>
+                {setInput ? <Button variant="ghost" size="icon" onClick={() => setInput(`#${cover.title}\n\n${cover.disc}`)}>#</Button> : null}
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => handlePinned(key)}
                 >
-                 {cover.pin?"★":"☆"}
-              </Button>
+                  {cover.pin ? "★" : "☆"}
+                </Button>
               </CardFooter>
             </Card>
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -222,11 +225,10 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isRemovePending}>
+                  <AlertDialogCancel>
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    disabled={isRemovePending}
                     onClick={() => {
                       const updatedCovers = { ...covers }
                       delete updatedCovers[key] // Remove the Cover from the object
@@ -235,7 +237,6 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
                     }
                     }
                   >
-                    {isRemovePending && <IconSpinner className="mr-2 animate-spin" />}
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -267,8 +268,8 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
                   Prompt
                 </Label>
                 <Textarea className="col-span-4 h-[200px]"
-                  value={currentCover.prompt}
-                  placeholder="Cover System Role Prompt"
+                  value={currentCover.disc}
+                  placeholder="Discription for this agent"
                   onChange={(e) => setCurrentCover({ ...currentCover, prompt: e.target.value })}
                 />
               </div>
