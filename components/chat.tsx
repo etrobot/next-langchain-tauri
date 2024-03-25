@@ -32,13 +32,18 @@ export function Chat({ id, className }: ChatProps) {
       id = `cid_${timestamp}`;
     }
   }, [id]);
-  const [previewToken, setPreviewToken] = useLocalStorage<{
-    llm_api_key: string;
-    llm_model: string;
-    llm_base_url: string;
-    tavilyserp_api_key: string;
-    bing_api_key: string;
-  } | null>('ai-token', null);
+  
+
+  const initialPreviewToken = {
+    llm_api_key: "",
+    llm_model: "",
+    llm_base_url: "",
+    tavilyserp_api_key: "",
+    google_api_key: "",
+    google_cse_id: "",
+    bing_api_key: "",
+  };
+  const [previewToken, setPreviewToken] = useState(initialPreviewToken)
 
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
@@ -71,7 +76,7 @@ export function Chat({ id, className }: ChatProps) {
     stop();
     const token = localStorage.getItem('ai-token')
     if (token) {
-      setPreviewToken(JSON.parse(token))
+      setPreviewToken(JSON.parse(token).current)
     }
     else { toast.error('Please set the API keys'); }
   }, []);

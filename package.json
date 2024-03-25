@@ -36,7 +36,7 @@
     "ai": "^3.0.13",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
-    "cmdk": "^1.0.0",
+    "cmdk": "^0.2.1",
     "downloadjs": "^1.4.7",
     "esbuild": "^0.20.2",
     "fastify": "^4.26.2",

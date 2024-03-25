@@ -67,7 +67,7 @@ export function ChatPanel({
             )
           )}
         </div>
-        <div className="px-4 py-2 space-y-4 shadow-lg bg-background sm:rounded-t-xl md:py-4">
+        <div className="px-4 py-2 space-y-2 shadow-lg bg-background sm:rounded-t-xl">
           <PromptForm
             onSubmit={async value => {
                 var prompt = value

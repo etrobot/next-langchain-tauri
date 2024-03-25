@@ -295,9 +295,9 @@ export default function Covers({ setInput, showPinnedOnly }: CoversProps) {
           <button className="mt-40" onClick={handleNewCover}>+ New Cover</button>
         </Card>}
       </div>
-      <div className="mx-auto px-4 text-center mt-4">
+      <div className="mx-auto px-4 text-center mt-6">
         <p className="leading-normal ">
-          Choose a cover to start your creation.
+          Selet a cover to start your creation.
         </p>
       </div>
     </>
