@@ -11,7 +11,7 @@ import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
-import Covers from '@/components/covers'
+import Agents from '@/components/agents'
 export interface ChatProps extends React.ComponentProps<'div'> {
   id?: string
 }
@@ -90,7 +90,7 @@ export function Chat({ id, className }: ChatProps) {
           </>
         ) : (
           <>
-            <Covers setInput={setInput} showPinnedOnly={showPinnedOnly}/>
+            <Agents setInput={setInput} showPinnedOnly={showPinnedOnly}/>
           </>
         )}
       </div>

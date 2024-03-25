@@ -74,9 +74,9 @@ export default function Header() {
 
   const initialKeyScheme: KeyScheme = {
     current: { ...initialPreviewToken },
-    scheme1: { ...initialPreviewToken },
-    scheme2: { ...initialPreviewToken },
-    scheme3: { ...initialPreviewToken },
+    keys1: { ...initialPreviewToken },
+    keys2: { ...initialPreviewToken },
+    keys3: { ...initialPreviewToken },
   };
 
   const [keyScheme, setKeyScheme] = useLocalStorage<KeyScheme>('ai-token', initialKeyScheme);
@@ -90,70 +90,70 @@ export default function Header() {
 
   const [previewTokenDialog, setPreviewTokenDialog] = useState(false);
 
-  const frameworks = [
+  const shcemes = [
     {
-      value: "scheme1",
-      label: "scheme1",
+      value: "keys1",
+      label: "keys1",
     },
     {
-      value: "scheme2",
-      label: "scheme2",
+      value: "keys2",
+      label: "keys2",
     },
     {
-      value: "scheme3",
-      label: "scheme3",
+      value: "keys3",
+      label: "keys3",
     }
   ]
   const [open, setOpen] = React.useState(false)
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between w-full h-12 p-2 border-b shrink-0 bg-gradient-to-b from-background/10 via-background/50 to-background/80 backdrop-blur-xl">
       <SidebarToggle />
-      <Link target='_blank' href={"https://aicube.fun"} className='title font-bold'>AICube.fun</Link>
-      <SidebarMobile>
-        <ChatHistory userId='123456789' />
-      </SidebarMobile>
-
-      <div className="flex items-center mx-auto">
-        <Tabs defaultValue="account" className="w-[200px]">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="account"><Link href="/">Chat</Link></TabsTrigger>
-            <TabsTrigger value="cover"><Link href="/cover">Covers</Link></TabsTrigger>
-            <TabsTrigger value="agent"><Link href="/agent">Agents</Link></TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      <div className="flex items-center justify-end space-x-2">
       <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
                   role="combobox"
                   aria-expanded={open}
-                  className="w-[100px] justify-between"
+                  className="w-[80px] justify-between"
                 >
                   {keyScheme.current.scheme}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[100px] p-0">
+              <PopoverContent className="w-[80px] p-0">
                 <Command>
                   <CommandGroup>
-                    {frameworks.map((framework) => (
+                    {shcemes.map((shceme) => (
                       <CommandItem
-                        key={framework.value}
-                        value={framework.value}
+                        key={shceme.value}
+                        value={shceme.value}
                         onSelect={(currentValue:string) => {
                           handleSchemeSelection(currentValue)
                           setOpen(false)
                         }}
                       >
-                        {framework.label}
+                        {shceme.label}
                       </CommandItem>
                     ))}
                   </CommandGroup>
                 </Command>
               </PopoverContent>
       </Popover>
+      <Link target='_blank' href={"https://aicube.fun"} className='mx-2 title font-bold'>AICube.fun</Link>
+      <SidebarMobile>
+        <ChatHistory userId='123456789' />
+      </SidebarMobile>
+
+      <div className="flex items-center mx-auto">
+        <Tabs defaultValue="account" className="w-[120px]">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="account"><Link href="/">Chat</Link></TabsTrigger>
+            <TabsTrigger value="agent"><Link href="/agent">Agents</Link></TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div className="flex items-center justify-end space-x-2">
+
       <Button
           variant={'outline'}
           onClick={() => {
@@ -186,23 +186,23 @@ export default function Header() {
           </DialogHeader>
           <Tabs defaultValue={keyScheme.current.scheme}>
             <TabsList className="grid w-full grid-cols-3">
-            {frameworks.map((framework) => (
-              <TabsTrigger value={framework.value}>{framework.label}</TabsTrigger>
+            {shcemes.map((shceme) => (
+              <TabsTrigger value={shceme.value}>{shceme.label}</TabsTrigger>
               ))}
             </TabsList>
-            {frameworks.map((framework) => (
-            <TabsContent value={framework.value}>
+            {shcemes.map((shceme) => (
+            <TabsContent value={shceme.value}>
               <div className="grid gap-3 py-4">
                 <div className="grid grid-cols-3 items-center gap-3">
                   <Label htmlFor="name" className="text-right">
                     * LLM API Key
                   </Label>
                   <Input className="col-span-2"
-                    value={keyScheme[framework.value].llm_api_key}
+                    value={keyScheme[shceme.value].llm_api_key}
                     placeholder="API KEY of LLM like OpenAI GPT or Gemini"
                     onChange={e => {
                       const newKeyScheme = {...keyScheme};
-                      newKeyScheme[framework.value].llm_api_key = e.target.value;
+                      newKeyScheme[shceme.value].llm_api_key = e.target.value;
                       setKeyScheme(newKeyScheme);
                     }}
                   /></div>
@@ -211,11 +211,11 @@ export default function Header() {
                     LLM Model
                   </Label>
                   <Input className="col-span-2"
-                    value={keyScheme[framework.value].llm_model}
+                    value={keyScheme[shceme.value].llm_model}
                     placeholder="optional, default is gpt-3.5-turbo-0125"
                     onChange={e => {
                       const newKeyScheme = {...keyScheme};
-                      newKeyScheme[framework.value].llm_model = e.target.value;
+                      newKeyScheme[shceme.value].llm_model = e.target.value;
                       setKeyScheme(newKeyScheme);
                     }}
                   /></div>
@@ -224,11 +224,11 @@ export default function Header() {
                     LLM Base URL
                   </Label>
                   <Input className="col-span-2"
-                    value={keyScheme[framework.value].llm_base_url}
+                    value={keyScheme[shceme.value].llm_base_url}
                     placeholder="optional, default is https://api.openai.com/v1"
                     onChange={e => {
                       const newKeyScheme = {...keyScheme};
-                      newKeyScheme[framework.value].llm_base_url = e.target.value;
+                      newKeyScheme[shceme.value].llm_base_url = e.target.value;
                       setKeyScheme(newKeyScheme);
                     }}
                   /></div>
@@ -237,11 +237,11 @@ export default function Header() {
                     Bing Search API Key
                   </Label>
                   <Input className="col-span-2"
-                    value={keyScheme[framework.value].bing_api_key}
+                    value={keyScheme[shceme.value].bing_api_key}
                     placeholder="from microsoft.com/bing/apis"
                     onChange={e => {
                       const newKeyScheme = {...keyScheme};
-                      newKeyScheme[framework.value].bing_api_key = e.target.value;
+                      newKeyScheme[shceme.value].bing_api_key = e.target.value;
                       setKeyScheme(newKeyScheme);
                     }}
                   /></div>
@@ -250,11 +250,11 @@ export default function Header() {
                     Google Search API Key
                   </Label>
                   <Input className="col-span-2"
-                    value={keyScheme[framework.value].google_api_key}
+                    value={keyScheme[shceme.value].google_api_key}
                     placeholder="optional, from cloud.google.com"
                     onChange={e => {
                       const newKeyScheme = {...keyScheme};
-                      newKeyScheme[framework.value].google_api_key = e.target.value;
+                      newKeyScheme[shceme.value].google_api_key = e.target.value;
                       setKeyScheme(newKeyScheme);
                     }}
                   /></div>
@@ -263,11 +263,11 @@ export default function Header() {
                     Google custom engine id
                   </Label>
                   <Input className="col-span-2"
-                    value={keyScheme[framework.value].google_cse_id}
+                    value={keyScheme[shceme.value].google_cse_id}
                     placeholder="optional, from cloud.google.com"
                     onChange={e => {
                       const newKeyScheme = {...keyScheme};
-                      newKeyScheme[framework.value].google_cse_id = e.target.value;
+                      newKeyScheme[shceme.value].google_cse_id = e.target.value;
                       setKeyScheme(newKeyScheme);
                     }}
                   /></div>
@@ -276,11 +276,11 @@ export default function Header() {
                     Tavily Search API Key
                   </Label>
                   <Input className="col-span-2"
-                    value={keyScheme[framework.value].tavilyserp_api_key}
+                    value={keyScheme[shceme.value].tavilyserp_api_key}
                     placeholder="optional, from tavily.com"
                     onChange={e => {
                       const newKeyScheme = {...keyScheme};
-                      newKeyScheme[framework.value].tavilyserp_api_key = e.target.value;
+                      newKeyScheme[shceme.value].tavilyserp_api_key = e.target.value;
                       setKeyScheme(newKeyScheme);
                     }}
                   /></div>
@@ -290,13 +290,13 @@ export default function Header() {
               onClick={() => {
                 setKeyScheme({
                   ...keyScheme,
-                  [framework.value]: {
-                    ...keyScheme[framework.value]
+                  [shceme.value]: {
+                    ...keyScheme[shceme.value]
                   },
                 });
                 setPreviewTokenDialog(false);
                 localStorage.setItem('ai-token', JSON.stringify(keyScheme));
-                keyScheme.current.scheme = framework.value;
+                keyScheme.current.scheme = shceme.value;
                 window.location.reload();
               }}
             >

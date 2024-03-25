@@ -3,7 +3,6 @@ import { UseChatHelpers } from 'ai/react'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -12,14 +11,13 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
 import { Input } from './ui/input'
 import { Label } from "@/components/ui/label"
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,14 +28,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { Checkbox } from "@/components/ui/checkbox"
-import { IconSpinner, IconTrash, IconSeparator } from '@/components/ui/icons'
+import { IconSpinner, IconSeparator, IconCheck } from '@/components/ui/icons'
 import { Textarea } from "@/components/ui/textarea"
-import { IconEdit, IconPlus } from '@/components/ui/icons'
+import { IconEdit, IconDownload } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
 import { ExternalLink } from '@/components/external-link'
 import { toast } from 'react-hot-toast'
-
+import { Checkbox } from "@/components/ui/checkbox"
+// import { toPng } from 'html-to-image';
+// import download from 'downloadjs';
 function getRandomColor(): string {
   const letters = '0123456789ABCDEF';
   let color = '#';
@@ -49,8 +48,16 @@ function getRandomColor(): string {
 
 export interface Agent {
   name: string;
+  title: string;
+  disc: string;
   prompt: string;
-  usetool?: boolean
+  bg: string;
+  pin: boolean;
+  dark: boolean;
+  usetool: boolean;
+}
+type Agents = {
+  [key: string]: Agent
 }
 
 export function getAgentsText() {
@@ -60,16 +67,46 @@ export function getAgentsText() {
   } else { return null }
 }
 
-export const newAgent = `{"#666666":{"name":"Search","prompt":"Get Info from Internet","usetool":true},"#666777":{"name":"CoT","prompt":"Let's think step by step."}}`
 
-export default function Agents() {
+function getRandomGradient(dark: boolean): string {
+  const randomHue = (): number => Math.floor(Math.random() * 360);
+  const randomSaturation = (): number => Math.floor(Math.random() * 100);
+  const fixedLightness = dark ? 60 : 90;
+
+  const color1 = `hsl(${randomHue()}, ${randomSaturation()}%, ${fixedLightness}%)`;
+  const color2 = `hsl(${randomHue()}, ${randomSaturation()}%, ${fixedLightness}%)`;
+  const color3 = `hsl(${randomHue()}, ${randomSaturation()}%, ${fixedLightness}%)`;
+
+  const angle = Math.floor(Math.random() * 360);
+
+  const gradientType = Math.random() < 0.5 ? 'linear' : 'radial';
+
+  if (gradientType === 'linear') {
+    return `linear-gradient(${angle}deg, ${color1}, ${color2}, ${color3})`;
+  } else {
+    const centerX = Math.floor(Math.random() * 100);
+    const centerY = Math.floor(Math.random() * 100);
+    return `radial-gradient(circle at ${centerX}% ${centerY}%, ${color1}, ${color2}, ${color3})`;
+  }
+}
+
+export const newAgent = `{"Search":{"name":"Search","title":"Search","disc":"Get Info from Internet","prompt":"","bg":"#ababab","dark":true,"pin":true,"usetool":true},"Cot":{"name":"Cot","title":"CoT","prompt":"Let's think step by step.","dist":"","dark":true,"bg":"#ababab","pin":true,"usetool":false}}`
+
+export interface AgentsProps extends Partial<Pick<UseChatHelpers, 'setInput'>> {
+  showPinnedOnly: boolean;
+}
+
+export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
+  useEffect(() => {
+    console.log(showPinnedOnly);
+  })
   const router = useRouter()
-  const [agentsText, setAgentsText] = useState(getAgentsText());
+  const [AgentsText, setAgentsText] = useState(getAgentsText());
   const [editorOpen, setEditorOpen] = useState(false)
   const [allAgentEditorOpen, setallAgentEditorOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [isRemovePending, startRemoveTransition] = useTransition()
-  const [currentAgent, setCurrentAgent] = useState({ id: '', name: '', prompt: '' })
+  const initAgent: Agent = { title: '', name: '', disc: '', prompt: '', bg: '', pin: false, usetool: false, dark: true }
+  const [currentAgent, setCurrentAgent] = useState(initAgent)
   const [agents, setAgents] = useState(() => {
     const atext = getAgentsText()
     if (atext) {
@@ -79,63 +116,104 @@ export default function Agents() {
       return JSON.parse(newAgent); // or you can return an empty object {} if that's the desired initial state
     }
   });
-  const [usetool, setUsetool] = useState(false) // Load agents from localStorage or initialize as an empty object
 
-  // Function to open the editor with the selected agent's details
-  const handleEditAgent = (agentId: string) => {
-    setCurrentAgent({ ...agents[agentId], id: agentId })
-    setEditorOpen(true)
-    if (agents[agentId].usetool) {
-      setUsetool(true)
-    } else {
-      setUsetool(false)
-    }
+  // Function to open the editor with the selected Agent's details
+  const handleEditAgent = (AgentId: string) => {
+    setCurrentAgent({ ...agents[AgentId], id: AgentId });
+    setEditorOpen(true);
   }
 
-  // Function to handle saving the current agent to the local state and localStorage
+  const handlePinned = (AgentId: string) => {
+    const updatedAgents = {
+      ...agents,
+      [AgentId]: { ...agents[AgentId], pin: !agents[AgentId].pin }
+    }
+    setAgents(updatedAgents)
+    saveAgents(updatedAgents);
+  }
+
+  const toggleDark = (AgentId: string) => {
+    const updatedAgents = {
+      ...agents,
+      [AgentId]: { ...agents[AgentId], bg: agents[AgentId].dark ? agents[AgentId].bg.replace(/60%\)/g, '90%)') : agents[AgentId].bg.replace(/90%\)/g, '60%)'), dark: !agents[AgentId].dark }
+    }
+    setAgents(updatedAgents)
+    saveAgents(updatedAgents);
+  }
+
+  const changeAgentBg = (AgentId: string) => {
+    const updatedAgents = {
+      ...agents,
+      [AgentId]: { ...agents[AgentId], bg: getRandomGradient(agents[AgentId].dark) }
+    }
+    setAgents(updatedAgents)
+    saveAgents(updatedAgents);
+  }
+
+  const handleNewAgent = () => {
+    setCurrentAgent({ ...initAgent, bg: getRandomGradient(true) });
+    setEditorOpen(true);
+  }
+
+  // Function to handle saving the current Agent to the local state and localStorage
   const handleSaveAgents = () => {
     const updatedAgents = {
       ...agents,
-      [currentAgent.id]: { name: currentAgent.name, prompt: currentAgent.prompt, usetool: usetool }
+      [currentAgent.name]: { ...agents[currentAgent.name], title: currentAgent.title, prompt: currentAgent.disc, bg: currentAgent.bg ,usetool: currentAgent.usetool}
     }
     setAgents(updatedAgents)
-    localStorage.setItem('Agents', JSON.stringify(updatedAgents)) // Save to localStorage
+    saveAgents(updatedAgents);
     setEditorOpen(false) // Close the editor
-    router.replace('/')
     router.refresh()
   }
 
-  // Function to open the editor for creating a new agent
-  const handleNewAgent = () => {
-    setCurrentAgent({ id: getRandomColor(), name: '', prompt: '' })
-    setEditorOpen(true)
+  function saveAgents(passAgents: any) {
+    localStorage.setItem('Agents', JSON.stringify(passAgents)) // Save to localStorage
+    router.refresh()
   }
-
+  // const handleDownloadImage = async (key: string) => {
+  //   try {
+  //     const cardElement = document.getElementById(`agent-${key}`) as HTMLElement;
+  //     if (cardElement) {
+  //       const buttons = [...cardElement.querySelectorAll('button')] as HTMLElement[];
+  //       buttons.forEach(btn => btn.style.visibility = 'hidden');
+  //       const dataUrl = await toPng(cardElement);
+  //       download(dataUrl, `card-${key}.png`);
+  //       buttons.forEach(btn => btn.style.visibility = 'visible');
+  //     }
+  //   } catch (error) {
+  //     console.error('Something went wrong when downloading the card image', error);
+  //   }
+  // };
   return (
     <>
       <div className='w-full flex justify-end'>
-        <Button variant={"link"} className='text-xs text-muted-foreground' onClick={() => { navigator.clipboard.writeText(localStorage.getItem('Agents') || ''); toast.success('Agents data is copied to clipboard') }}>Export</Button>
-        <IconSeparator className='my-2' /><Button className='text-xs text-muted-foreground' variant={"link"} onClick={() => { setAgentsText(getAgentsText()); setallAgentEditorOpen(true) }}>Import</Button>
+        <Button variant="link" className='text-xs ' onClick={() => { navigator.clipboard.writeText(localStorage.getItem('Agents') || ''); toast.success('Agents data is copied to clipboard') }}>Export</Button>
+        <IconSeparator className='my-2' /><Button className='text-xs ' variant={"link"} onClick={() => { setAgentsText(getAgentsText()); setallAgentEditorOpen(true) }}>Import</Button>
       </div>
-      <div className="flex flex-wrap gap-4 mx-4 justify-center">
-        {Object.entries(agents).map(([key, agent]) => (
+      <div className= "flex flex-wrap gap-4 mx-4 justify-center">
+        {Object.entries(agents as Agents).filter(([key, agent]: [string, Agent]) => !showPinnedOnly || agent.pin).map(([key, agent]: [string, Agent]) => (
           <>
-            <Card key={key} className="w-[300px] h-[180px]">
+            <Card id={`agent-${key}`} key={key}
+              className={agent.dark ? "w-[300px] h-[240px] flex-shrink-0 text-white z-99" : "w-[300px] h-[240px] flex-shrink-0 text-black z-99"}
+              style={{ background: agent.bg }}>
               <CardHeader>
-                <CardTitle>{(agent as Agent).name} {(agent as Agent).usetool && <span className="text-xs text-muted-foreground"> usetool</span>}
+                <CardTitle>{agent.title}
                 </CardTitle>
-                <CardDescription className='h-[42px]'>{(agent as Agent).prompt.slice(0, 70) + ' ...'}</CardDescription>
               </CardHeader>
-              <CardFooter className="flex gap-2">
-                <Button onClick={() => handleEditAgent(key)}><IconEdit /></Button>
+              <CardContent className='flex flex-col h-[120px] justify-end'><pre>{agent.disc}</pre></CardContent>
+              <CardFooter className="flex gap-1">
+                <Button variant="ghost" size="icon" onClick={() => handleEditAgent(key)}><IconEdit /></Button>
+                <Button variant="ghost" size="icon" onClick={() => changeAgentBg(key)}>🎨</Button>
+                <Button variant="ghost" size="icon" onClick={() => toggleDark(key)}>{agent.dark ? "☀️" : "🌙"}</Button>
+                {/* <Button variant="ghost" size="icon" onClick={() => handleDownloadImage(key)}><IconDownload /></Button> */}
+                {setInput ? <Button variant="ghost" size="icon" onClick={() => setInput(`@${agent.name} `)}>@</Button> : null}
                 <Button
                   variant="ghost"
-                  className="ml-auto size-6 p-0 hover:bg-background"
-                  disabled={isRemovePending}
-                  onClick={() => setDeleteDialogOpen(true)}
+                  size="icon"
+                  onClick={() => handlePinned(key)}
                 >
-                  <IconTrash />
-                  <span className="sr-only">Delete</span>
+                  {agent.pin ? "★" : "☆"}
                 </Button>
               </CardFooter>
             </Card>
@@ -149,20 +227,18 @@ export default function Agents() {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isRemovePending}>
+                  <AlertDialogCancel>
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    disabled={isRemovePending}
                     onClick={() => {
                       const updatedAgents = { ...agents }
-                      delete updatedAgents[key] // Remove the agent from the object
+                      delete updatedAgents[key] // Remove the Agent from the object
                       setAgents(updatedAgents) // Update local state
                       localStorage.setItem('Agents', JSON.stringify(updatedAgents)) // Update localStorage
                     }
                     }
                   >
-                    {isRemovePending && <IconSpinner className="mr-2 animate-spin" />}
                     Delete
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -178,18 +254,25 @@ export default function Agents() {
             <div className="grid gap-2 py-4">
               <div className="grid grid-cols-5 items-center gap-2">
                 <Label htmlFor="name" className="text-right">
-                  * Name
+                  * Title
                 </Label>
                 <Input className="col-span-4"
-                  value={currentAgent.name}
+                  value={currentAgent.title}
                   placeholder="Input an Agent Name"
                   onChange={(e) => {
                     const newName = e.target.value;
-                    // const usernamePattern = /^[A-Za-z][A-Za-z0-9_-]{2,15}$/;
-                    // if (usernamePattern.test(newName)) {
-                    setCurrentAgent({ ...currentAgent, name: newName });
-                    // }
+                    setCurrentAgent({ ...currentAgent, title: newName });
                   }}
+                />
+              </div>
+              <div className="grid grid-cols-5 items-center gap-2">
+                <Label htmlFor="name" className="text-right">
+                  Discription
+                </Label>
+                <Textarea className="col-span-4 h-[100px]"
+                  value={currentAgent.disc}
+                  placeholder="Discription for this agent"
+                  onChange={(e) => setCurrentAgent({ ...currentAgent, disc: e.target.value })}
                 />
               </div>
               <div className="grid grid-cols-5 items-center gap-2">
@@ -198,19 +281,13 @@ export default function Agents() {
                 </Label>
                 <Textarea className="col-span-4 h-[200px]"
                   value={currentAgent.prompt}
-                  placeholder="Agent System Role Prompt"
+                  placeholder="Prompt for this agent"
                   onChange={(e) => setCurrentAgent({ ...currentAgent, prompt: e.target.value })}
                 />
               </div>
             </div>
             <DialogFooter className="items-center">
-              <Checkbox id="usetool" checked={usetool} onCheckedChange={() => setUsetool(!usetool)} />
-              <label
-                htmlFor="terms"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Use Tools
-              </label>
+              <Checkbox id="usetool" checked={currentAgent.usetool} onCheckedChange={() => setCurrentAgent({ ...currentAgent, usetool: !currentAgent.usetool })}/>useTool
               <Button onClick={handleSaveAgents}>Save Agent</Button>
             </DialogFooter>
           </DialogContent>
@@ -221,31 +298,20 @@ export default function Agents() {
               <DialogTitle>Import Agents</DialogTitle>
             </DialogHeader>
             <Textarea className="col-span-4 h-[200px]"
-              value={agentsText || ''}
+              value={AgentsText || ''}
               onChange={(e) => { setAgentsText(e.target.value) }}
             />
-            <Button onClick={() => { localStorage.setItem('Agents', agentsText || getAgentsText() || ''); window.location.reload() }}>Save Agents</Button>
-            <Button variant="outline" onClick={() => setAgentsText(newAgent)}>Reset to Default</Button>
+            <Button onClick={() => { localStorage.setItem('Agents', AgentsText || getAgentsText() || ''); window.location.reload() }}>Save Agents</Button>
+            <Button variant="ghost" onClick={() => setAgentsText(newAgent)}>Reset to Default</Button>
           </DialogContent>
         </Dialog>
-        <Card className="w-[300px] h-[180px] text-center">
-          <button className="mt-20" onClick={handleNewAgent}>+ New Agent</button>
-        </Card>
+        {!showPinnedOnly && <Card className="w-[300px] h-[240px] flex-shrink-0 z-99 text-center">
+          <button className="mt-28" onClick={handleNewAgent}>+ New Agent</button>
+        </Card>}
       </div>
-      <div className="mx-auto px-4 text-center mt-12">
-        <p className="mb-2 leading-normal text-muted-foreground">
-          This is an open source AI app built with{' '}
-          <ExternalLink href="https://nextjs.org">▲ Next.js</ExternalLink> and{' '}
-          <ExternalLink href="https://js.langchain.com/docs">
-            LangChain.js 🦜🔗
-          </ExternalLink>
-          .
-        </p>
-        <p className="leading-normal text-muted-foreground">
-          You can add your own agents and use '@' to mention them for conversation.
-        </p>
-        <p className="leading-normal text-muted-foreground mt-2">
-          if agents are not updated after editting, please try <Button variant={"outline"} onClick={() => window.location.reload()}>Reload Page</Button>
+      <div className="mx-auto px-4 text-center mt-6">
+        <p className="leading-normal ">
+          Selet a agent to start your creation.
         </p>
       </div>
     </>
