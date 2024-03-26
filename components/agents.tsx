@@ -183,9 +183,9 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
   // };
   return (
     <>
-      <div className='w-full flex justify-end'>
-        <Button variant="link" className='text-xs ' onClick={() => { navigator.clipboard.writeText(localStorage.getItem('Agents') || ''); toast.success('Agents data is copied to clipboard') }}>Export</Button>
-        <IconSeparator className='my-2' /><Button className='text-xs ' variant={"link"} onClick={() => { setAgentsText(getAgentsText()); setallAgentEditorOpen(true) }}>Import</Button>
+      <div className='w-full flex justify-end h-[40px]'>
+      {!showPinnedOnly && <> <Button variant="link" className='text-xs ' onClick={() => { navigator.clipboard.writeText(localStorage.getItem('Agents') || ''); toast.success('Agents data is copied to clipboard') }}>Export</Button>
+        <IconSeparator className='my-2' /><Button className='text-xs ' variant={"link"} onClick={() => { setAgentsText(getAgentsText()); setallAgentEditorOpen(true) }}>Import</Button></>}
       </div>
       <div className= "flex flex-wrap gap-4 mx-4 justify-center">
         {Object.entries(agents as Agents).filter(([key, agent]: [string, Agent]) => !showPinnedOnly || agent.pin).map(([key, agent]: [string, Agent]) => (
@@ -307,7 +307,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
       </div>
       <div className="mx-auto px-4 text-center mt-6">
         <p className="leading-normal ">
-          Selet a agent to start your creation.
+          Select a agent to start your creation.
         </p>
       </div>
     </>

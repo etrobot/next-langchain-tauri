@@ -93,7 +93,7 @@ export function ChatPanel({
                   role: 'user',
                   function_call:function_call
                 } as Message
-                setMessages([...messages, newMsg])
+                messages.push(newMsg)
                 await append(newMsg)
               }
             }}

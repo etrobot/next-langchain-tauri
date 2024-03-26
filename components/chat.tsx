@@ -17,6 +17,7 @@ export interface ChatProps extends React.ComponentProps<'div'> {
 }
 
 export function Chat({ id, className }: ChatProps) {
+  const router = useRouter();
   const [showPinnedOnly, setShowPinnedOnly] = useState(true);
   const timestamp = `${new Date().toISOString().split('.')[0]}`
   const [initialMessages, setInitialMessages] = useState<Message[] | undefined>(undefined);
@@ -44,7 +45,6 @@ export function Chat({ id, className }: ChatProps) {
     bing_api_key: "",
   };
   const [previewToken, setPreviewToken] = useState(initialPreviewToken)
-
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
       api: process.env.NEXT_PUBLIC_API_URL + '/api/chat',
@@ -68,7 +68,8 @@ export function Chat({ id, className }: ChatProps) {
           content: response.content
         })
         localStorage.setItem(id||`cid_${timestamp}`, JSON.stringify(msg));
-        useRouter().replace(`/?cid=${id}`);
+        router.replace(`/?cid=${id}`);
+        router.refresh();
       }
     })
 

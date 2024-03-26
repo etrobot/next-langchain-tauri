@@ -1,6 +1,5 @@
 import Textarea from 'react-textarea-autosize'
 import { UseChatHelpers } from 'ai/react'
-import { useEnterSubmit } from '@/lib/hooks/use-enter-submit'
 import { cn } from '@/lib/utils'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
@@ -36,12 +35,24 @@ export function PromptForm({
   agents,
   setAgents
 }: PromptProps) {
-  const { formRef, onKeyDown } = useEnterSubmit()
+  const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
   const router = useRouter()
 
   const [showPopup, setshowPopup] = useState(false);
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!input?.trim()) {
+        return;
+      }
+      setInput('');
+      formRef.current?.requestSubmit()
+    } else if (e.key === 'Enter' && e.shiftKey) {
+      setInput(input + '\n');
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
