@@ -90,16 +90,12 @@ function getRandomGradient(dark: boolean): string {
   }
 }
 
-export const newAgent = `{"Search":{"name":"Search","title":"Search","disc":"Get Info from Internet","prompt":"","bg":"#ababab","dark":true,"pin":true,"usetool":true},"Cot":{"name":"Cot","title":"CoT","prompt":"Let's think step by step.","dist":"","dark":true,"bg":"#ababab","pin":true,"usetool":false}}`
-
+export const newAgent = `{"Search":{"name":"Search","title":"Search","disc":"Get Info from Internet","prompt":"Get Info from Internet","bg":"linear-gradient(316deg, hsl(306, 95%, 60%), hsl(232, 34%, 60%), hsl(141, 58%, 60%))","dark":true,"pin":true,"usetool":true},"Cot":{"name":"Cot","title":"CoT","disc":"Let's think step by step.","prompt":"","dark":true,"bg":"linear-gradient(267deg, hsl(24, 68%, 60%), hsl(341, 68%, 60%), hsl(230, 48%, 60%))","pin":false,"usetool":false}}`
 export interface AgentsProps extends Partial<Pick<UseChatHelpers, 'setInput'>> {
   showPinnedOnly: boolean;
 }
 
 export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
-  useEffect(() => {
-    console.log(showPinnedOnly);
-  })
   const router = useRouter()
   const [AgentsText, setAgentsText] = useState(getAgentsText());
   const [editorOpen, setEditorOpen] = useState(false)
