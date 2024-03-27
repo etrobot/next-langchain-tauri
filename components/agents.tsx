@@ -188,7 +188,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
         <IconSeparator className='my-2' /><Button className='text-xs ' variant={"link"} onClick={() => { setAgentsText(getAgentsText()); setallAgentEditorOpen(true) }}>Import</Button></>}
       </div>
       <div className= "flex flex-wrap gap-4 mx-4 justify-center">
-        {Object.entries(agents as Agents).filter(([key, agent]: [string, Agent]) => !showPinnedOnly || agent.pin).map(([key, agent]: [string, Agent]) => (
+      {Object.entries(agents as Agents).filter(([key, agent]: [string, Agent]) => !showPinnedOnly || agent.pin).map(([key, agent]: [string, Agent]) =>  (
           <>
             <Card id={`agent-${key}`} key={key}
               className={agent.dark ? "w-[300px] h-[240px] flex-shrink-0 text-white z-99" : "w-[300px] h-[240px] flex-shrink-0 text-black z-99"}
@@ -306,7 +306,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
         </Card>}
       </div>
       <div className="mx-auto px-4 text-center mt-6">
-        <p className="leading-normal ">
+        <p className="leading-normal text-muted-foreground">
           Select a agent to start your creation.
         </p>
       </div>

@@ -43,6 +43,7 @@ export function ChatMessageActions({
       )}
       {...props}
     >
+      <div className='w-[8px]'>
       <Button variant="ghost" size="icon" onClick={() =>{
         setMsg(message.content);
         setMsgEditorOpen(true);
@@ -54,7 +55,7 @@ export function ChatMessageActions({
         {isCopied ? <IconCheck /> : <IconCopy />}
         <span className="sr-only">Copy message</span>
       </Button>
-
+      </div>
       <Dialog open={msgEditorOpen} onOpenChange={setMsgEditorOpen}>
           <DialogContent className="sm:max-w-xl">
             <DialogHeader>
@@ -70,7 +71,8 @@ export function ChatMessageActions({
                     const msgTxt = localStorage.getItem(cid);
                     if(msgTxt){
                       setMsgEditorOpen(false);
-                      localStorage.setItem(cid, msgTxt.replace(message.content, msg));
+                      const msgJson = JSON.parse(msgTxt);
+                      localStorage.setItem(cid, JSON.stringify(msgJson.map((m: Message) => m.content === message.content ? { ...m, content: msg } : m)));
                       window.location.reload();
                     }
                   }
