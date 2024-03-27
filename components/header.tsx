@@ -56,7 +56,7 @@ type PreviewToken = {
 };
 
 interface KeyScheme {
-  [key: string]:PreviewToken;
+  [key: string]: PreviewToken;
 }
 
 export default function Header() {
@@ -82,7 +82,7 @@ export default function Header() {
   const [keyScheme, setKeyScheme] = useLocalStorage<KeyScheme>('ai-token', initialKeyScheme);
   const [keyInput, setKeyInput] = useState(keyScheme)
   const handleSchemeSelection = (selectedSchemeKey: string) => {
-    const selectedScheme = { ...keyScheme, current: { ...keyScheme[selectedSchemeKey], scheme: selectedSchemeKey }};
+    const selectedScheme = { ...keyScheme, current: { ...keyScheme[selectedSchemeKey], scheme: selectedSchemeKey } };
     setKeyScheme(selectedScheme);
     localStorage.setItem('ai-token', JSON.stringify(selectedScheme));
     setOpen(false); // Assuming you have a state 'open' to control the popover visibility
@@ -113,15 +113,15 @@ export default function Header() {
         <ChatHistory userId='123456789' />
       </SidebarMobile>
       <div className='hidden md:block sm:hidden'>
-      <a
+        <a
           target="_blank"
           href="https://github.com/etrobot/next-langchain-tauri"
           rel="noopener noreferrer"
           className={cn(buttonVariants({ variant: 'outline' }))}
         >
           <IconGitHub />
-      </a>
-      <Link target='_blank' href={"https://aicube.fun"} className='mx-2 title font-bold'>AICube.fun</Link>
+        </a>
+        <Link target='_blank' href={"https://aicube.fun"} className='mx-2 title font-bold'>AICube.fun</Link>
       </div>
 
       <div className="flex items-center mx-auto">
@@ -134,38 +134,38 @@ export default function Header() {
       </div>
 
       <div className="flex items-center justify-end space-x-2">
-      <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className="w-[80px] justify-between"
-                >
-                  {keyScheme.current.scheme}
-                  <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[80px] p-0">
-                <Command>
-                  <CommandGroup>
-                    {shcemes.map((shceme) => (
-                      <CommandItem
-                        key={shceme.value}
-                        value={shceme.value}
-                        onSelect={(currentValue:string) => {
-                          handleSchemeSelection(currentValue)
-                          setOpen(false)
-                        }}
-                      >
-                        {shceme.label}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-      </Popover>
-      <Button
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-[80px] justify-between"
+            >
+              {keyScheme.current.scheme}
+              <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[80px] p-0">
+            <Command>
+              <CommandGroup>
+                {shcemes.map((shceme) => (
+                  <CommandItem
+                    key={shceme.value}
+                    value={shceme.value}
+                    onSelect={(currentValue: string) => {
+                      handleSchemeSelection(currentValue)
+                      setOpen(false)
+                    }}
+                  >
+                    {shceme.label}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </Command>
+          </PopoverContent>
+        </Popover>
+        <Button
           variant={'outline'}
           onClick={() => {
             setKeyInput(keyScheme);
@@ -176,11 +176,11 @@ export default function Header() {
         </Button>
         <ThemeToggle />
       </div>
-      <Dialog open={previewTokenDialog} onOpenChange={()=>{
-            setKeyInput(keyScheme);
-            setPreviewTokenDialog(!previewTokenDialog);
+      <Dialog open={previewTokenDialog} onOpenChange={() => {
+        setKeyInput(keyScheme);
+        setPreviewTokenDialog(!previewTokenDialog);
       }
-        }>
+      }>
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>🔑 Enter your API Keys</DialogTitle>
@@ -190,118 +190,118 @@ export default function Header() {
           </DialogHeader>
           <Tabs defaultValue={keyScheme.current.scheme}>
             <TabsList className="grid w-full grid-cols-3">
-            {shcemes.map((shceme) => (
-              <TabsTrigger value={shceme.value}>{shceme.label}</TabsTrigger>
+              {shcemes.map((shceme) => (
+                <TabsTrigger value={shceme.value}>{shceme.label}</TabsTrigger>
               ))}
             </TabsList>
             {shcemes.map((shceme) => (
-            <TabsContent value={shceme.value}>
-              <div className="grid gap-3 py-4">
-                <div className="grid grid-cols-3 items-center gap-3">
-                  <Label htmlFor="name" className="text-right">
-                    * LLM API Key
-                  </Label>
-                  <Input className="col-span-2"
-                    value={keyInput[shceme.value].llm_api_key}
-                    placeholder="API KEY of LLM like OpenAI GPT or Gemini"
-                    onChange={e => {
-                      const newKeyScheme = {...keyInput};
-                      newKeyScheme[shceme.value].llm_api_key = e.target.value;
-                      setKeyInput(newKeyScheme);
+              <TabsContent value={shceme.value}>
+                <div className="grid gap-3 py-4">
+                  <div className="grid grid-cols-3 items-center gap-3">
+                    <Label htmlFor="name" className="text-right">
+                      * LLM API Key
+                    </Label>
+                    <Input className="col-span-2"
+                      value={keyInput[shceme.value].llm_api_key}
+                      placeholder="API KEY of LLM like OpenAI GPT or Gemini"
+                      onChange={e => {
+                        const newKeyScheme = { ...keyInput };
+                        newKeyScheme[shceme.value].llm_api_key = e.target.value;
+                        setKeyInput(newKeyScheme);
+                      }}
+                    /></div>
+                  <div className="grid grid-cols-3 items-center gap-3">
+                    <Label htmlFor="name" className="text-right">
+                      LLM Model
+                    </Label>
+                    <Input className="col-span-2"
+                      value={keyInput[shceme.value].llm_model}
+                      placeholder="optional, default is gpt-3.5-turbo-0125"
+                      onChange={e => {
+                        const newKeyScheme = { ...keyInput };
+                        newKeyScheme[shceme.value].llm_model = e.target.value;
+                        setKeyInput(newKeyScheme);
+                      }}
+                    /></div>
+                  <div className="grid grid-cols-3 items-center gap-3">
+                    <Label htmlFor="name" className="text-right">
+                      LLM Base URL
+                    </Label>
+                    <Input className="col-span-2"
+                      value={keyInput[shceme.value].llm_base_url}
+                      placeholder="optional, default is https://api.openai.com/v1"
+                      onChange={e => {
+                        const newKeyScheme = { ...keyInput };
+                        newKeyScheme[shceme.value].llm_base_url = e.target.value;
+                        setKeyInput(newKeyScheme);
+                      }}
+                    /></div>
+                  <div className="grid grid-cols-3 items-center gap-3">
+                    <Label htmlFor="name" className="text-right">
+                      Bing Search API Key
+                    </Label>
+                    <Input className="col-span-2"
+                      value={keyInput[shceme.value].bing_api_key}
+                      placeholder="from microsoft.com/bing/apis"
+                      onChange={e => {
+                        const newKeyScheme = { ...keyInput };
+                        newKeyScheme[shceme.value].bing_api_key = e.target.value;
+                        setKeyInput(newKeyScheme);
+                      }}
+                    /></div>
+                  <div className="grid grid-cols-3 items-center gap-3">
+                    <Label htmlFor="name" className="text-right">
+                      Google Search API Key
+                    </Label>
+                    <Input className="col-span-2"
+                      value={keyInput[shceme.value].google_api_key}
+                      placeholder="optional, from cloud.google.com"
+                      onChange={e => {
+                        const newKeyScheme = { ...keyInput };
+                        newKeyScheme[shceme.value].google_api_key = e.target.value;
+                        setKeyInput(newKeyScheme);
+                      }}
+                    /></div>
+                  <div className="grid grid-cols-3 items-center gap-3">
+                    <Label htmlFor="name" className="text-right">
+                      Google custom engine id
+                    </Label>
+                    <Input className="col-span-2"
+                      value={keyInput[shceme.value].google_cse_id}
+                      placeholder="optional, from cloud.google.com"
+                      onChange={e => {
+                        const newKeyScheme = { ...keyInput };
+                        newKeyScheme[shceme.value].google_cse_id = e.target.value;
+                        setKeyInput(newKeyScheme);
+                      }}
+                    /></div>
+                  <div className="grid grid-cols-3 items-center gap-3">
+                    <Label htmlFor="name" className="text-right">
+                      Tavily Search API Key
+                    </Label>
+                    <Input className="col-span-2"
+                      value={keyInput[shceme.value].tavilyserp_api_key}
+                      placeholder="optional, from tavily.com"
+                      onChange={e => {
+                        const newKeyScheme = { ...keyInput };
+                        newKeyScheme[shceme.value].tavilyserp_api_key = e.target.value;
+                        setKeyInput(newKeyScheme);
+                      }}
+                    /></div>
+                </div>
+                <DialogFooter className="items-center">
+                  <Button
+                    onClick={() => {
+                      keyInput.scheme = keyInput[keyScheme.current.scheme || 'keys1']
+                      setKeyScheme(keyInput);
+                      localStorage.setItem('ai-token', JSON.stringify(keyInput));
+                      window.location.reload();
                     }}
-                  /></div>
-                <div className="grid grid-cols-3 items-center gap-3">
-                  <Label htmlFor="name" className="text-right">
-                    LLM Model
-                  </Label>
-                  <Input className="col-span-2"
-                    value={keyInput[shceme.value].llm_model}
-                    placeholder="optional, default is gpt-3.5-turbo-0125"
-                    onChange={e => {
-                      const newKeyScheme = {...keyInput};
-                      newKeyScheme[shceme.value].llm_model = e.target.value;
-                      setKeyInput(newKeyScheme);
-                    }}
-                  /></div>
-                <div className="grid grid-cols-3 items-center gap-3">
-                  <Label htmlFor="name" className="text-right">
-                    LLM Base URL
-                  </Label>
-                  <Input className="col-span-2"
-                    value={keyInput[shceme.value].llm_base_url}
-                    placeholder="optional, default is https://api.openai.com/v1"
-                    onChange={e => {
-                      const newKeyScheme = {...keyInput};
-                      newKeyScheme[shceme.value].llm_base_url = e.target.value;
-                      setKeyInput(newKeyScheme);
-                    }}
-                  /></div>
-                <div className="grid grid-cols-3 items-center gap-3">
-                  <Label htmlFor="name" className="text-right">
-                    Bing Search API Key
-                  </Label>
-                  <Input className="col-span-2"
-                    value={keyInput[shceme.value].bing_api_key}
-                    placeholder="from microsoft.com/bing/apis"
-                    onChange={e => {
-                      const newKeyScheme = {...keyInput};
-                      newKeyScheme[shceme.value].bing_api_key = e.target.value;
-                      setKeyInput(newKeyScheme);
-                    }}
-                  /></div>
-                <div className="grid grid-cols-3 items-center gap-3">
-                  <Label htmlFor="name" className="text-right">
-                    Google Search API Key
-                  </Label>
-                  <Input className="col-span-2"
-                    value={keyInput[shceme.value].google_api_key}
-                    placeholder="optional, from cloud.google.com"
-                    onChange={e => {
-                      const newKeyScheme = {...keyInput};
-                      newKeyScheme[shceme.value].google_api_key = e.target.value;
-                      setKeyInput(newKeyScheme);
-                    }}
-                  /></div>
-                <div className="grid grid-cols-3 items-center gap-3">
-                  <Label htmlFor="name" className="text-right">
-                    Google custom engine id
-                  </Label>
-                  <Input className="col-span-2"
-                    value={keyInput[shceme.value].google_cse_id}
-                    placeholder="optional, from cloud.google.com"
-                    onChange={e => {
-                      const newKeyScheme = {...keyInput};
-                      newKeyScheme[shceme.value].google_cse_id = e.target.value;
-                      setKeyInput(newKeyScheme);
-                    }}
-                  /></div>
-                <div className="grid grid-cols-3 items-center gap-3">
-                  <Label htmlFor="name" className="text-right">
-                    Tavily Search API Key
-                  </Label>
-                  <Input className="col-span-2"
-                    value={keyInput[shceme.value].tavilyserp_api_key}
-                    placeholder="optional, from tavily.com"
-                    onChange={e => {
-                      const newKeyScheme = {...keyInput};
-                      newKeyScheme[shceme.value].tavilyserp_api_key = e.target.value;
-                      setKeyInput(newKeyScheme);
-                    }}
-                  /></div>
-              </div>
-              <DialogFooter className="items-center">
-            <Button
-              onClick={() => {
-                keyInput.current = keyInput[keyScheme.current.scheme]
-                setKeyScheme(keyInput);
-                localStorage.setItem('ai-token', JSON.stringify(keyInput));
-                window.location.reload();
-              }}
-            >
-              Save Token
-            </Button>
-          </DialogFooter>
-            </TabsContent>
+                  >
+                    Save Token
+                  </Button>
+                </DialogFooter>
+              </TabsContent>
             ))}
           </Tabs>
         </DialogContent>

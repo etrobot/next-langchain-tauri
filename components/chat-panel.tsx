@@ -15,7 +15,6 @@ export interface ChatPanelProps
     | 'isLoading'
     | 'reload'
     | 'messages'
-    | 'setMessages'
     | 'stop'
     | 'input'
     | 'setInput'
@@ -33,8 +32,7 @@ export function ChatPanel({
   reload,
   input,
   setInput,
-  messages,
-  setMessages,
+  messages
 }: ChatPanelProps) {
   const [agents,setAgents]=useState(newAgent)
   return (
@@ -92,9 +90,8 @@ export function ChatPanel({
                   content: prompt,
                   role: 'user',
                   function_call:function_call
-                } as Message
-                messages.push(newMsg)
-                await append(newMsg)
+                } as Message;
+                append(newMsg);
               }
             }}
             input={input}

@@ -102,7 +102,6 @@ export function Chat({ id, className }: ChatProps) {
         append={append}
         reload={reload}
         messages={messages}
-        setMessages={setInitialMessages}
         input={input}
         setInput={setInput}
       />
