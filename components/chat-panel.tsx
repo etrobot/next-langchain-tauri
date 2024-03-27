@@ -92,6 +92,7 @@ export function ChatPanel({
                   function_call:function_call
                 } as Message;
                 append(newMsg);
+                messages.push(newMsg);
               }
             }}
             input={input}
