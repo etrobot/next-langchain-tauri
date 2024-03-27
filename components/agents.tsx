@@ -35,16 +35,9 @@ import { useRouter } from 'next/navigation'
 import { ExternalLink } from '@/components/external-link'
 import { toast } from 'react-hot-toast'
 import { Checkbox } from "@/components/ui/checkbox"
-// import { toPng } from 'html-to-image';
-// import download from 'downloadjs';
-function getRandomColor(): string {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
-  for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)];
-  }
-  return color;
-}
+import { getRandomGradient } from '@/lib/utils'
+
+
 
 export interface Agent {
   name: string;
@@ -67,28 +60,6 @@ export function getAgentsText() {
   } else { return null }
 }
 
-
-function getRandomGradient(dark: boolean): string {
-  const randomHue = (): number => Math.floor(Math.random() * 360);
-  const randomSaturation = (): number => Math.floor(Math.random() * 100);
-  const fixedLightness = dark ? 60 : 90;
-
-  const color1 = `hsl(${randomHue()}, ${randomSaturation()}%, ${fixedLightness}%)`;
-  const color2 = `hsl(${randomHue()}, ${randomSaturation()}%, ${fixedLightness}%)`;
-  const color3 = `hsl(${randomHue()}, ${randomSaturation()}%, ${fixedLightness}%)`;
-
-  const angle = Math.floor(Math.random() * 360);
-
-  const gradientType = Math.random() < 0.5 ? 'linear' : 'radial';
-
-  if (gradientType === 'linear') {
-    return `linear-gradient(${angle}deg, ${color1}, ${color2}, ${color3})`;
-  } else {
-    const centerX = Math.floor(Math.random() * 100);
-    const centerY = Math.floor(Math.random() * 100);
-    return `radial-gradient(circle at ${centerX}% ${centerY}%, ${color1}, ${color2}, ${color3})`;
-  }
-}
 
 export const newAgent = `{"Search":{"name":"Search","title":"Search","disc":"Get Info from Internet","prompt":"Get Info from Internet","bg":"linear-gradient(316deg, hsl(306, 95%, 60%), hsl(232, 34%, 60%), hsl(141, 58%, 60%))","dark":true,"pin":true,"usetool":true},"Cot":{"name":"Cot","title":"CoT","disc":"Let's think step by step.","prompt":"","dark":true,"bg":"linear-gradient(267deg, hsl(24, 68%, 60%), hsl(341, 68%, 60%), hsl(230, 48%, 60%))","pin":false,"usetool":false}}`
 export interface AgentsProps extends Partial<Pick<UseChatHelpers, 'setInput'>> {
