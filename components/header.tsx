@@ -142,7 +142,7 @@ export default function Header() {
               aria-expanded={open}
               className="w-[80px] justify-between"
             >
-              {keyScheme.current.scheme}
+              {keyScheme.current.scheme || 'keys1'}
               <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -172,7 +172,7 @@ export default function Header() {
             setPreviewTokenDialog(true);
           }}
         >
-          Setting
+          🔑
         </Button>
         <ThemeToggle />
       </div>
