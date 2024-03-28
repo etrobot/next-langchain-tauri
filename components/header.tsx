@@ -142,7 +142,7 @@ export default function Header() {
               aria-expanded={open}
               className="w-[80px] justify-between"
             >
-              {keyScheme.current.scheme || 'keys1'}
+              {keyScheme.current.scheme || 'None'}
               <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
