@@ -95,7 +95,7 @@ export function ChatMessageActions({
         <Card id={`agent-${id}`} key={id}
               className={dark ? "w-[300px] h-[400px] flex-shrink-0 text-white z-99" : "w-[300px] h-[400px] flex-shrink-0 text-black z-99"}
               style={{ background }}>
-              <CardHeader className='h-[360px]'>
+              <CardHeader className='h-[360px] w-[300px]'>
                 <CardTitle><pre style={{ lineHeight: "1.5" }}>{title}</pre></CardTitle>
                 <br/>
                 {content}
