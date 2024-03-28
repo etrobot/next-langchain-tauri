@@ -58,7 +58,7 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
       >
         <div className="relative select-none overflow-hidden whitespace-nowrap overflow-ellipsis">
          
-          {chat.messages.slice(-1)[0].content.split('Final Answer:').slice(-1)[0].slice(0, 50).replace('**','')}
+          {chat.messages[0].content.slice(0, 50)}
           <p className='text-xs text-muted-foreground'>{chat.id.slice(4)}</p>
         </div>
         

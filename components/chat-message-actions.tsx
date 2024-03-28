@@ -3,11 +3,11 @@
 import { type Message } from 'ai'
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from '@/components/ui/button'
-import { IconCheck, IconCopy,IconEdit } from '@/components/ui/icons'
+import { IconCheck, IconCopy,IconEdit,IconDownload } from '@/components/ui/icons'
 import { useCopyToClipboard } from '@/lib/hooks/use-copy-to-clipboard'
 import { cn } from '@/lib/utils'
 import { useSearchParams,useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toPng } from 'html-to-image';
 import download from 'downloadjs';
 import {
@@ -17,6 +17,13 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { getRandomGradient } from '@/lib/utils'
 interface ChatMessageActionsProps extends React.ComponentProps<'div'> {
   message: Message
@@ -28,8 +35,19 @@ export function ChatMessageActions({
   ...props
 }: ChatMessageActionsProps) {
   const router = useRouter()
+  const [dark,setDark]=useState(false)
+  useEffect(()=>{
+    const darkFromStorage = localStorage.getItem('theme');
+    if (darkFromStorage === 'dark') {
+      setDark(true)
+    }else if(darkFromStorage==='system'){
+      setDark(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    }else{
+      setDark(false)}
+  });
+  const [fromCovers,setFromCovers] = useState(false)
   const [msgEditorOpen, setMsgEditorOpen] = useState(false)
-  const [cardsOpen, setCardsOpen] = useState(false)
+  const [coversOpen, setCoversOpen] = useState(false)
   const [msg,setMsg]=useState(message.content)
   const { isCopied, copyToClipboard } = useCopyToClipboard({ timeout: 2000 })
   const params = useSearchParams()
@@ -38,56 +56,55 @@ export function ChatMessageActions({
     copyToClipboard(message.content)
   }
 
-  const sections = message.content.split('\n\n');
-  const cards = sections.map((section, index) => {
-    const titleMatch = section.match(/\*\*(.*?)\*\*/);
-    const title = titleMatch ? titleMatch[1] : `Section ${index + 1}`;
-    const content = section.replace(/\*\*(.*?)\*\*/, '').trim();
-    return { title, content };
-  });
-  const Card = ({ title, content, id }: { title: string; content: string; id: string }) => {
-    const [background, setBackground] = useState(getRandomGradient(false));
-  
+  const sections = msg.split('\n\n');
+  const covers = sections.reduce<{ title: string; content: string; }[]>((accumulator, section, index) => {
+    const titleMatches = section.match(/\*\*(.*?)\*\*/g);
+    if (titleMatches) {
+      const title = titleMatches.map(match => match.replace(/\*\*(.*?)\*\*/, '$1')).join('\n');
+      const content = section.split('**').slice(-1)[0];
+      accumulator.push({ title, content });
+    }
+    return accumulator;
+  }, []);
+  const Cover = ({ title, content, id,dark }: { title: string; content: string; id: string,dark: boolean }) => {
+    const [background, setBackground] = useState(getRandomGradient(dark));
+
     const refreshBackground = () => {
-      setBackground(getRandomGradient(false));
+      setBackground(getRandomGradient(dark));
     };
   
     const downloadImage = async (elementId: string) => {
       const element = document.getElementById(elementId);
       if (element) {
+        const buttons = element.querySelectorAll('button');
+        buttons.forEach(btn => btn.style.visibility = 'hidden');
         toPng(element, { cacheBust: true })
           .then((dataUrl) => {
             download(dataUrl, `${title}.png`);
+            buttons.forEach(btn => btn.style.visibility = 'visible');
           })
           .catch((error) => {
             console.error('Could not download the image', error);
+            buttons.forEach(btn => btn.style.visibility = 'visible');
           });
+        
       }
     };
   
     return (
-      <div
-        id={id}
-        className="flex-shrink-0 w-64 h-64 p-4 m-2 rounded shadow-lg overflow-hidden"
-        style={{ background }}
-      >
-        <h3 className="text-lg font-bold mb-2">{title}</h3>
-        <p className="text-sm">{content}</p>
-        <div className="mt-4">
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            onClick={refreshBackground}
-          >
-            Refresh Background
-          </button>
-          <button
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2"
-            onClick={() => downloadImage(id)}
-          >
-            Download as Image
-          </button>
-        </div>
-      </div>
+        <Card id={`agent-${id}`} key={id}
+              className={dark ? "w-[300px] h-[400px] flex-shrink-0 text-white z-99" : "w-[300px] h-[400px] flex-shrink-0 text-black z-99"}
+              style={{ background }}>
+              <CardHeader className='h-[360px]'>
+                <CardTitle><pre style={{ lineHeight: "1.5" }}>{title}</pre></CardTitle>
+                <br/>
+                {content}
+              </CardHeader>
+              <CardFooter className="flex gap-1 justify-end">
+                <Button variant="ghost" size="icon" onClick={refreshBackground}>🎨</Button>
+                <Button variant="ghost" size="icon" onClick={() => downloadImage(`agent-${id}`)}><IconDownload /></Button>
+              </CardFooter>
+            </Card>
     );
   };
 
@@ -107,7 +124,7 @@ export function ChatMessageActions({
         <IconEdit />
         <span className="sr-only">Edit message</span>
       </Button>
-       <Button variant="ghost" size="icon" onClick={() => setCardsOpen(true)}>
+       <Button variant="ghost" size="icon" onClick={() => setCoversOpen(true)}>
         C
      </Button></>}
       <Button variant="ghost" size="icon" onClick={onCopy}>
@@ -115,7 +132,13 @@ export function ChatMessageActions({
         <span className="sr-only">Copy message</span>
       </Button>
       </div>
-      <Dialog open={msgEditorOpen} onOpenChange={setMsgEditorOpen}>
+      <Dialog open={msgEditorOpen} onOpenChange={()=>{
+          setMsgEditorOpen(!msgEditorOpen);
+          if(fromCovers){
+            setFromCovers(false);
+            setCoversOpen(true);
+          }
+        }}>
           <DialogContent className="sm:max-w-xl">
             <DialogHeader>
               <DialogTitle>Edit Message</DialogTitle>
@@ -131,26 +154,33 @@ export function ChatMessageActions({
                     if(msgTxt){
                       setMsgEditorOpen(false);
                       const msgJson = JSON.parse(msgTxt);
-                      localStorage.setItem(cid, JSON.stringify(msgJson.map((m: Message) => m.content === message.content ? { ...m, content: msg } : m)));
-                      window.location.reload();
+                      const newChat = msgJson.map((m: Message) => m.content === message.content ? { ...m, content: msg } : m);
+                      localStorage.setItem(cid, JSON.stringify(newChat));
+                      if(fromCovers){
+                        setFromCovers(false);
+                        setCoversOpen(true);
+                      }else{window.location.reload();}
                     }
                   }
             }}>Save Message</Button>
             <Button variant="ghost" onClick={() => setMsg(message.content)}>Reset</Button>
           </DialogContent>
         </Dialog>
-        <Dialog open={cardsOpen} onOpenChange={setCardsOpen}>
+        <Dialog open={coversOpen} onOpenChange={setCoversOpen} >
           <DialogContent className="sm:max-w-xl">
             <DialogHeader>
-              <DialogTitle>Cards</DialogTitle>
+              <DialogTitle>Covers 
+                <Button className='mx-1' variant="outline"  onClick={() => {setCoversOpen(false);setMsgEditorOpen(true);setFromCovers(true)}}>Edit Texts</Button> 
+              </DialogTitle>
             </DialogHeader>
-            <div className="flex space-x-4">
-            {cards.map((card, index) => (
-              <Card
+            <div className="flex flex-nowrap overflow-x-auto space-x-4">
+            {covers.map((cover, index) => (
+              <Cover
                 key={index}
-                title={card.title}
-                content={card.content}
-                id={`card-${index}`}
+                title={cover.title}
+                content={cover.content}
+                id={`cover-${index}`}
+                dark={dark}
               />
             ))}
           </div>

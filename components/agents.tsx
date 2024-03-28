@@ -138,20 +138,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
     localStorage.setItem('Agents', JSON.stringify(passAgents)) // Save to localStorage
     router.refresh()
   }
-  // const handleDownloadImage = async (key: string) => {
-  //   try {
-  //     const cardElement = document.getElementById(`agent-${key}`) as HTMLElement;
-  //     if (cardElement) {
-  //       const buttons = [...cardElement.querySelectorAll('button')] as HTMLElement[];
-  //       buttons.forEach(btn => btn.style.visibility = 'hidden');
-  //       const dataUrl = await toPng(cardElement);
-  //       download(dataUrl, `card-${key}.png`);
-  //       buttons.forEach(btn => btn.style.visibility = 'visible');
-  //     }
-  //   } catch (error) {
-  //     console.error('Something went wrong when downloading the card image', error);
-  //   }
-  // };
+
   return (
     <>
       <div className='w-full flex justify-end h-[40px]'>
@@ -162,13 +149,13 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
       {Object.entries(agents as Agents).filter(([key, agent]: [string, Agent]) => !showPinnedOnly || agent.pin).map(([key, agent]: [string, Agent]) =>  (
           <>
             <Card id={`agent-${key}`} key={key}
-              className={agent.dark ? "w-[300px] h-[240px] flex-shrink-0 text-white z-99" : "w-[300px] h-[240px] flex-shrink-0 text-black z-99"}
+              className={agent.dark ? "w-[300px] h-[210px] flex-shrink-0 text-white z-99" : "w-[300px] h-[210px] flex-shrink-0 text-black z-99"}
               style={{ background: agent.bg }}>
               <CardHeader>
                 <CardTitle>{agent.title}
                 </CardTitle>
               </CardHeader>
-              <CardContent className='flex flex-col h-[120px] justify-end'><pre>{agent.disc}</pre></CardContent>
+              <CardContent className='flex flex-col h-[93px] justify-end'><pre>{agent.disc}</pre></CardContent>
               <CardFooter className="flex gap-1">
                 <Button variant="ghost" size="icon" onClick={() => handleEditAgent(key)}><IconEdit /></Button>
                 <Button variant="ghost" size="icon" onClick={() => changeAgentBg(key)}>🎨</Button>
@@ -272,7 +259,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
             <Button variant="ghost" onClick={() => setAgentsText(newAgent)}>Reset to Default</Button>
           </DialogContent>
         </Dialog>
-        {!showPinnedOnly && <Card className="w-[300px] h-[240px] flex-shrink-0 z-99 text-center">
+        {!showPinnedOnly && <Card className="w-[300px] h-[210px] flex-shrink-0 z-99 text-center">
           <button className="mt-28" onClick={handleNewAgent}>+ New Agent</button>
         </Card>}
       </div>
