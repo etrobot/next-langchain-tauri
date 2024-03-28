@@ -139,11 +139,11 @@ export function ChatMessageActions({
             setCoversOpen(true);
           }
         }}>
-          <DialogContent className="sm:max-w-xl">
+          <DialogContent className="sm:max-w-4xl">
             <DialogHeader>
               <DialogTitle>Edit Message</DialogTitle>
             </DialogHeader>
-            <Textarea className="col-span-4 h-[200px]"
+            <Textarea className="col-span-4 h-[420px]"
               value={msg}
               onChange={(e) => { setMsg(e.target.value) }}
             />
@@ -167,7 +167,7 @@ export function ChatMessageActions({
           </DialogContent>
         </Dialog>
         <Dialog open={coversOpen} onOpenChange={setCoversOpen} >
-          <DialogContent className="sm:max-w-xl">
+          <DialogContent className="sm:max-w-4xl h-[560px]">
             <DialogHeader>
               <DialogTitle>Covers 
                 <Button className='mx-1' variant="outline"  onClick={() => {setCoversOpen(false);setMsgEditorOpen(true);setFromCovers(true)}}>Edit Texts</Button> 

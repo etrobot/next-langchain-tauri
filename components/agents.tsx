@@ -201,16 +201,16 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
           </>
         ))}
         <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
-          <DialogContent className="sm:max-w-xl">
+          <DialogContent className="sm:max-w-3xl">
             <DialogHeader>
               <DialogTitle>Edit Agent</DialogTitle>
             </DialogHeader>
             <div className="grid gap-2 py-4">
-              <div className="grid grid-cols-5 items-center gap-2">
+              <div className="grid grid-cols-6 items-center gap-2">
                 <Label htmlFor="name" className="text-right">
                   * Title
                 </Label>
-                <Input className="col-span-4"
+                <Input className="col-span-5"
                   value={currentAgent.title}
                   placeholder="Input an Agent Name"
                   onChange={(e) => {
@@ -219,21 +219,21 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
                   }}
                 />
               </div>
-              <div className="grid grid-cols-5 items-center gap-2">
+              <div className="grid grid-cols-6 items-center gap-2">
                 <Label htmlFor="name" className="text-right">
                   Discription
                 </Label>
-                <Textarea className="col-span-4 h-[100px]"
+                <Textarea className="col-span-5 h-[60px]"
                   value={currentAgent.disc}
                   placeholder="Discription for this agent"
                   onChange={(e) => setCurrentAgent({ ...currentAgent, disc: e.target.value })}
                 />
               </div>
-              <div className="grid grid-cols-5 items-center gap-2">
+              <div className="grid grid-cols-6 items-center gap-2">
                 <Label htmlFor="name" className="text-right">
                   Prompt
                 </Label>
-                <Textarea className="col-span-4 h-[200px]"
+                <Textarea className="col-span-5 h-[280px]"
                   value={currentAgent.prompt}
                   placeholder="Prompt for this agent"
                   onChange={(e) => setCurrentAgent({ ...currentAgent, prompt: e.target.value })}
@@ -260,7 +260,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
           </DialogContent>
         </Dialog>
         {!showPinnedOnly && <Card className="w-[300px] h-[210px] flex-shrink-0 z-99 text-center">
-          <button className="mt-28" onClick={handleNewAgent}>+ New Agent</button>
+          <button className="mt-24" onClick={handleNewAgent}>+ New Agent</button>
         </Card>}
       </div>
       <div className="mx-auto px-4 text-center mt-6">
