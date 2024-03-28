@@ -1,5 +1,6 @@
 'use client'
 import { UseChatHelpers } from 'ai/react'
+import { useChat, type Message } from 'ai/react'
 import {
   Card,
   CardContent,
@@ -28,14 +29,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { IconSeparator, IconTrash } from '@/components/ui/icons'
+import { IconSeparator, IconSpinner, IconTrash } from '@/components/ui/icons'
 import { Textarea } from "@/components/ui/textarea"
-import { IconEdit, IconDownload } from '@/components/ui/icons'
+import { IconEdit } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
-import { ExternalLink } from '@/components/external-link'
+import { useLocalStorage } from '@/lib/hooks/use-local-storage'
+import {initialKeyScheme,KeyScheme } from '@/components/header'
 import { toast } from 'react-hot-toast'
 import { Checkbox } from "@/components/ui/checkbox"
 import { getRandomGradient,getRandomColor } from '@/lib/utils'
+import { error } from 'console'
 
 export interface Agent {
   id: string;
@@ -58,8 +61,22 @@ export function getAgentsText() {
   } else { return null }
 }
 
-
-export const newAgent = `{"#666666":{"id":"#666666","name":"Search","disc":"Get Info from Internet","prompt":"Get Info from Internet","bg":"linear-gradient(176deg, hsl(177, 72%, 60%), hsl(309, 16%, 60%), hsl(60, 93%, 60%))","dark":true,"pin":true,"usetool":true},"#666777":{"id":"#666777","name":"CoverMaker","disc":"Turn the message to covers.","prompt":"Turn the message to topics in markdown format like ' 1. **Item1** description1 \\n\\n 2.**Item2** description2\\n\\n 3...**' every item name should be surrounded by stars","dark":true,"bg":"radial-gradient(circle at 6% 15%, hsl(222, 92%, 60%), hsl(18, 91%, 60%), hsl(210, 94%, 60%))","pin":true,"usetool":false}}`
+export const promptOptimizer = `You are a prompt optimizer, skilled in refining and enhancing the prompts provided to ensure effective communication and precise outcomes. Your task is to apply the principles of clear instruction, relevant examples, role definition, structured formatting, and the use of XML tags to improve the quality and clarity of prompts submitted. By doing so, you'll guide the AI to better understand and accurately complete the tasks assigned.
+Here are the steps you should follow to optimize prompts:
+Clarify and Specify:
+Review the prompt for clarity and directness, ensuring that all necessary context and details are included for the AI to understand the task at hand.
+Remove any ambiguities and clearly state the desired outcomes.
+Enrich with Examples:
+Add relevant examples that are closely related to the real-world use cases the user might encounter.
+Ensure diversity in examples to cover a range of potential scenarios the AI may need to address.
+Define the Role Clearly:
+Assign a clear role to the AI that aligns with the nature of the task, such as a 'coding navigator' for programming-related inquiries. This role will shape the tone and approach of the AI's responses.
+Organize with Structure:
+Break down the prompt into an organized list of instructions, whether numbered or bulleted, to make complex tasks more manageable.
+Implement XML Tagging:
+Use XML tags to segment the prompt into distinct sections, such as instructions, examples, and expected outputs. This will help the AI parse and respond to each part of the prompt accurately.
+Now, please optimize the prompt below:\n\n`
+export const newAgent = `{"#666666":{"id":"#666666","name":"Search","disc":"Get Info from Internet","prompt":"Get Info from Internet","bg":"linear-gradient(176deg, hsl(177, 72%, 60%), hsl(309, 16%, 60%), hsl(60, 93%, 60%))","dark":true,"pin":true,"usetool":true},"#666777":{"id":"#666777","name":"CoverMaker","disc":"Turn the message to covers.","prompt":"Turn the message to topics in markdown format like ' 1. **Item1** description1 \n\n 2.**Item2** description2\n\n 3...**' every item name should be surrounded by stars","dark":true,"bg":"radial-gradient(circle at 6% 15%, hsl(222, 92%, 60%), hsl(18, 91%, 60%), hsl(210, 94%, 60%))","pin":true,"usetool":false},"#318F3C":{"id":"#318F3C","name":"PromptOptimizer","disc":"a prompt optimizer, skilled in refining and enhancing the prompts","prompt":"${promptOptimizer}","bg":"linear-gradient(117deg, hsl(332, 99%, 60%), hsl(147, 42%, 60%), hsl(297, 53%, 60%))","pin":false,"usetool":false,"dark":true}}`
 export interface AgentsProps extends Partial<Pick<UseChatHelpers, 'setInput'>> {
   showPinnedOnly: boolean;
 }
@@ -81,7 +98,25 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
       return JSON.parse(newAgent); // or you can return an empty object {} if that's the desired initial state
     }
   });
-
+  const [keyScheme, setKeyScheme] = useLocalStorage<KeyScheme>('ai-token', initialKeyScheme);
+  const { messages, append,stop, isLoading} =
+    useChat({
+      api: process.env.NEXT_PUBLIC_API_URL + '/api/chat',
+      id:'123',
+      body: {
+        previewToken:keyScheme.current,
+        locale: navigator.language,
+      },
+      onResponse(response) {
+        if (response.status !== 200) {
+          toast.error(`${response.status} ${response.statusText}`);
+        }
+      },
+      onFinish(response) {
+        console.log(response.content);
+        setCurrentAgent({...currentAgent,prompt:response.content});
+      }
+    })
   // Function to open the editor with the selected Agent's details
   const handleEditAgent = (AgentId: string) => {
     setCurrentAgent(agents[AgentId]);
@@ -158,12 +193,11 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
                 <CardTitle>{agent.name}
                 </CardTitle>
               </CardHeader>
-              <CardContent className='flex flex-col h-[93px] justify-end'><pre>{agent.disc}</pre></CardContent>
+              <CardContent className='flex flex-col h-[93px] overflow-hidden'>{agent.disc}</CardContent>
               <CardFooter className="flex gap-1">
                 <Button variant="ghost" size="icon" onClick={() => handleEditAgent(key)}><IconEdit /></Button>
                 <Button variant="ghost" size="icon" onClick={() => changeAgentBg(key)}>🎨</Button>
                 <Button variant="ghost" size="icon" onClick={() => toggleDark(key)}>{agent.dark ? "☀️" : "🌙"}</Button>
-                {/* <Button variant="ghost" size="icon" onClick={() => handleDownloadImage(key)}><IconDownload /></Button> */}
                 {setInput ? <Button variant="ghost" size="icon" onClick={() => setInput(`@${agent.name} `)}>@</Button> : null}
                 <Button
                   variant="ghost"
@@ -211,7 +245,10 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
             </AlertDialog>
           </>
         ))}
-        <Dialog open={editorOpen} onOpenChange={setEditorOpen}>
+        <Dialog open={editorOpen} onOpenChange={()=>{
+          if(!editorOpen)stop();
+          setEditorOpen(!editorOpen);
+        }}>
           <DialogContent className="sm:max-w-3xl">
             <DialogHeader>
               <DialogTitle>Edit Agent</DialogTitle>
@@ -225,7 +262,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
                   value={currentAgent.name}
                   placeholder="Input an unique name without space"
                   onChange={(e) => {
-                    const newName = e.target.value;
+                    const newName = e.target.value.replace(/\s/g, '_');
                     setCurrentAgent({ ...currentAgent, name: newName });
                   }}
                 />
@@ -242,12 +279,23 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
               </div>
               <div className="grid grid-cols-6 items-center gap-2">
                 <Label htmlFor="name" className="text-right">
-                  Prompt
+                  <p>Prompt</p>
+                  <Button variant="outline" className='mt-2' onClick={()=>{
+                    if(currentAgent.prompt.length<10){
+                      toast.error('Too short for AI prompt optimization')
+                      return;
+                    }
+                    append({
+                    id: '123',
+                    content: promptOptimizer+currentAgent.prompt,
+                    role: 'user'
+                  })}}>{isLoading?<IconSpinner/>:"AI"}</Button>
                 </Label>
+                
                 <Textarea className="col-span-5 h-[280px]"
                   value={currentAgent.prompt}
                   placeholder="Prompt for this agent"
-                  onChange={(e) => setCurrentAgent({ ...currentAgent, prompt: e.target.value })}
+                  onChange={(e) => setCurrentAgent({ ...currentAgent, prompt: e.target.value.replace(/"/g, "'") })}
                 />
               </div>
             </div>

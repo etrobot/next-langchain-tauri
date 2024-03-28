@@ -44,7 +44,7 @@ import {
 } from "@/components/ui/command"
 import { Check, ChevronsUpDown } from "lucide-react"
 
-type PreviewToken = {
+export type PreviewToken = {
   scheme: string;
   llm_api_key: string;
   llm_model: string;
@@ -55,30 +55,30 @@ type PreviewToken = {
   bing_api_key: string;
 };
 
-interface KeyScheme {
+export interface KeyScheme {
   [key: string]: PreviewToken;
 }
 
+export const initialPreviewToken = {
+  scheme: "",
+  llm_api_key: "",
+  llm_model: "",
+  llm_base_url: "",
+  tavilyserp_api_key: "",
+  google_api_key: "",
+  google_cse_id: "",
+  bing_api_key: "",
+};
+
+export  const initialKeyScheme: KeyScheme = {
+  current: { ...initialPreviewToken },
+  keys1: { ...initialPreviewToken },
+  keys2: { ...initialPreviewToken },
+  keys3: { ...initialPreviewToken },
+};
+
 export default function Header() {
   const router = useRouter();
-  const initialPreviewToken = {
-    scheme: "",
-    llm_api_key: "",
-    llm_model: "",
-    llm_base_url: "",
-    tavilyserp_api_key: "",
-    google_api_key: "",
-    google_cse_id: "",
-    bing_api_key: "",
-  };
-
-  const initialKeyScheme: KeyScheme = {
-    current: { ...initialPreviewToken },
-    keys1: { ...initialPreviewToken },
-    keys2: { ...initialPreviewToken },
-    keys3: { ...initialPreviewToken },
-  };
-
   const [keyScheme, setKeyScheme] = useLocalStorage<KeyScheme>('ai-token', initialKeyScheme);
   const [keyInput, setKeyInput] = useState(keyScheme)
   const handleSchemeSelection = (selectedSchemeKey: string) => {
