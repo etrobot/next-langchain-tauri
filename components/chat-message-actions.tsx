@@ -1,5 +1,5 @@
 'use client'
-
+import { ThemeToggle } from '@/components/theme-toggle'
 import { type Message } from 'ai'
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from '@/components/ui/button'
@@ -100,7 +100,7 @@ export function ChatMessageActions({
                 <br/>
                 {content}
               </CardHeader>
-              <CardFooter className="flex gap-1 justify-end">
+              <CardFooter className="flex gap-1">
                 <Button variant="ghost" size="icon" onClick={refreshBackground}>🎨</Button>
                 <Button variant="ghost" size="icon" onClick={() => downloadImage(`agent-${id}`)}><IconDownload /></Button>
               </CardFooter>
