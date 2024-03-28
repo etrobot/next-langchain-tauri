@@ -28,20 +28,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
-import { IconSpinner, IconSeparator, IconCheck } from '@/components/ui/icons'
+import { IconSeparator, IconTrash } from '@/components/ui/icons'
 import { Textarea } from "@/components/ui/textarea"
 import { IconEdit, IconDownload } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
 import { ExternalLink } from '@/components/external-link'
 import { toast } from 'react-hot-toast'
 import { Checkbox } from "@/components/ui/checkbox"
-import { getRandomGradient } from '@/lib/utils'
-
-
+import { getRandomGradient,getRandomColor } from '@/lib/utils'
 
 export interface Agent {
+  id: string;
   name: string;
-  title: string;
   disc: string;
   prompt: string;
   bg: string;
@@ -61,7 +59,7 @@ export function getAgentsText() {
 }
 
 
-export const newAgent = `{"Search":{"name":"Search","title":"Search","disc":"Get Info from Internet","prompt":"Get Info from Internet","bg":"linear-gradient(316deg, hsl(306, 95%, 60%), hsl(232, 34%, 60%), hsl(141, 58%, 60%))","dark":true,"pin":true,"usetool":true},"Cot":{"name":"Cot","title":"CoT","disc":"Let's think step by step.","prompt":"","dark":true,"bg":"linear-gradient(267deg, hsl(24, 68%, 60%), hsl(341, 68%, 60%), hsl(230, 48%, 60%))","pin":false,"usetool":false}}`
+export const newAgent = `{"#666666":{"id":"#666666","name":"Search","disc":"Get Info from Internet","prompt":"Get Info from Internet","bg":"linear-gradient(316deg, hsl(306, 95%, 60%), hsl(232, 34%, 60%), hsl(141, 58%, 60%))","dark":true,"pin":true,"usetool":true},"#666777":{"id":"#666777","name":"Cot","disc":"Let's think step by step.","prompt":"","dark":true,"bg":"linear-gradient(267deg, hsl(24, 68%, 60%), hsl(341, 68%, 60%), hsl(230, 48%, 60%))","pin":false,"usetool":false}}`
 export interface AgentsProps extends Partial<Pick<UseChatHelpers, 'setInput'>> {
   showPinnedOnly: boolean;
 }
@@ -72,7 +70,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
   const [editorOpen, setEditorOpen] = useState(false)
   const [allAgentEditorOpen, setallAgentEditorOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const initAgent: Agent = { title: '', name: '', disc: '', prompt: '', bg: '', pin: false, usetool: false, dark: true }
+  const initAgent: Agent = { id: getRandomColor(), name: '', disc: '', prompt: '', bg: getRandomGradient(true), pin: false, usetool: false, dark: true }
   const [currentAgent, setCurrentAgent] = useState(initAgent)
   const [agents, setAgents] = useState(() => {
     const atext = getAgentsText()
@@ -86,7 +84,8 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
 
   // Function to open the editor with the selected Agent's details
   const handleEditAgent = (AgentId: string) => {
-    setCurrentAgent({ ...agents[AgentId], id: AgentId });
+    setCurrentAgent(agents[AgentId]);
+    console.log(currentAgent)
     setEditorOpen(true);
   }
 
@@ -118,15 +117,19 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
   }
 
   const handleNewAgent = () => {
-    setCurrentAgent({ ...initAgent, bg: getRandomGradient(true) });
+    setCurrentAgent(initAgent);
     setEditorOpen(true);
   }
 
   // Function to handle saving the current Agent to the local state and localStorage
   const handleSaveAgents = () => {
+    if(!currentAgent.name){
+      toast.error('Agent name is required')
+      return
+    }
     const updatedAgents = {
       ...agents,
-      [currentAgent.name]: { ...agents[currentAgent.name], title: currentAgent.title, prompt: currentAgent.disc, bg: currentAgent.bg ,usetool: currentAgent.usetool}
+      [currentAgent.id]: currentAgent
     }
     setAgents(updatedAgents)
     saveAgents(updatedAgents);
@@ -152,7 +155,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
               className={agent.dark ? "w-[300px] h-[210px] flex-shrink-0 text-white z-99" : "w-[300px] h-[210px] flex-shrink-0 text-black z-99"}
               style={{ background: agent.bg }}>
               <CardHeader>
-                <CardTitle>{agent.title}
+                <CardTitle>{agent.name}
                 </CardTitle>
               </CardHeader>
               <CardContent className='flex flex-col h-[93px] justify-end'><pre>{agent.disc}</pre></CardContent>
@@ -168,6 +171,14 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
                   onClick={() => handlePinned(key)}
                 >
                   {agent.pin ? "★" : "☆"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="ml-auto size-6 p-0 hover:bg-background"
+                  onClick={() => setDeleteDialogOpen(true)}
+                >
+                  <IconTrash />
+                  <span className="sr-only">Delete</span>
                 </Button>
               </CardFooter>
             </Card>
@@ -208,14 +219,14 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
             <div className="grid gap-2 py-4">
               <div className="grid grid-cols-6 items-center gap-2">
                 <Label htmlFor="name" className="text-right">
-                  * Title
+                  * Name
                 </Label>
                 <Input className="col-span-5"
-                  value={currentAgent.title}
-                  placeholder="Input an Agent Name"
+                  value={currentAgent.name}
+                  placeholder="Input an unique name without space"
                   onChange={(e) => {
                     const newName = e.target.value;
-                    setCurrentAgent({ ...currentAgent, title: newName });
+                    setCurrentAgent({ ...currentAgent, name: newName });
                   }}
                 />
               </div>
