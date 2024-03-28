@@ -59,7 +59,7 @@ export function getAgentsText() {
 }
 
 
-export const newAgent = `{"#666666":{"id":"#666666","name":"Search","disc":"Get Info from Internet","prompt":"Get Info from Internet","bg":"linear-gradient(316deg, hsl(306, 95%, 60%), hsl(232, 34%, 60%), hsl(141, 58%, 60%))","dark":true,"pin":true,"usetool":true},"#666777":{"id":"#666777","name":"Cot","disc":"Let's think step by step.","prompt":"","dark":true,"bg":"linear-gradient(267deg, hsl(24, 68%, 60%), hsl(341, 68%, 60%), hsl(230, 48%, 60%))","pin":false,"usetool":false}}`
+export const newAgent = `{"#666666":{"id":"#666666","name":"Search","disc":"Get Info from Internet","prompt":"Get Info from Internet","bg":"linear-gradient(176deg, hsl(177, 72%, 60%), hsl(309, 16%, 60%), hsl(60, 93%, 60%))","dark":true,"pin":true,"usetool":true},"#666777":{"id":"#666777","name":"CoverMaker","disc":"Turn the message to covers.","prompt":"Turn the message to topics in markdown format like \" 1. **Item1** description1 \\n\\n 2.**Item2** description2\\n\\n 3...**\" every item name should be surrounded by stars","dark":true,"bg":"radial-gradient(circle at 6% 15%, hsl(222, 92%, 60%), hsl(18, 91%, 60%), hsl(210, 94%, 60%))","pin":true,"usetool":false}}`
 export interface AgentsProps extends Partial<Pick<UseChatHelpers, 'setInput'>> {
   showPinnedOnly: boolean;
 }
@@ -101,7 +101,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
   const toggleDark = (AgentId: string) => {
     const updatedAgents = {
       ...agents,
-      [AgentId]: { ...agents[AgentId], bg: agents[AgentId].dark ? agents[AgentId].bg.replace(/60%\)/g, '90%)') : agents[AgentId].bg.replace(/90%\)/g, '60%)'), dark: !agents[AgentId].dark }
+      [AgentId]: { ...agents[AgentId], bg: agents[AgentId].dark ? agents[AgentId].bg.replace(/60%\)/g, '94%)') : agents[AgentId].bg.replace(/94%\)/g, '60%)'), dark: !agents[AgentId].dark }
     }
     setAgents(updatedAgents)
     saveAgents(updatedAgents);

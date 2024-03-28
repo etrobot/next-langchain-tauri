@@ -1,5 +1,5 @@
 'use client'
-import { ThemeToggle } from '@/components/theme-toggle'
+
 import { type Message } from 'ai'
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from '@/components/ui/button'
