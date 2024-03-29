@@ -3,12 +3,16 @@ import { nanoid } from '../lib/utils';
 import { useChat, type Message } from 'ai/react'
 import { cn } from '@/lib/utils'
 import { ChatList } from '@/components/chat-list'
-import { ChatPanel } from '@/components/chat-panel'
+import { Button } from '@/components/ui/button'
 import { ChatScrollAnchor } from '@/components/chat-scroll-anchor'
 import { useState, useEffect } from 'react'
 import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import Agents from '@/components/agents'
+import { Agent, newAgent } from '@/components/agents'
+import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
+import { IconRefresh, IconSpinner } from '@/components/ui/icons'
+import { PromptForm } from '@/components/prompt-form'
 export interface ChatProps extends React.ComponentProps<'div'> {
   id?: string
 }
@@ -30,8 +34,8 @@ export function Chat({ id, className }: ChatProps) {
       id = `cid_${timestamp}`;
     }
   }, [id]);
-  
 
+  const [agents, setAgents] = useState(newAgent)
   const initialPreviewToken = {
     llm_api_key: "",
     llm_model: "",
@@ -58,13 +62,13 @@ export function Chat({ id, className }: ChatProps) {
         }
       },
       onFinish(response) {
-        const msg =  messages ?? initialMessages;
+        const msg = messages ?? initialMessages;
         msg.push({
           id: nanoid(),
           role: 'assistant',
           content: response.content
         })
-        localStorage.setItem(id||`cid_${timestamp}`, JSON.stringify(msg));
+        localStorage.setItem(id || `cid_${timestamp}`, JSON.stringify(msg));
         router.replace(`/?cid=${id}`);
         router.refresh();
       }
@@ -88,21 +92,73 @@ export function Chat({ id, className }: ChatProps) {
           </>
         ) : (
           <>
-            <Agents setInput={setInput} showPinnedOnly={showPinnedOnly}/>
+            <Agents setInput={setInput} showPinnedOnly={showPinnedOnly} />
           </>
         )}
       </div>
-      <ChatPanel
-        id={id}
-        isLoading={isLoading}
-        stop={stop}
-        append={append}
-        reload={reload}
-        messages={messages}
-        input={input}
-        setInput={setInput}
-      />
-
+      <div className="fixed inset-x-0 bottom-0 w-full bg-gradient-to-b from-muted/30 from-0% to-muted/30 to-50% animate-in duration-300 ease-in-out dark:from-background/10 dark:from-10% dark:to-background/80 peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]">
+        <ButtonScrollToBottom />
+        <div className="mx-auto sm:max-w-3xl sm:px-4">
+          <div className="flex items-center justify-center h-12">
+            {isLoading ? (
+              <Button
+                variant="outline"
+                onClick={() => stop()}
+                className="bg-background"
+              >
+                <IconSpinner className="mr-2" />
+                Generating ... ■
+              </Button>
+            ) : (
+              messages?.length >= 2 && (
+                <div className="flex space-x-2">
+                  <Button variant="outline" onClick={() => reload()}>
+                    <IconRefresh className="mr-2" />
+                    Regenerate response
+                  </Button>
+                </div>
+              )
+            )}
+          </div>
+          <div className="px-4 py-2 space-y-2 shadow-lg bg-background sm:rounded-t-xl">
+            <PromptForm
+              onSubmit={async value => {
+                var prompt = value
+                var function_call = null as any
+                if (agents) {
+                  const found = input.split(' ')[0];
+                  if (found.charAt(0) === '@') {
+                    Object.entries(agents).forEach(([key, agent]) => {
+                      const agentName = (agent as unknown as Agent).name;
+                      const agentPrompt = (agent as unknown as Agent).prompt
+                      if (value.startsWith(`@${agentName}`)) {
+                        if (!JSON.stringify(messages).includes(agentPrompt)) {
+                          prompt = `("${agentName}:"` + ":『" + (agent as unknown as Agent).prompt + '』)\n' + value;
+                        }
+                        function_call = (agent as unknown as Agent).usetool ? 'tool' : null
+                      }
+                      return; // Break out of the forEach loop
+                    });
+                  }
+                  const newMsg = {
+                    id: nanoid(),
+                    content: prompt,
+                    role: 'user',
+                    function_call: function_call
+                  } as Message;
+                  append(newMsg);
+                  messages.push(newMsg);
+                }
+              }}
+              input={input}
+              setInput={setInput}
+              isLoading={isLoading}
+              agents={agents}
+              setAgents={setAgents}
+            />
+          </div>
+        </div>
+      </div>
     </>
   )
 }

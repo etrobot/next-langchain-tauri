@@ -52,7 +52,7 @@ export function SidebarItem({ index, chat, children }: SidebarItemProps) {
         href={`/?cid=${chat.id}`}
         className={cn(
           buttonVariants({ variant: 'ghost' }),
-          'group w-[230px] transition-colors hover:bg-zinc-200/40 dark:hover:bg-zinc-300/10',
+          'group w-[230px] transition-colors hover:bg-zinc-200/40 dark:hover:bg-zinc-300/10 justify-normal',
           isActive && 'bg-zinc-200 pr-16 font-semibold dark:bg-zinc-800'
         )}
       >
