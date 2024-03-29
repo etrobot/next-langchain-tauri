@@ -34,7 +34,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { IconEdit } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
-import {initialKeyScheme,KeyScheme } from '@/components/header'
+import {initialKeyScheme } from '@/components/header'
+import {KeyScheme} from '@/lib/types'
 import { toast } from 'react-hot-toast'
 import { Checkbox } from "@/components/ui/checkbox"
 import { getRandomGradient,getRandomColor } from '@/lib/utils'

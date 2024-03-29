@@ -16,3 +16,18 @@ export type ServerActionResult<Result> = Promise<
       error: string
     }
 >
+
+export type PreviewToken = {
+  scheme: string;
+  llm_api_key: string;
+  llm_model: string;
+  llm_base_url: string;
+  tavilyserp_api_key: string;
+  google_api_key: string;
+  google_cse_id: string;
+  bing_api_key: string;
+};
+
+export interface KeyScheme {
+  [key: string]: PreviewToken;
+}
