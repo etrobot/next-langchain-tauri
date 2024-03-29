@@ -57,7 +57,7 @@ type Agents = {
 export function getAgentsText() {
   const storedAgents = localStorage.getItem('Agents');
   if (storedAgents) {
-    return storedAgents
+    return storedAgents.replace(/\n/g, "\\n")
   } else { return null }
 }
 
