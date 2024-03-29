@@ -92,10 +92,10 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
   const [agents, setAgents] = useState(() => {
     const atext = getAgentsText()
     if (atext) {
-      return JSON.parse(atext);
+      return JSON.parse(atext.replace(/\n/g, "\\n"));
     } else {
       localStorage.setItem('Agents', newAgent);
-      return JSON.parse(newAgent); // or you can return an empty object {} if that's the desired initial state
+      return JSON.parse(newAgent.replace(/\n/g, "\\n")); // or you can return an empty object {} if that's the desired initial state
     }
   });
   const [keyScheme, setKeyScheme] = useLocalStorage<KeyScheme>('ai-token', initialKeyScheme);
