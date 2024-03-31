@@ -301,7 +301,8 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
               </div>
             </div>
             <DialogFooter className="items-center">
-            <Input className="col-span-2"
+            <Checkbox id="usetool" checked={currentAgent.usetool} onCheckedChange={() => setCurrentAgent({ ...currentAgent, usetool: !currentAgent.usetool })}/>useTool
+            <Input className="max-w-xs"
                   value={currentAgent.model || ''}
                   placeholder="Input model (optional)"
                   onChange={(e) => {
@@ -309,7 +310,6 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
                     setCurrentAgent({ ...currentAgent, model: newModel });
                   }}
                 />
-              <Checkbox id="usetool" checked={currentAgent.usetool} onCheckedChange={() => setCurrentAgent({ ...currentAgent, usetool: !currentAgent.usetool })}/>useTool
               <Button onClick={handleSaveAgents}>Save Agent</Button>
             </DialogFooter>
           </DialogContent>
@@ -323,7 +323,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
               value={AgentsText || ''}
               onChange={(e) => { setAgentsText(e.target.value) }}
             />
-            <Button onClick={() => { localStorage.setItem('Agents', AgentsText || getAgentsText() || ''); window.location.reload() }}>Save Agents</Button>
+            <Button onClick={() => { localStorage.setItem('Agents', AgentsText || getAgentsText() || ''); setallAgentEditorOpen(false) }}>Save Agents</Button>
             <Button variant="ghost" onClick={() => setAgentsText(newAgent)}>Reset to Default</Button>
           </DialogContent>
         </Dialog>

@@ -120,7 +120,7 @@ export function Chat({ id, className }: ChatProps) {
                 if (agents) {
                   const found = input.split(' ')[0];
                   if (found.charAt(0) === '@') {
-                    Object.entries(agents).filter(([key, agent]) => (agent as unknown as Agent).pin === true).forEach(([key, agent]) => {
+                    Object.entries(agents).forEach(([key, agent]) => {
                       const agentName = (agent as unknown as Agent).name;
                       const agentPrompt = (agent as unknown as Agent).prompt
                       if (value.startsWith(`@${agentName}`)) {

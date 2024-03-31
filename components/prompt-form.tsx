@@ -84,7 +84,7 @@ export function PromptForm({
         >
           {showPopup &&
             <CommandGroup className='' >
-              {Object.entries(agents).map(([key, agent]) => (
+              {Object.entries(agents).filter(([key, agent]) => (agent as unknown as Agent).pin === true).map(([key, agent]) => (
                 <CommandItem
                   key={key}
                   value={(agent as Agent).name}
