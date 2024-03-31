@@ -10,9 +10,11 @@ import { toast } from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import Agents from '@/components/agents'
 import { Agent, newAgent } from '@/components/agents'
+import { useLocalStorage } from '@/lib/hooks/use-local-storage'
 import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
 import { IconRefresh, IconSpinner } from '@/components/ui/icons'
 import { PromptForm } from '@/components/prompt-form'
+import {useSetting} from '@/lib/hooks/use-setting'
 export interface ChatProps extends React.ComponentProps<'div'> {
   id?: string
 }
@@ -36,16 +38,8 @@ export function Chat({ id, className }: ChatProps) {
   }, [id]);
 
   const [agents, setAgents] = useState(newAgent)
-  const initialPreviewToken = {
-    llm_api_key: "",
-    llm_model: "",
-    llm_base_url: "",
-    tavilyserp_api_key: "",
-    google_api_key: "",
-    google_cse_id: "",
-    bing_api_key: "",
-  };
-  const [previewToken, setPreviewToken] = useState(initialPreviewToken)
+  const [keys, setKeys]  = useSetting();
+
   const { messages, append, reload, stop, isLoading, input, setInput } =
     useChat({
       api: process.env.NEXT_PUBLIC_API_URL + '/api/chat',
@@ -53,7 +47,7 @@ export function Chat({ id, className }: ChatProps) {
       id,
       body: {
         id,
-        previewToken,
+        previewToken:keys.current,
         locale: navigator.language,
       },
       onResponse(response) {
@@ -77,10 +71,7 @@ export function Chat({ id, className }: ChatProps) {
   useEffect(() => {
     stop();
     const token = localStorage.getItem('ai-token')
-    if (token) {
-      setPreviewToken(JSON.parse(token).current)
-    }
-    else { toast.error('Please set the API keys'); }
+    if (!token) toast.error('Please set the API keys');
   }, []);
   return (
     <>
@@ -125,10 +116,11 @@ export function Chat({ id, className }: ChatProps) {
               onSubmit={async value => {
                 var prompt = value
                 var function_call = null as any
+                var annotations:any[] =[]
                 if (agents) {
                   const found = input.split(' ')[0];
                   if (found.charAt(0) === '@') {
-                    Object.entries(agents).forEach(([key, agent]) => {
+                    Object.entries(agents).filter(([key, agent]) => (agent as unknown as Agent).pin === true).forEach(([key, agent]) => {
                       const agentName = (agent as unknown as Agent).name;
                       const agentPrompt = (agent as unknown as Agent).prompt
                       if (value.startsWith(`@${agentName}`)) {
@@ -136,6 +128,7 @@ export function Chat({ id, className }: ChatProps) {
                           prompt = `("${agentName}:"` + ":『" + (agent as unknown as Agent).prompt + '』)\n' + value;
                         }
                         function_call = (agent as unknown as Agent).usetool ? 'tool' : null
+                        annotations =[(agent as unknown as Agent).model]
                       }
                       return; // Break out of the forEach loop
                     });
@@ -144,7 +137,8 @@ export function Chat({ id, className }: ChatProps) {
                     id: nanoid(),
                     content: prompt,
                     role: 'user',
-                    function_call: function_call
+                    function_call: function_call,
+                    annotations
                   } as Message;
                   append(newMsg);
                   messages.push(newMsg);

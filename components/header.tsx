@@ -18,7 +18,7 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs"
 import Link from 'next/link'
-import { useLocalStorage } from '@/lib/hooks/use-local-storage'
+import { useSetting } from '@/lib/hooks/use-setting'
 import {
   Dialog,
   DialogContent,
@@ -37,42 +37,24 @@ import {
 } from "@/components/ui/popover"
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
 } from "@/components/ui/command"
-import { Check, ChevronsUpDown } from "lucide-react"
-import { KeyScheme } from '@/lib/types'
+import { ChevronsUpDown } from "lucide-react"
+import {initialKeyScheme } from '@/lib/hooks/use-setting'
 
-export const initialPreviewToken = {
-  scheme: "",
-  llm_api_key: "",
-  llm_model: "",
-  llm_base_url: "",
-  tavilyserp_api_key: "",
-  google_api_key: "",
-  google_cse_id: "",
-  bing_api_key: "",
-};
-
-export  const initialKeyScheme: KeyScheme = {
-  current: { ...initialPreviewToken },
-  keys1: { ...initialPreviewToken },
-  keys2: { ...initialPreviewToken },
-  keys3: { ...initialPreviewToken },
-};
 
 export default function Header() {
   const router = useRouter();
-  const [keyScheme, setKeyScheme] = useLocalStorage<KeyScheme>('ai-token', initialKeyScheme);
-  const [keyInput, setKeyInput] = useState(keyScheme)
+  const [keys, setKeys]  = useSetting();
+  const [keyInput, setKeyInput] = useState(initialKeyScheme);
   const handleSchemeSelection = (selectedSchemeKey: string) => {
-    const selectedScheme = { ...keyScheme, current: { ...keyScheme[selectedSchemeKey], scheme: selectedSchemeKey } };
-    setKeyScheme(selectedScheme);
-    localStorage.setItem('ai-token', JSON.stringify(selectedScheme));
-    setOpen(false); // Assuming you have a state 'open' to control the popover visibility
-    window.location.reload();
+    if (typeof keys === 'object' && 'current' in keys) {
+      const selectedScheme = { ...keys, current: { ...keys[selectedSchemeKey], scheme: selectedSchemeKey } };
+      setKeys(selectedScheme);
+      setOpen(false); // Assuming you have a state 'open' to control the popover visibility
+      router.refresh();
+    }
   };
 
   const [previewTokenDialog, setPreviewTokenDialog] = useState(false);
@@ -128,7 +110,7 @@ export default function Header() {
               aria-expanded={open}
               className="w-[80px] justify-between"
             >
-              {keyScheme.current.scheme || 'None'}
+              {keys.current.scheme || 'None'}
               <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -154,7 +136,7 @@ export default function Header() {
         <Button
           variant={'outline'}
           onClick={() => {
-            setKeyInput(keyScheme);
+            setKeyInput(keys);
             setPreviewTokenDialog(true);
           }}
         >
@@ -163,7 +145,7 @@ export default function Header() {
         <ThemeToggle />
       </div>
       <Dialog open={previewTokenDialog} onOpenChange={() => {
-        setKeyInput(keyScheme);
+        setKeyInput(keys);
         setPreviewTokenDialog(!previewTokenDialog);
       }
       }>
@@ -174,7 +156,7 @@ export default function Header() {
               Keys are stored in your computer without sharing to anyone.
             </DialogDescription>
           </DialogHeader>
-          <Tabs defaultValue={keyScheme.current.scheme}>
+          <Tabs defaultValue={keys.current.scheme}>
             <TabsList className="grid w-full grid-cols-3">
               {shcemes.map((shceme) => (
                 <TabsTrigger value={shceme.value}>{shceme.label}</TabsTrigger>
@@ -191,9 +173,9 @@ export default function Header() {
                       value={keyInput[shceme.value].llm_api_key}
                       placeholder="API KEY of LLM like OpenAI GPT or Gemini"
                       onChange={e => {
-                        const newKeyScheme = { ...keyInput };
-                        newKeyScheme[shceme.value].llm_api_key = e.target.value;
-                        setKeyInput(newKeyScheme);
+                        const newkeys = { ...keyInput };
+                        newkeys[shceme.value].llm_api_key = e.target.value;
+                        setKeyInput(newkeys);
                       }}
                     /></div>
                   <div className="grid grid-cols-3 items-center gap-3">
@@ -204,9 +186,9 @@ export default function Header() {
                       value={keyInput[shceme.value].llm_model}
                       placeholder="optional, default is gpt-3.5-turbo-0125"
                       onChange={e => {
-                        const newKeyScheme = { ...keyInput };
-                        newKeyScheme[shceme.value].llm_model = e.target.value;
-                        setKeyInput(newKeyScheme);
+                        const newkeys = { ...keyInput };
+                        newkeys[shceme.value].llm_model = e.target.value;
+                        setKeyInput(newkeys);
                       }}
                     /></div>
                   <div className="grid grid-cols-3 items-center gap-3">
@@ -217,9 +199,9 @@ export default function Header() {
                       value={keyInput[shceme.value].llm_base_url}
                       placeholder="optional, default is https://api.openai.com/v1"
                       onChange={e => {
-                        const newKeyScheme = { ...keyInput };
-                        newKeyScheme[shceme.value].llm_base_url = e.target.value;
-                        setKeyInput(newKeyScheme);
+                        const newkeys = { ...keyInput };
+                        newkeys[shceme.value].llm_base_url = e.target.value;
+                        setKeyInput(newkeys);
                       }}
                     /></div>
                   <div className="grid grid-cols-3 items-center gap-3">
@@ -230,9 +212,9 @@ export default function Header() {
                       value={keyInput[shceme.value].bing_api_key}
                       placeholder="from microsoft.com/bing/apis"
                       onChange={e => {
-                        const newKeyScheme = { ...keyInput };
-                        newKeyScheme[shceme.value].bing_api_key = e.target.value;
-                        setKeyInput(newKeyScheme);
+                        const newkeys = { ...keyInput };
+                        newkeys[shceme.value].bing_api_key = e.target.value;
+                        setKeyInput(newkeys);
                       }}
                     /></div>
                   <div className="grid grid-cols-3 items-center gap-3">
@@ -243,9 +225,9 @@ export default function Header() {
                       value={keyInput[shceme.value].google_api_key}
                       placeholder="optional, from cloud.google.com"
                       onChange={e => {
-                        const newKeyScheme = { ...keyInput };
-                        newKeyScheme[shceme.value].google_api_key = e.target.value;
-                        setKeyInput(newKeyScheme);
+                        const newkeys = { ...keyInput };
+                        newkeys[shceme.value].google_api_key = e.target.value;
+                        setKeyInput(newkeys);
                       }}
                     /></div>
                   <div className="grid grid-cols-3 items-center gap-3">
@@ -256,9 +238,9 @@ export default function Header() {
                       value={keyInput[shceme.value].google_cse_id}
                       placeholder="optional, from cloud.google.com"
                       onChange={e => {
-                        const newKeyScheme = { ...keyInput };
-                        newKeyScheme[shceme.value].google_cse_id = e.target.value;
-                        setKeyInput(newKeyScheme);
+                        const newkeys = { ...keyInput };
+                        newkeys[shceme.value].google_cse_id = e.target.value;
+                        setKeyInput(newkeys);
                       }}
                     /></div>
                   <div className="grid grid-cols-3 items-center gap-3">
@@ -269,19 +251,20 @@ export default function Header() {
                       value={keyInput[shceme.value].tavilyserp_api_key}
                       placeholder="optional, from tavily.com"
                       onChange={e => {
-                        const newKeyScheme = { ...keyInput };
-                        newKeyScheme[shceme.value].tavilyserp_api_key = e.target.value;
-                        setKeyInput(newKeyScheme);
+                        const newkeys = { ...keyInput };
+                        newkeys[shceme.value].tavilyserp_api_key = e.target.value;
+                        setKeyInput(newkeys);
                       }}
                     /></div>
                 </div>
                 <DialogFooter className="items-center">
                   <Button
                     onClick={() => {
-                      keyInput.scheme = keyInput[keyScheme.current.scheme || 'keys1']
-                      setKeyScheme(keyInput);
+                      keyInput.scheme = keyInput[keys.current.scheme || 'keys1']
+                      setKeys(keyInput);
                       localStorage.setItem('ai-token', JSON.stringify(keyInput));
-                      window.location.reload();
+                      router.refresh();
+                      setOpen(false);
                     }}
                   >
                     Save Token

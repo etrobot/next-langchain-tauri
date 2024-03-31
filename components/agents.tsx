@@ -34,7 +34,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { IconEdit } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
-import {initialKeyScheme } from '@/components/header'
+import {initialKeyScheme } from '@/lib/hooks/use-setting'
 import {KeyScheme} from '@/lib/types'
 import { toast } from 'react-hot-toast'
 import { Checkbox } from "@/components/ui/checkbox"
@@ -50,6 +50,7 @@ export interface Agent {
   pin: boolean;
   dark: boolean;
   usetool: boolean;
+  model?:string
 }
 type Agents = {
   [key: string]: Agent
@@ -88,7 +89,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
   const [editorOpen, setEditorOpen] = useState(false)
   const [allAgentEditorOpen, setallAgentEditorOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const initAgent: Agent = { id: getRandomColor(), name: '', disc: '', prompt: '', bg: getRandomGradient(true), pin: false, usetool: false, dark: true }
+  const initAgent: Agent = { id: getRandomColor(), name: '', disc: '', prompt: '', bg: getRandomGradient(true), pin: false, usetool: false, dark: true ,model:''}
   const [currentAgent, setCurrentAgent] = useState(initAgent)
   const [agents, setAgents] = useState(() => {
     const atext = getAgentsText()
@@ -114,7 +115,6 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
         }
       },
       onFinish(response) {
-        console.log(response.content);
         setCurrentAgent({...currentAgent,prompt:response.content});
       }
     })
@@ -301,6 +301,14 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
               </div>
             </div>
             <DialogFooter className="items-center">
+            <Input className="col-span-2"
+                  value={currentAgent.model || ''}
+                  placeholder="Input model (optional)"
+                  onChange={(e) => {
+                    const newModel = e.target.value.replace(/\s/g, '_');
+                    setCurrentAgent({ ...currentAgent, model: newModel });
+                  }}
+                />
               <Checkbox id="usetool" checked={currentAgent.usetool} onCheckedChange={() => setCurrentAgent({ ...currentAgent, usetool: !currentAgent.usetool })}/>useTool
               <Button onClick={handleSaveAgents}>Save Agent</Button>
             </DialogFooter>

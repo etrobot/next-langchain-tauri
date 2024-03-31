@@ -32,7 +32,7 @@ export async function Chat(body: any) {
     ).map(convertMessageToLangChainMessage);
     const model = new ChatOpenAI({
         temperature: 0.7,
-        modelName: body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
+        modelName:  (body.annotations?body.annotations[0]:undefined) || body.previewToken.llm_model || 'gpt-3.5-turbo-0125',
         openAIApiKey: body.previewToken.llm_api_key,
         configuration: { baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1' },
         maxTokens: 2048,
