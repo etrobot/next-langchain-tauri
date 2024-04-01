@@ -136,7 +136,11 @@ export default function Header() {
         <Button
           variant={'outline'}
           onClick={() => {
-            setKeyInput(keys);
+            const item = window.localStorage.getItem('ai-token')
+            if (item) {
+              setKeys(JSON.parse(item))
+            }
+            setKeyInput(keys)
             setPreviewTokenDialog(true);
           }}
         >
@@ -144,11 +148,7 @@ export default function Header() {
         </Button>
         <ThemeToggle />
       </div>
-      <Dialog open={previewTokenDialog} onOpenChange={() => {
-        setKeyInput(keys);
-        setPreviewTokenDialog(!previewTokenDialog);
-      }
-      }>
+      <Dialog open={previewTokenDialog} onOpenChange={setPreviewTokenDialog}>
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>🔑 Enter your API Keys</DialogTitle>
@@ -264,7 +264,7 @@ export default function Header() {
                       setKeys(keyInput);
                       localStorage.setItem('ai-token', JSON.stringify(keyInput));
                       router.refresh();
-                      setOpen(false);
+                      setPreviewTokenDialog(false);
                     }}
                   >
                     Save Token
