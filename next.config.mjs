@@ -3,6 +3,16 @@
 const nextConfig = {
   env: {
     NEXT_PUBLIC_API_URL: ''
+  },
+  images: {
+    domains: [
+      'uploadthing.com',
+      'lh3.googleusercontent.com',
+      'oaidalleapiprodscus.blob.core.windows.net',
+    ],
+  },
+  experimental: {
+    appDir: true,
   }
 }
 export default nextConfig;
