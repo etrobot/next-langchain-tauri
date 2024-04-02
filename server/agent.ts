@@ -1,7 +1,7 @@
 import { StreamingTextResponse } from "ai";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
-import { ChatOpenAI,OpenAIEmbeddings } from "@langchain/openai";
+import { ChatOpenAI,OpenAIEmbeddings,DallEAPIWrapper } from "@langchain/openai";
 import { TavilySearchResults } from "./custom/tools/tavily/tavily_search";
 import { BingSerpAPI } from "./custom/tools/bing/bingserpapi";
 import { GoogleCustomSearch } from "./custom/tools/google/google_custom_search";
@@ -59,14 +59,14 @@ export async function Chat(body: any) {
     if (body.previewToken.google_api_key) {
       tools.push(new GoogleCustomSearch());
     }
-    const embeddings = new OpenAIEmbeddings(
-      process.env.AZURE_OPENAI_API_KEY
-        ? { azureOpenAIApiDeploymentName: "Embeddings2" }
-        : {openAIApiKey:body.previewToken.llm_api_key}
-    );
-    // process.env.OPENAI_API_KEY = body.previewToken.llm_api_key
+    const embeddings = new OpenAIEmbeddings( {openAIApiKey:body.previewToken.llm_api_key});
     const browser = new WebBrowser({ model, embeddings });
     tools.push(browser);
+    tools.push(new DallEAPIWrapper({
+      n: 1,
+      modelName: "dall-e-2", 
+      openAIApiKey: body.previewToken.llm_api_key
+    })) 
     const AGENT_SYSTEM_PROMPT = "You are a helpful assistant can play any role and reply as the role user calls by '@' symbol . Here's one of the roles:"
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", AGENT_SYSTEM_PROMPT],
@@ -109,6 +109,7 @@ export async function Chat(body: any) {
               if(addOp.path.startsWith('/logs/BingSerpAPI/final_output') || addOp.path.startsWith('/logs/GoogleCustomSearch/final_output') || addOp.path.startsWith('/logs/TavilySearchResults/final_output')){
                 controller.enqueue(encoder.encode('\n\n---\n\n'+ addOp.value.output.split('\n\n').map((line:string)=>line.split(']')[1]).join('\n\n') +'---\n\n'));
               }
+              if(addOp.path.includes('dall-e'))controller.enqueue(addOp.value);
             }
           }
           controller.close();
