@@ -78,7 +78,7 @@ Break down the prompt into an organized list of instructions, whether numbered o
 Implement XML Tagging:
 Use XML tags to segment the prompt into distinct sections, such as instructions, examples, and expected outputs. This will help the AI parse and respond to each part of the prompt accurately.
 Now, please optimize the prompt below:\n\n`
-export const newAgent = `{"#666666":{"id":"#666666","name":"Search","disc":"Get Info from Internet","prompt":"Get Info from Internet","bg":"linear-gradient(176deg, hsl(177, 72%, 60%), hsl(309, 16%, 60%), hsl(60, 93%, 60%))","dark":true,"pin":true,"usetool":true},"#666777":{"id":"#666777","name":"CoverMaker","disc":"Turn the message to covers.","prompt":"Turn the message to topics in markdown format like ' 1. **Item1** description1 \n\n 2.**Item2** description2\n\n 3...**' every item name should be surrounded by stars","dark":true,"bg":"radial-gradient(circle at 6% 15%, hsl(222, 92%, 60%), hsl(18, 91%, 60%), hsl(210, 94%, 60%))","pin":true,"usetool":false},"#318F3C":{"id":"#318F3C","name":"PromptOptimizer","disc":"a prompt optimizer, skilled in refining and enhancing the prompts","prompt":"${promptOptimizer}","bg":"linear-gradient(117deg, hsl(332, 99%, 60%), hsl(147, 42%, 60%), hsl(297, 53%, 60%))","pin":false,"usetool":false,"dark":true}}`
+export const newAgent = `{"#666666":{"id":"#666666","name":"Search","disc":"Get Info from Internet","prompt":"Get Info from Internet","bg":"linear-gradient(176deg, hsl(177, 72%, 60%), hsl(309, 16%, 60%), hsl(60, 93%, 60%))","dark":true,"pin":true,"usetool":true},"#666777":{"id":"#666777","name":"CoverMaker","disc":"Turn the message to covers.","prompt":"Turn the message to topics in markdown format like ' 1. **Item1**\ndescription1 \n\n 2.**Item2**\ndescription2\n\n 3.**Item3**\n' every item name should be surrounded by stars","dark":true,"bg":"radial-gradient(circle at 6% 15%, hsl(222, 92%, 60%), hsl(18, 91%, 60%), hsl(210, 94%, 60%))","pin":true,"usetool":false},"#318F3C":{"id":"#318F3C","name":"PromptOptimizer","disc":"a prompt optimizer, skilled in refining and enhancing the prompts","prompt":"${promptOptimizer}","bg":"linear-gradient(117deg, hsl(332, 99%, 60%), hsl(147, 42%, 60%), hsl(297, 53%, 60%))","pin":false,"usetool":false,"dark":true}}`
 export interface AgentsProps extends Partial<Pick<UseChatHelpers, 'setInput'>> {
   showPinnedOnly: boolean;
 }
@@ -121,7 +121,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
   // Function to open the editor with the selected Agent's details
   const handleEditAgent = (AgentId: string) => {
     setCurrentAgent(agents[AgentId]);
-    console.log(currentAgent)
+    // console.log(currentAgent)
     setEditorOpen(true);
   }
 

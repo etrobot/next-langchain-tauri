@@ -1,12 +1,12 @@
 import { StreamingTextResponse } from "ai";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatOpenAI,OpenAIEmbeddings } from "@langchain/openai";
 import { TavilySearchResults } from "./custom/tools/tavily/tavily_search";
 import { BingSerpAPI } from "./custom/tools/bing/bingserpapi";
 import { GoogleCustomSearch } from "./custom/tools/google/google_custom_search";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
-
+import { WebBrowser } from "langchain/tools/webbrowser";
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
@@ -47,7 +47,7 @@ export async function Chat(body: any) {
     const previousMessages = messages
       .slice(0, -1)
     const currentMessageContent = messages[messages.length - 1].content;
-    console.log(previousMessages,currentMessageContent)
+    // console.log(previousMessages,currentMessageContent)
 
     var tools: any[] = [];
     if (body.previewToken.tavilyserp_api_key) {
@@ -59,7 +59,14 @@ export async function Chat(body: any) {
     if (body.previewToken.google_api_key) {
       tools.push(new GoogleCustomSearch());
     }
-
+    const embeddings = new OpenAIEmbeddings(
+      process.env.AZURE_OPENAI_API_KEY
+        ? { azureOpenAIApiDeploymentName: "Embeddings2" }
+        : {openAIApiKey:body.previewToken.llm_api_key}
+    );
+    // process.env.OPENAI_API_KEY = body.previewToken.llm_api_key
+    const browser = new WebBrowser({ model, embeddings });
+    tools.push(browser);
     const AGENT_SYSTEM_PROMPT = "You are a helpful assistant can play any role and reply as the role user calls by '@' symbol . Here's one of the roles:"
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", AGENT_SYSTEM_PROMPT],
