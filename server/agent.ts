@@ -1,7 +1,8 @@
 import { StreamingTextResponse } from "ai";
 import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
-import { ChatOpenAI,OpenAIEmbeddings,DallEAPIWrapper } from "@langchain/openai";
+import { ChatOpenAI,OpenAIEmbeddings } from "@langchain/openai";
+import { DallEAPIWrapper } from "./custom/tools/dalle/dalle";
 import { TavilySearchResults } from "./custom/tools/tavily/tavily_search";
 import { BingSerpAPI } from "./custom/tools/bing/bingserpapi";
 import { GoogleCustomSearch } from "./custom/tools/google/google_custom_search";
@@ -65,7 +66,8 @@ export async function Chat(body: any) {
     tools.push(new DallEAPIWrapper({
       n: 1,
       modelName: "dall-e-3", 
-      openAIApiKey: body.previewToken.llm_api_key
+      openAIApiKey: body.previewToken.llm_api_key,
+      baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1',
     })) 
     const AGENT_SYSTEM_PROMPT = "You are a helpful assistant can play any role and reply as the role user calls by '@' symbol . Here's one of the roles:"
     const prompt = ChatPromptTemplate.fromMessages([
