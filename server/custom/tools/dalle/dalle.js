@@ -20,7 +20,7 @@ export class DallEAPIWrapper extends Tool {
             enumerable: true,
             configurable: true,
             writable: true,
-            value: "A wrapper around OpenAI DALL-E API. Useful for when you need to generate images from a text description. Input should be an image description.and output must be the full original url"
+            value: "A wrapper around OpenAI DALL-E API. Useful for when you need to generate images from a text description. Input should be an image description.plz output the full original url ended with params"
         });
         Object.defineProperty(this, "client", {
             enumerable: true,

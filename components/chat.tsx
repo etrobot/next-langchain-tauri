@@ -124,7 +124,7 @@ export function Chat({ id, className }: ChatProps) {
                       const agentPrompt = (agent as unknown as Agent).prompt
                       if (value.startsWith(`@${agentName}`)) {
                         if (!JSON.stringify(messages).includes(agentPrompt)) {
-                          prompt = `("${agentName}:"` + ":『" + (agent as unknown as Agent).prompt + '』)\n' + value;
+                          prompt = `("${agentName}:"` + ":『" + (agent as unknown as Agent).prompt + '』)\n\n' + value;
                         }
                         function_call = (agent as unknown as Agent).usetool ? 'tool' : null
                         annotations =[(agent as unknown as Agent).model]
