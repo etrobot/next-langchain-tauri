@@ -67,7 +67,7 @@ export async function Chat(body: any) {
       n: 1,
       modelName: "dall-e-3", 
       openAIApiKey: body.previewToken.llm_api_key,
-      baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1',
+      baseURL: body.previewToken?.llm_base_url || 'https://api.openai.com/v1'
     })) 
     const AGENT_SYSTEM_PROMPT = "You are a helpful assistant can play any role and reply as the role user calls by '@' symbol . Here's one of the roles:"
     const prompt = ChatPromptTemplate.fromMessages([
@@ -111,7 +111,7 @@ export async function Chat(body: any) {
               if(addOp.path.startsWith('/logs/BingSerpAPI/final_output') || addOp.path.startsWith('/logs/GoogleCustomSearch/final_output') || addOp.path.startsWith('/logs/TavilySearchResults/final_output')){
                 controller.enqueue(encoder.encode('\n\n---\n\n'+ addOp.value.output.split('\n\n').map((line:string)=>line.split(']')[1]).join('\n\n') +'---\n\n'));
               }
-              if(addOp.path.includes('dall-e'))controller.enqueue(encoder.encode(addOp.value));
+              // if(addOp.path.startsWith('/logs/DallEAPIWrapper/final_output'))controller.enqueue(encoder.encode(`![](${addOp.value.output})`));
             }
           }
           controller.close();
