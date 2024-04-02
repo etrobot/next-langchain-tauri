@@ -64,7 +64,7 @@ export async function Chat(body: any) {
     tools.push(browser);
     tools.push(new DallEAPIWrapper({
       n: 1,
-      modelName: "dall-e-2", 
+      modelName: "dall-e-3", 
       openAIApiKey: body.previewToken.llm_api_key
     })) 
     const AGENT_SYSTEM_PROMPT = "You are a helpful assistant can play any role and reply as the role user calls by '@' symbol . Here's one of the roles:"
