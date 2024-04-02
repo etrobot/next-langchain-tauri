@@ -109,7 +109,7 @@ export async function Chat(body: any) {
               if(addOp.path.startsWith('/logs/BingSerpAPI/final_output') || addOp.path.startsWith('/logs/GoogleCustomSearch/final_output') || addOp.path.startsWith('/logs/TavilySearchResults/final_output')){
                 controller.enqueue(encoder.encode('\n\n---\n\n'+ addOp.value.output.split('\n\n').map((line:string)=>line.split(']')[1]).join('\n\n') +'---\n\n'));
               }
-              if(addOp.path.includes('dall-e'))controller.enqueue(addOp.value);
+              if(addOp.path.includes('dall-e'))controller.enqueue(encoder.encode(addOp.value));
             }
           }
           controller.close();
