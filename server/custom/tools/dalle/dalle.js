@@ -73,7 +73,7 @@ export class DallEAPIWrapper extends Tool {
         const openAIApiKey = fields?.openAIApiKey ?? getEnvironmentVariable("OPENAI_API_KEY");
         const organization = fields?.organization ?? getEnvironmentVariable("OPENAI_ORGANIZATION");
         const clientConfig = {
-            baseURL: fields?.baseUrl ?? "https://api.openai.com/v1",
+            baseURL: fields?.baseURL ?? "https://api.openai.com/v1",
             apiKey: openAIApiKey,
             organization,
             dangerouslyAllowBrowser: true,
