@@ -262,6 +262,7 @@ export default function Header() {
                     onClick={() => {
                       keyInput.scheme = keyInput[keys.current.scheme || 'keys1']
                       setKeys(keyInput);
+                      handleSchemeSelection(keys.current.scheme);
                       localStorage.setItem('ai-token', JSON.stringify(keyInput));
                       router.refresh();
                       setPreviewTokenDialog(false);
