@@ -260,9 +260,7 @@ export default function Header() {
                 <DialogFooter className="items-center">
                   <Button
                     onClick={() => {
-                      keyInput.scheme = keyInput[keys.current.scheme || 'keys1']
                       setKeys(keyInput);
-                      handleSchemeSelection(keys.current.scheme);
                       localStorage.setItem('ai-token', JSON.stringify(keyInput));
                       router.refresh();
                       setPreviewTokenDialog(false);
