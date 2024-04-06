@@ -3,9 +3,10 @@ import { HttpResponseOutputParser } from "langchain/output_parsers";
 import { AgentExecutor, createOpenAIFunctionsAgent } from "langchain/agents";
 import { ChatOpenAI,OpenAIEmbeddings } from "@langchain/openai";
 import { DallEAPIWrapper } from "./custom/tools/dalle/dalle";
-import { TavilySearchResults } from "./custom/tools/tavily/tavily_search";
-import { BingSerpAPI } from "./custom/tools/bing/bingserpapi";
-import { GoogleCustomSearch } from "./custom/tools/google/google_custom_search";
+import { DuckDuckGoSearch } from "@langchain/community/tools/duckduckgo_search";
+import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
+import { BingSerpAPI } from "@langchain/community/tools/bingserpapi";
+import { GoogleCustomSearch } from "@langchain/community/tools/google_custom_search";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { WebBrowser } from "langchain/tools/webbrowser";
 import {
@@ -52,6 +53,7 @@ export async function Chat(body: any) {
     // console.log(previousMessages,currentMessageContent)
 
     var tools: any[] = [];
+    tools.push(new DuckDuckGoSearch({ maxResults: 5 }));
     if (body.previewToken.tavilyserp_api_key) {
       tools.push(new TavilySearchResults({maxResults: 5}));
     }
