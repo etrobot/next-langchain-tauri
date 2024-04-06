@@ -210,7 +210,7 @@ export default function Header() {
                     </Label>
                     <Input className="col-span-2"
                       value={keyInput[shceme.value].bing_api_key}
-                      placeholder="from microsoft.com/bing/apis"
+                      placeholder="optional, from microsoft.com/bing/apis"
                       onChange={e => {
                         const newkeys = { ...keyInput };
                         newkeys[shceme.value].bing_api_key = e.target.value;
