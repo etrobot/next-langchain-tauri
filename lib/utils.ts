@@ -23,7 +23,7 @@ export function getRandomColor(): string {
 export function getRandomGradient(dark: boolean): string {
   const randomHue = (): number => Math.floor(Math.random() * 360);
   const randomSaturation = (): number => Math.floor(Math.random() * 100);
-  const fixedLightness = dark ? 60 : 94;
+  const fixedLightness = dark ? 60 : 96;
 
   const color1 = `hsl(${randomHue()}, ${randomSaturation()}%, ${fixedLightness}%)`;
   const color2 = `hsl(${randomHue()}, ${randomSaturation()}%, ${fixedLightness}%)`;

@@ -173,7 +173,7 @@ export function ChatMessageActions({
                 <Button className='mx-1' variant="outline"  onClick={() => {setCoversOpen(false);setMsgEditorOpen(true);setFromCovers(true)}}>Edit Texts</Button> 
               </DialogTitle>
             </DialogHeader>
-            <div className="flex flex-nowrap overflow-x-auto space-x-4">
+            <div className="flex flex-nowrap overflow-x-auto">
             {covers.map((cover, index) => (
               <Cover
                 key={index}

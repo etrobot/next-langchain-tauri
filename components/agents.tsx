@@ -137,7 +137,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
   const toggleDark = (AgentId: string) => {
     const updatedAgents = {
       ...agents,
-      [AgentId]: { ...agents[AgentId], bg: agents[AgentId].dark ? agents[AgentId].bg.replace(/60%\)/g, '94%)') : agents[AgentId].bg.replace(/94%\)/g, '60%)'), dark: !agents[AgentId].dark }
+      [AgentId]: { ...agents[AgentId], bg: agents[AgentId].dark ? agents[AgentId].bg.replace(/60%\)/g, '96%)') : agents[AgentId].bg.replace(/96%\)/g, '60%)'), dark: !agents[AgentId].dark }
     }
     setAgents(updatedAgents)
     saveAgents(updatedAgents);
