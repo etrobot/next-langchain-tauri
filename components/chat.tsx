@@ -14,6 +14,8 @@ import { ButtonScrollToBottom } from '@/components/button-scroll-to-bottom'
 import { IconRefresh, IconSpinner } from '@/components/ui/icons'
 import { PromptForm } from '@/components/prompt-form'
 import {useSetting} from '@/lib/hooks/use-setting'
+import { getAgentsText } from '@/components/agents'
+
 export interface ChatProps extends React.ComponentProps<'div'> {
   id?: string
 }
@@ -23,7 +25,16 @@ export function Chat({ id, className }: ChatProps) {
   const [showPinnedOnly, setShowPinnedOnly] = useState(true);
   const timestamp = `${new Date().toISOString().split('.')[0]}`
   const [initialMessages, setInitialMessages] = useState<Message[] | undefined>(undefined);
+  const [agents, setAgents] = useState(newAgent)
+
+  function refreshAgents(){
+    const storedAgents=getAgentsText()
+    if(storedAgents){
+      setAgents(JSON.parse(storedAgents))
+    }
+  }
   useEffect(() => {
+    refreshAgents();
     setInitialMessages([]);
     if (id) {
       const storedData = localStorage.getItem(id);
@@ -35,8 +46,7 @@ export function Chat({ id, className }: ChatProps) {
       id = `cid_${timestamp}`;
     }
   }, [id]);
-
-  const [agents, setAgents] = useState(newAgent)
+  
   const [keys, setKeys]  = useSetting();
 
   const { messages, append, reload, stop, isLoading, input, setInput } =
@@ -116,6 +126,7 @@ export function Chat({ id, className }: ChatProps) {
                 var prompt = value
                 var function_call = null as any
                 var annotations:any[] =[]
+                refreshAgents();
                 if (agents) {
                   const found = input.split(' ')[0];
                   if (found.charAt(0) === '@') {
@@ -147,7 +158,6 @@ export function Chat({ id, className }: ChatProps) {
               setInput={setInput}
               isLoading={isLoading}
               agents={agents}
-              setAgents={setAgents}
             />
           </div>
         </div>

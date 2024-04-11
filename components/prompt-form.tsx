@@ -11,7 +11,6 @@ import { IconArrowElbow,IconPlus } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 
-import { getAgentsText } from '@/components/agents'
 import { FooterText } from '@/components/footer'
 import { Agent } from '@/components/agents'
 import {
@@ -25,7 +24,6 @@ export interface PromptProps
   onSubmit: (value: string) => void
   isLoading: boolean,
   agents: any,
-  setAgents:(value: any) => void
 }
 export function PromptForm({
   onSubmit,
@@ -33,7 +31,6 @@ export function PromptForm({
   setInput,
   isLoading,
   agents,
-  setAgents
 }: PromptProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -58,10 +55,6 @@ export function PromptForm({
     const value = e.target.value;
     setInput(value)
     if (value.split(' ')[0] === '@' || value === '@') {
-      const storedAgents=getAgentsText()
-      if(storedAgents){
-        setAgents(JSON.parse(storedAgents))
-      }
       setshowPopup(true);
     } else {
       setshowPopup(false);
