@@ -9,10 +9,20 @@ import {
 } from '@/components/ui/dialog'
 import { Textarea } from "@/components/ui/textarea"
 import { useLocalStorage } from '@/lib/hooks/use-local-storage'
-
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 type Paragraph = {
   id: string,
   reference: string,
+  prompt: string,
   genTxt: string
 }
 type Article={
@@ -25,11 +35,12 @@ export function Writer() {
   const [article, setArticle] = useLocalStorage<Article>('article', { p: [] });
 
   const handleNewTaskClick = () => {
-    const sections = initialText.split('\n').filter(Boolean);
-    const newArticle = sections.map((section, index) => ({
-      id: `id-${index}`,
-      reference: `ref-${index}`,
-      genTxt: section,
+    const sections = initialText.split('\n\n').filter(Boolean);
+    const newArticle = sections.map((section,index) => ({
+      id: `${index}`,
+      reference: `${section}`,
+      prompt:``,
+      genTxt: ``,
     }));
     setArticle({ p: newArticle });
     setImportWriterOpen(false);
@@ -37,11 +48,13 @@ export function Writer() {
 
   return (
     <>
+    <div className='w-full flex justify-end h-[40px]'>
       <Button className="text-xs" variant={"link"} onClick={() => { setImportWriterOpen(true) }}>Import</Button>
+      </div>
       <Dialog open={importWriterOpen} onOpenChange={setImportWriterOpen}>
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Import Agents</DialogTitle>
+            <DialogTitle>Import Reference</DialogTitle>
           </DialogHeader>
           <Textarea className="col-span-4 h-[200px]"
             value={initialText || ''}
@@ -50,24 +63,27 @@ export function Writer() {
           <Button onClick={handleNewTaskClick}>New Task</Button>
         </DialogContent>
       </Dialog>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Reference</th>
-            <th>Generated Text</th>
-          </tr>
-        </thead>
-        <tbody>
-          {article.p.map(paragraph => (
-            <tr key={paragraph.id}>
-              <td>{paragraph.id}</td>
-              <td>{paragraph.reference}</td>
-              <td>{paragraph.genTxt}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <Table>
+      <TableCaption>A list of your recent invoices.</TableCaption>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[100px]">Id</TableHead>
+          <TableHead>Reference</TableHead>
+          <TableHead>Prompt</TableHead>
+          <TableHead className="text-right">GenTxt</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {article.p.map((paragraph) => (
+          <TableRow key={paragraph.id}>
+            <TableCell className="font-medium">{paragraph.id}</TableCell>
+            <TableCell>{paragraph.reference}</TableCell>
+            <TableCell>{paragraph.prompt}</TableCell>
+            <TableCell>{paragraph.genTxt}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
     </>
   );
 }
