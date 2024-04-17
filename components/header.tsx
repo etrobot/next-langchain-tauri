@@ -93,10 +93,11 @@ export default function Header() {
       </div>
 
       <div className="flex items-center mx-auto">
-        <Tabs defaultValue="account" className="w-[120px]">
-          <TabsList className="grid w-full grid-cols-2">
+        <Tabs defaultValue="account" className="w-[180px]">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="account"><Link href="/">Chat</Link></TabsTrigger>
             <TabsTrigger value="agent"><Link href="/agent">Agents</Link></TabsTrigger>
+            <TabsTrigger value="writer"><Link href="/writer">Writer</Link></TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
