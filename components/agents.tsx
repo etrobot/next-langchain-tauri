@@ -319,7 +319,7 @@ export default function Agents({ setInput, showPinnedOnly }: AgentsProps) {
             <DialogHeader>
               <DialogTitle>Import Agents</DialogTitle>
             </DialogHeader>
-            <Textarea className="col-span-4 h-[200px]"
+            <Textarea className="col-span-4 h-[400px]"
               value={AgentsText || ''}
               onChange={(e) => { setAgentsText(e.target.value) }}
             />
