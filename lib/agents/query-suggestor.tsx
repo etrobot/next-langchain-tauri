@@ -7,8 +7,7 @@ import { OpenAI } from '@ai-sdk/openai'
 
 export async function querySuggestor(
   uiStream: ReturnType<typeof createStreamableUI>,
-  messages: ExperimentalMessage[]
-,
+  messages: ExperimentalMessage[],
   llm_base_url:string,
   llm_api_key:string,
   llm_model:string

@@ -10,6 +10,7 @@ import { ArrowRight, Plus, Square } from 'lucide-react'
 import { EmptyScreen } from './empty-screen'
 import {useSetting} from '@/lib/hooks/use-setting'
 import { CollapsibleMessage } from './collapsible-message'
+import { skip } from 'node:test'
 
 export function Fortune() {
   const [input, setInput] = useState('')
@@ -48,7 +49,9 @@ export function Fortune() {
 
     // Submit and get response message
     const formData = new FormData(e.currentTarget)
-    const responseMessage = await submit({'llm_api_key':keys.current.llm_api_key,'llm_base_url':keys.current.llm_base_url,'llm_model':keys.current.llm_model,'tavilyserp_api_key':keys.current.tavilyserp_api_key},formData)
+    const apikeys = {'llm_api_key':keys.current.llm_api_key,'llm_base_url':keys.current.llm_base_url,'llm_model':keys.current.llm_model,'tavilyserp_api_key':keys.current.tavilyserp_api_key}
+    var skip=undefined
+    const responseMessage = await submit(formData,skip,apikeys)
     setMessages(currentMessages => [...currentMessages, responseMessage as any])
 
     setInput('')

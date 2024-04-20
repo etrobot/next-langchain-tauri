@@ -10,6 +10,7 @@ import { ArrowRight, Check, FastForward, Sparkles } from 'lucide-react'
 import { useActions, useStreamableValue, useUIState } from 'ai/rsc'
 import { AI } from '@/app/action'
 import { cn } from '@/lib/utils'
+import {useSetting} from '@/lib/hooks/use-setting'
 
 export type CopilotProps = {
   inquiry?: PartialInquiry
@@ -26,7 +27,7 @@ export const Copilot: React.FC<CopilotProps> = ({ inquiry }: CopilotProps) => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true)
   const [messages, setMessages] = useUIState<typeof AI>()
   const { submit } = useActions<typeof AI>()
-
+  const [keys, setKeys]  = useSetting();
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value)
     checkIfButtonShouldBeEnabled()
@@ -71,8 +72,9 @@ export const Copilot: React.FC<CopilotProps> = ({ inquiry }: CopilotProps) => {
     const formData = skip
       ? undefined
       : new FormData(e.target as HTMLFormElement)
-
-    const responseMessage = await submit(formData, skip)
+   
+    const apikeys = {'llm_api_key':keys.current.llm_api_key,'llm_base_url':keys.current.llm_base_url,'llm_model':keys.current.llm_model,'tavilyserp_api_key':keys.current.tavilyserp_api_key}
+    const responseMessage = await submit(formData, skip,apikeys)
     setMessages(currentMessages => [...currentMessages, responseMessage])
   }
 
@@ -119,7 +121,7 @@ export const Copilot: React.FC<CopilotProps> = ({ inquiry }: CopilotProps) => {
         </div>
         <form onSubmit={onFormSubmit}>
           <div className="flex flex-wrap justify-start mb-4">
-            {data?.options?.map((option, index) => (
+            {data?.options?.map((option: any, index: number) => (
               <div
                 key={`option-${index}`}
                 className="flex items-center space-x-1.5 mb-2"
