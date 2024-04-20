@@ -10,7 +10,6 @@ import { ArrowRight, Plus, Square } from 'lucide-react'
 import { EmptyScreen } from './empty-screen'
 import {useSetting} from '@/lib/hooks/use-setting'
 import { CollapsibleMessage } from './collapsible-message'
-import { skip } from 'node:test'
 
 export function Fortune() {
   const [input, setInput] = useState('')

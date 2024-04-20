@@ -7,8 +7,10 @@ import { useActions, useUIState } from 'ai/rsc'
 import type { AI } from '@/app/action'
 import { UserMessage } from './user-message'
 import { ArrowRight } from 'lucide-react'
+import {useSetting} from '@/lib/hooks/use-setting'
 
 export function FollowupPanel() {
+  const [keys, setKeys]  = useSetting();
   const [input, setInput] = useState('')
   const { submit } = useActions<typeof AI>()
   const [, setMessages] = useUIState<typeof AI>()
@@ -22,8 +24,9 @@ export function FollowupPanel() {
       isGenerating: false,
       component: <UserMessage message={input} isFirstMessage={false} />
     }
-
-    const responseMessage = await submit(formData)
+    const apikeys = {'llm_api_key':keys.current.llm_api_key,'llm_base_url':keys.current.llm_base_url,'llm_model':keys.current.llm_model,'tavilyserp_api_key':keys.current.tavilyserp_api_key}
+    const skip=undefined
+    const responseMessage = await submit(formData,skip,apikeys)
     setMessages(currentMessages => [
       ...currentMessages,
       userMessage,
