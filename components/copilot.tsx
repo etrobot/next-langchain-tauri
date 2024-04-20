@@ -9,7 +9,6 @@ import { Card } from './ui/card'
 import { ArrowRight, Check, FastForward, Sparkles } from 'lucide-react'
 import { useActions, useStreamableValue, useUIState } from 'ai/rsc'
 import { AI } from '@/app/action'
-import { IconLogo } from './ui/icons'
 import { cn } from '@/lib/utils'
 
 export type CopilotProps = {
@@ -102,7 +101,6 @@ export const Copilot: React.FC<CopilotProps> = ({ inquiry }: CopilotProps) => {
     return (
       <Card className="p-3 md:p-4 w-full flex justify-between items-center">
         <div className="flex items-center space-x-2 flex-1 min-w-0">
-          <IconLogo className="w-4 h-4 flex-shrink-0" />
           <h5 className="text-muted-foreground text-xs truncate">
             {updatedQuery()}
           </h5>
@@ -114,9 +112,7 @@ export const Copilot: React.FC<CopilotProps> = ({ inquiry }: CopilotProps) => {
     return (
       <Card className="p-4 rounded-lg w-full mx-auto">
         <div className="flex items-center mb-4">
-          <IconLogo
-            className={cn('w-4 h-4 flex-shrink-0', { 'animate-spin': pending })}
-          />
+
           <p className="text-lg text-foreground text-semibold ml-2">
             {data?.question}
           </p>

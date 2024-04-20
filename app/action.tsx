@@ -12,15 +12,15 @@ import { Section } from '@/components/section'
 import { FollowupPanel } from '@/components/followup-panel'
 import { inquire, researcher, taskManager, querySuggestor } from '@/lib/agents'
 
-async function submit(formData?: FormData, skip?: boolean) {
+async function submit(apikeys:any,formData?: FormData, skip?: boolean) {
   'use server'
-
   const aiState = getMutableAIState<typeof AI>()
   const uiStream = createStreamableUI()
   const isGenerating = createStreamableValue(true)
   const isCollapsed = createStreamableValue(false)
 
   const messages: ExperimentalMessage[] = aiState.get() as any
+  console.log(formData)
   // Limit the number of messages to 10
   messages.splice(0, Math.max(messages.length - 10, 0))
   // Get the user input from the form data
@@ -41,14 +41,14 @@ async function submit(formData?: FormData, skip?: boolean) {
 
   async function processEvents() {
     uiStream.update(<IconSpinner />)
-
     let action: any = { object: { next: 'proceed' } }
+    process.env.OPENAI_API_KEY = apikeys.llm_api_key
     // If the user skips the task, we proceed to the search
-    if (!skip) action = (await taskManager(messages)) ?? action
-
+    if (!skip) action = (await taskManager(messages,apikeys.llm_base_url as string,apikeys.llm_api_key as string,apikeys.llm_model as string)) ?? action
     if (action.object.next === 'inquire') {
+
       // Generate inquiry
-      const inquiry = await inquire(uiStream, messages)
+      const inquiry = await inquire(uiStream, messages,apikeys.llm_base_url as string,apikeys.llm_api_key as string,apikeys.llm_model as string)
 
       uiStream.done()
       isGenerating.done()
@@ -59,7 +59,6 @@ async function submit(formData?: FormData, skip?: boolean) {
       ])
       return
     }
-
     // Set the collapsed state to true
     isCollapsed.done(true)
 
@@ -72,7 +71,11 @@ async function submit(formData?: FormData, skip?: boolean) {
       const { fullResponse, hasError } = await researcher(
         uiStream,
         streamText,
-        messages
+        messages,
+        apikeys.llm_base_url as string,
+        apikeys.llm_api_key as string,
+        apikeys.llm_model as string,
+        apikeys.tavilyserp_api_key as string
       )
       answer = fullResponse
       errorOccurred = hasError
@@ -81,7 +84,7 @@ async function submit(formData?: FormData, skip?: boolean) {
 
     if (!errorOccurred) {
       // Generate related queries
-      await querySuggestor(uiStream, messages)
+      await querySuggestor(uiStream, messages,apikeys.llm_base_url as string,apikeys.llm_api_key as string,apikeys.llm_model as string)
 
       // Add follow-up panel
       uiStream.append(

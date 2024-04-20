@@ -6,19 +6,22 @@ import { PartialInquiry, inquirySchema } from '@/lib/schema/inquiry'
 
 export async function inquire(
   uiStream: ReturnType<typeof createStreamableUI>,
-  messages: ExperimentalMessage[]
+  messages: ExperimentalMessage[],
+  llm_base_url:string,
+  llm_api_key:string,
+  llm_model:string
 ) {
   const openai = new OpenAI({
-    baseUrl: process.env.OPENAI_API_BASE, // optional base URL for proxies etc.
-    apiKey: process.env.OPENAI_API_KEY, // optional API key, default to env property OPENAI_API_KEY
+    baseUrl: llm_base_url, // optional base URL for proxies etc.
+    apiKey: llm_api_key, // optional API key, default to env property OPENAI_API_KEY
     organization: '' // optional organization
   })
   const objectStream = createStreamableValue<PartialInquiry>()
   uiStream.update(<Copilot inquiry={objectStream.value} />)
-
+  console.log('inquire start', uiStream,messages,llm_base_url,llm_api_key,llm_model)
   let finalInquiry: PartialInquiry = {}
   await experimental_streamObject({
-    model: openai.chat(process.env.OPENAI_API_MODEL || 'gpt-4-turbo'),
+    model: openai.chat(llm_model || 'gpt-3.5-turbo-0125'),
     system: `As a professional web researcher, your role is to deepen your understanding of the user's input by conducting further inquiries when necessary.
     After receiving an initial response from the user, carefully assess whether additional questions are absolutely essential to provide a comprehensive and accurate answer. Only proceed with further inquiries if the available information is insufficient or ambiguous.
 
@@ -58,6 +61,7 @@ export async function inquire(
     schema: inquirySchema
   })
     .then(async result => {
+      console.log("inquire",result)
       for await (const obj of result.partialObjectStream) {
         if (obj) {
           objectStream.update(obj)

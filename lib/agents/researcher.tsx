@@ -20,10 +20,15 @@ export async function researcher(
   uiStream: ReturnType<typeof createStreamableUI>,
   streamText: ReturnType<typeof createStreamableValue<string>>,
   messages: ExperimentalMessage[]
+,
+  llm_base_url:string,
+  llm_api_key:string,
+  llm_model:string,
+  tavilyserp_api_key:string
 ) {
   const openai = new OpenAI({
-    baseUrl: process.env.OPENAI_API_BASE, // optional base URL for proxies etc.
-    apiKey: process.env.OPENAI_API_KEY, // optional API key, default to env property OPENAI_API_KEY
+    baseUrl: llm_base_url, // optional base URL for proxies etc.
+    apiKey: llm_api_key, // optional API key, default to env property OPENAI_API_KEY
     organization: '' // optional organization
   })
 
@@ -38,7 +43,7 @@ export async function researcher(
   )
 
   const result = await experimental_streamText({
-    model: openai.chat(process.env.OPENAI_API_MODEL || 'gpt-4-turbo'),
+    model: openai.chat(llm_model || 'gpt-3.5-turbo-0125'),
     maxTokens: 2500,
     system: `As a professional search expert, you possess the ability to search for any information on the web. 
     For each user query, utilize the search results to their fullest potential to provide additional information and assistance in your response.
@@ -79,7 +84,7 @@ export async function researcher(
           try {
             searchResult =
               searchAPI === 'tavily'
-                ? await tavilySearch(filledQuery, max_results, search_depth)
+                ? await tavilySearch(filledQuery, max_results, search_depth,tavilyserp_api_key)
                 : await exaSearch(query)
           } catch (error) {
             console.error('Search API error:', error)
@@ -162,9 +167,10 @@ export async function researcher(
 async function tavilySearch(
   query: string,
   maxResults: number = 10,
-  searchDepth: 'basic' | 'advanced' = 'basic'
+  searchDepth: 'basic' | 'advanced' = 'basic',
+  tavilyserp_api_key: string
 ): Promise<any> {
-  const apiKey = process.env.TAVILY_API_KEY
+  const apiKey = tavilyserp_api_key
   const response = await fetch('https://api.tavily.com/search', {
     method: 'POST',
     headers: {

@@ -1,13 +1,15 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
 import type { AI } from '@/app/action'
-import { useUIState, useActions, useAIState } from 'ai/rsc'
+import {StreamableValue, useUIState, useActions, useAIState } from 'ai/rsc'
 import { cn } from '@/lib/utils'
 import { UserMessage } from './user-message'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { ArrowRight, Plus, Square } from 'lucide-react'
 import { EmptyScreen } from './empty-screen'
+import {useSetting} from '@/lib/hooks/use-setting'
+import { CollapsibleMessage } from './collapsible-message'
 
 export function Fortune() {
   const [input, setInput] = useState('')
@@ -17,6 +19,7 @@ export function Fortune() {
   const [isButtonPressed, setIsButtonPressed] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const [showEmptyScreen, setShowEmptyScreen] = useState(false)
+  const [keys, setKeys]  = useSetting();
   // Focus on input when button is pressed
   useEffect(() => {
     if (isButtonPressed) {
@@ -45,7 +48,7 @@ export function Fortune() {
 
     // Submit and get response message
     const formData = new FormData(e.currentTarget)
-    const responseMessage = await submit(formData)
+    const responseMessage = await submit({'llm_api_key':keys.current.llm_api_key,'llm_base_url':keys.current.llm_base_url,'llm_model':keys.current.llm_model,'tavilyserp_api_key':keys.current.tavilyserp_api_key},formData)
     setMessages(currentMessages => [...currentMessages, responseMessage as any])
 
     setInput('')
@@ -66,6 +69,20 @@ export function Fortune() {
   // If there are messages and the new button has not been pressed, display the new Button
   if (messages.length > 0 && !isButtonPressed) {
     return (
+      <div className="px-8 md:px-12 pt-6 md:pt-8 pb-14 md:pb-24 max-w-3xl mx-auto flex flex-col space-y-3 md:space-y-4">
+      {messages.map(
+        (message: {
+          id: number
+          component: React.ReactNode
+          isCollapsed?: StreamableValue<boolean>
+        }) => (
+          <CollapsibleMessage
+            key={message.id}
+            message={message}
+            isLastMessage={message.id === messages[messages.length - 1].id}
+          />
+        )
+      )}
       <div className="fixed bottom-2 md:bottom-8 left-0 right-0 flex justify-center items-center mx-auto">
         <Button
           type="button"
@@ -78,6 +95,7 @@ export function Fortune() {
           </span>
           <Plus size={18} className="group-hover:rotate-90 transition-all" />
         </Button>
+      </div>
       </div>
     )
   }
