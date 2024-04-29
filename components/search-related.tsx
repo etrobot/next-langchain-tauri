@@ -7,6 +7,7 @@ import { useActions, useStreamableValue, useUIState } from 'ai/rsc'
 import { AI } from '@/app/action'
 import { UserMessage } from './user-message'
 import { PartialRelated } from '@/lib/schema/related'
+import {useSetting} from '@/lib/hooks/use-setting'
 
 export interface SearchRelatedProps {
   relatedQueries: PartialRelated
@@ -19,7 +20,7 @@ export const SearchRelated: React.FC<SearchRelatedProps> = ({
   const [, setMessages] = useUIState<typeof AI>()
   const [data, error, pending] =
     useStreamableValue<PartialRelated>(relatedQueries)
-
+  const [keys, setKeys]  = useSetting();
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const formData = new FormData(event.currentTarget as HTMLFormElement)
@@ -37,8 +38,9 @@ export const SearchRelated: React.FC<SearchRelatedProps> = ({
       id: Date.now(),
       component: <UserMessage message={query} isFirstMessage={false} />
     }
-
-    const responseMessage = await submit(formData)
+    const apikeys = {'llm_api_key':keys.current.llm_api_key,'llm_base_url':keys.current.llm_base_url,'llm_model':keys.current.llm_model,'tavilyserp_api_key':keys.current.tavilyserp_api_key}
+    const skip=undefined
+    const responseMessage = await submit(formData,skip,apikeys)
     setMessages(currentMessages => [
       ...currentMessages,
       userMessage,
