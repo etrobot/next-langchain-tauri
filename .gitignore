@@ -136,3 +136,5 @@ dist
 /src-tauri/bin/
 .DS_Store
 /server/*.js
+.vercel
+.env*.local

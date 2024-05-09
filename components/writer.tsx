@@ -44,8 +44,11 @@ type Article={
 
 export function Writer() {
   const router = useRouter();
+  const [dialogType,setDialogType] = useState('task');
+  const [loading, setLoading] = useState(false);
   const [importWriterOpen, setImportWriterOpen] = useState(false);
   const [initialText, setInitialText] = useState('');
+  const [sources, setSources] = useState('');
   const [article, setArticle] = useLocalStorage<Article>('article', { p: [] });
   const initialParagraph: Paragraph= {
     id: '',
@@ -57,9 +60,9 @@ export function Writer() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [currentRow, setCurrentRow] = useState('prompt');
   const [keyScheme, setKeyScheme] = useLocalStorage<KeyScheme>('ai-token', initialKeyScheme);
-  const { messages, append,stop, isLoading} =
+  const { messages,setMessages,append,stop, isLoading} =
     useChat({
-      api: process.env.NEXT_PUBLIC_API_URL + '/api/chat',
+      api: process.env.NEXT_PUBLIC_API_URL + '/api/retrieval/chat',
       id:'123',
       body: {
         previewToken:keyScheme.current,
@@ -69,9 +72,11 @@ export function Writer() {
         if (response.status !== 200) {
           toast.error(`${response.status} ${response.statusText}`);
         }
+        const sourcesHeader = response.headers.get("x-sources");
+        setSources((Buffer.from(sourcesHeader ?? '', 'base64')).toString('utf8'));
       },
       onFinish(response) {
-        setEditingParagraph({...editingParagraph,genTxt:response.content});
+        setEditingParagraph({...editingParagraph,genTxt:response.content+'\n\n'+sources});
       }
     })
 
@@ -79,25 +84,53 @@ export function Writer() {
     setEditingParagraph(paragraph);
     setCurrentRow(key);
     setEditDialogOpen(true);
+    setDialogType('task');
   };
+
+
   const handleNewTaskClick = () => {
     const sections = initialText.split('\n\n').filter(Boolean);
     const newArticle = sections.map((section,index) => ({
       id: `${index}`,
       reference: `${section}`,
-      prompt:`将以上资料整理成要点输出`,
+      prompt:`根据以上要求尽可能多的列出所有相关内容和数字(若有)`,
       genTxt: ``,
     }));
     setArticle({ p: newArticle });
     setImportWriterOpen(false);
   };
 
+  const handleVectorStoreClick = async () => {
+    setLoading(true);
+    const response = await fetch("/api/retrieval/ingest", {
+      method: "POST",
+      body: JSON.stringify({
+        text: initialText,
+        llm_api_key: keyScheme.current.llm_api_key,
+        llm_base_url: keyScheme.current.llm_base_url
+      })
+    });
+    if (response.status === 200) {
+      toast("Uploaded!");
+      setLoading(false);
+      setImportWriterOpen(false);
+    } else {
+      const json = await response.json();
+      if (json.error) {
+        toast(json.error);
+      }
+    }
+
+  };
+
   return (
     <>
     <div className='w-full flex justify-end h-[40px]'>
-    <Button variant="link" className='text-xs ' onClick={() => { navigator.clipboard.writeText((article.p.map((p) => p.genTxt)).join('\n\n')); toast.success('The article is copied to clipboard') }}>Export</Button>
+    <Button className="text-xs" variant={"link"} onClick={() => {setDialogType('retrieval');setImportWriterOpen(true);}}>Retrieve</Button>
+    <IconSeparator className='my-2' />
+    <Button variant="link" className='text-xs ' onClick={() => { navigator.clipboard.writeText((article.p.map((p) => p.genTxt)).join('\n\n')); toast.success('The article is copied to clipboard') }}>Export Gen</Button>
         <IconSeparator className='my-2' />
-      <Button className="text-xs" variant={"link"} onClick={() => { setImportWriterOpen(true) }}>Import</Button>
+      <Button className="text-xs" variant={"link"} onClick={() => {setDialogType('task');setImportWriterOpen(true) }}>Import Task</Button>
       </div>
       <Dialog open={importWriterOpen} onOpenChange={setImportWriterOpen}>
         <DialogContent className="sm:max-w-xl">
@@ -108,7 +141,8 @@ export function Writer() {
             value={initialText || ''}
             onChange={(e) => { setInitialText(e.target.value) }}
           />
-          <Button onClick={handleNewTaskClick}>New Task</Button>
+          { dialogType === 'task' && <Button onClick={handleNewTaskClick}>New Task</Button>}
+          { dialogType === 'retrieval' && <Button onClick={handleVectorStoreClick}>{loading?'UPLoading...':'Retrieve'}</Button>}
         </DialogContent>
       </Dialog>
       <Table>
@@ -157,6 +191,7 @@ export function Writer() {
                       toast.error('Too short for AI prompt optimization')
                       return;
                     }
+                    setMessages([]);
                     append({
                     id: '123',
                     content: editingParagraph.reference+'\n\n'+editingParagraph.prompt,
