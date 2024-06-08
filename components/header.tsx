@@ -94,11 +94,9 @@ export default function Header() {
 
       <div className="flex items-center mx-auto">
         <Tabs defaultValue="account" className="w-[240px]">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="account"><Link href="/">Chat</Link></TabsTrigger>
             <TabsTrigger value="agent"><Link href="/agent">Agents</Link></TabsTrigger>
-            <TabsTrigger value="writer"><Link href="/writer">Writer</Link></TabsTrigger>
-            <TabsTrigger value="fortune"><Link href="/fortune">Perplex</Link></TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -262,6 +260,10 @@ export default function Header() {
                 <DialogFooter className="items-center">
                   <Button
                     onClick={() => {
+                      if(keys.current.scheme===shceme.value){
+                        keyInput.current={...keyInput[shceme.value]}
+                        keyInput.current.scheme=shceme.value
+                      }
                       setKeys(keyInput);
                       localStorage.setItem('ai-token', JSON.stringify(keyInput));
                       router.refresh();
